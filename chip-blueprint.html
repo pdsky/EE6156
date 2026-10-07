@@ -1,0 +1,2399 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>芯片蓝图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<style>
+/* ============ 令牌系统 Design Tokens ============ */
+:root{
+  --bg:#eef2f6;
+  --bg-grid: #dfe8ef;
+  --surface:#ffffff;
+  --surface-2:#e3eaf1;
+  --surface-3:#d3dfea;
+  --ink:#12222f;
+  --ink-soft:#33495a;
+  --muted:#5c7182;
+  --accent:#b85c17;
+  --accent-strong:#8f4610;
+  --accent-soft:#f3e2cf;
+  --accent-ink:#fff8f0;
+  --line:#c7d4e0;
+  --line-strong:#a9bccb;
+  --teal:#0e6d61;
+  --teal-soft:#dcefec;
+  --warn:#a5301d;
+  --warn-soft:#f6e0db;
+  --shadow: 0 1px 2px rgba(20,35,50,.06), 0 8px 24px -12px rgba(20,35,50,.18);
+  --radius: 3px;
+  --font-display:'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+  --font-body:'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a1725;
+    --bg-grid:#0f2032;
+    --surface:#0f2136;
+    --surface-2:#153049;
+    --surface-3:#1c3c59;
+    --ink:#e9f1f7;
+    --ink-soft:#c1d2e0;
+    --muted:#87a1b6;
+    --accent:#ef9f4f;
+    --accent-strong:#ffc083;
+    --accent-soft:#2c2011;
+    --accent-ink:#1b1102;
+    --line:#22415e;
+    --line-strong:#2e577a;
+    --teal:#5fd9c8;
+    --teal-soft:#0e2f2b;
+    --warn:#ff8b71;
+    --warn-soft:#3a1a14;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a1725;
+  --bg-grid:#0f2032;
+  --surface:#0f2136;
+  --surface-2:#153049;
+  --surface-3:#1c3c59;
+  --ink:#e9f1f7;
+  --ink-soft:#c1d2e0;
+  --muted:#87a1b6;
+  --accent:#ef9f4f;
+  --accent-strong:#ffc083;
+  --accent-soft:#2c2011;
+  --accent-ink:#1b1102;
+  --line:#22415e;
+  --line-strong:#2e577a;
+  --teal:#5fd9c8;
+  --teal-soft:#0e2f2b;
+  --warn:#ff8b71;
+  --warn-soft:#3a1a14;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:.01ms !important; transition-duration:.01ms !important;} }
+
+body{
+  margin:0;
+  background:
+    repeating-linear-gradient(0deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+a{color:var(--accent-strong);}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+::selection{ background:var(--accent-soft); color:var(--ink);}
+
+/* ============ 顶部工具条 ============ */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; gap:12px; flex-wrap:nowrap;
+  padding:10px 16px; overflow-x:auto;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .brand{
+  font-family:var(--font-mono); font-weight:600; font-size:13px;
+  letter-spacing:.06em; color:var(--muted); display:flex; gap:8px; align-items:center;
+  white-space:nowrap; flex-shrink:0;
+}
+.topbar .brand b{color:var(--ink); font-weight:700;}
+.topbar .spacer{flex:1; flex-shrink:1; min-width:0;}
+.navtoggle{display:none; flex-shrink:0;}
+.iconbtn{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; white-space:nowrap; flex-shrink:0;
+  border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft);
+  padding:7px 12px; border-radius:var(--radius); cursor:pointer;
+}
+.iconbtn:hover{ background:var(--surface-3); }
+.progresspill{
+  font-family:var(--font-mono); font-size:12px; color:var(--muted); white-space:nowrap; flex-shrink:0;
+  border:1px solid var(--line); padding:6px 10px; border-radius:20px;
+  display:flex; align-items:center; gap:8px;
+}
+.progresspill .bar{ width:60px; height:5px; background:var(--surface-3); border-radius:3px; overflow:hidden; flex-shrink:0;}
+.progresspill .bar i{ display:block; height:100%; width:0%; background:var(--accent); transition:width .3s;}
+.navbackdrop{ display:none; }
+
+/* ============ 布局 ============ */
+.shell{ display:grid; grid-template-columns: 288px 1fr; max-width:1320px; margin:0 auto; align-items:start;}
+.nav{
+  position:sticky; top:53px; align-self:start;
+  height:calc(100vh - 53px); overflow-y:auto;
+  padding:22px 14px 60px 20px; border-right:1px solid var(--line);
+}
+.nav::-webkit-scrollbar{width:8px;}
+.nav::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:8px;}
+.nav .navhead{ font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; color:var(--muted); margin:0 0 14px 2px; text-transform:uppercase;}
+.navmod{ margin-bottom:4px;}
+.navmod > a{
+  display:flex; align-items:baseline; gap:8px;
+  padding:8px 8px; border-radius:var(--radius);
+  color:var(--ink-soft); text-decoration:none; font-weight:600; font-size:14.5px;
+}
+.navmod > a .tag{ font-family:var(--font-mono); font-size:11px; color:var(--accent-strong); font-weight:700;}
+.navmod > a:hover{ background:var(--surface-2);}
+.navmod.active > a{ background:var(--accent-soft); color:var(--ink);}
+.navsub{ list-style:none; margin:2px 0 10px 0; padding:0 0 0 26px; border-left:1px solid var(--line);}
+.navsub li a{
+  display:block; padding:4px 10px; margin:1px 0; font-size:13px; color:var(--muted);
+  text-decoration:none; border-radius:var(--radius);
+}
+.navsub li a:hover{ color:var(--ink); background:var(--surface-2);}
+.navsub li a.active{ color:var(--accent-strong); font-weight:600;}
+.navcheck{
+  display:inline-flex; width:14px; height:14px; border:1.5px solid var(--line-strong);
+  border-radius:3px; margin-right:2px; flex-shrink:0; cursor:pointer; position:relative; vertical-align:-2px;
+}
+.navcheck.done{ background:var(--teal); border-color:var(--teal);}
+.navcheck.done::after{ content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;}
+
+main{ min-width:0; padding:0 40px 120px 40px; }
+
+/* ============ Hero ============ */
+.hero{
+  padding:64px 0 40px 0; border-bottom:1px solid var(--line); margin-bottom:56px;
+  position:relative;
+}
+.hero .eyebrow{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; color:var(--accent-strong);
+  text-transform:uppercase; display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.hero .eyebrow::before{ content:""; width:26px; height:1px; background:var(--accent-strong);}
+.hero h1{
+  font-family:var(--font-display); font-weight:700; font-size:clamp(36px,5.4vw,64px);
+  line-height:1.04; margin:0 0 20px 0; text-wrap:balance; letter-spacing:-.01em;
+}
+.hero h1 em{ font-style:normal; color:var(--accent-strong);}
+.hero p.lede{ max-width:62ch; font-size:18px; color:var(--ink-soft); margin:0 0 28px 0;}
+.hero .meta{ display:flex; flex-wrap:wrap; gap:10px; }
+.chip{
+  font-family:var(--font-mono); font-size:12px; color:var(--muted); border:1px solid var(--line);
+  padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;
+}
+.chip b{color:var(--ink);}
+
+/* ============ Module ============ */
+.module{ padding-top:26px; margin-top:-26px; scroll-margin-top:70px;}
+.modhead{ display:flex; align-items:flex-end; gap:18px; margin-bottom:8px; flex-wrap:wrap;}
+.modhead .ref{
+  font-family:var(--font-mono); font-weight:700; font-size:13px; color:var(--accent-strong);
+  border:1px solid var(--accent-strong); padding:3px 9px; border-radius:3px; letter-spacing:.05em;
+}
+.modhead h2{ font-family:var(--font-display); font-size:clamp(26px,3.4vw,38px); margin:0; font-weight:700; text-wrap:balance;}
+.modintro{ color:var(--ink-soft); max-width:74ch; font-size:16.5px; margin:14px 0 40px 0;}
+.modintro strong{color:var(--ink);}
+
+.sub{ scroll-margin-top:70px; margin:0 0 46px 0; padding-top:8px;}
+.sub h3{
+  font-family:var(--font-display); font-size:22px; font-weight:700; margin:0 0 14px 0;
+  display:flex; align-items:center; gap:10px;
+}
+.sub h3 .num{ font-family:var(--font-mono); font-size:13px; color:var(--muted); font-weight:500;}
+.sub p{ max-width:72ch; margin:0 0 14px 0;}
+.sub h4{ font-family:var(--font-display); font-size:16px; font-weight:700; margin:22px 0 8px 0; color:var(--ink);}
+
+.lead-drop{ font-size:17.5px; }
+
+ul.speclist{ margin:0 0 16px 0; padding-left:0; list-style:none; max-width:72ch;}
+ul.speclist li{ position:relative; padding-left:20px; margin-bottom:9px;}
+ul.speclist li::before{ content:"▸"; position:absolute; left:0; color:var(--accent-strong); font-size:13px; top:1px;}
+
+/* callouts */
+.callout{
+  border:1px solid var(--line); border-left:3px solid var(--accent-strong);
+  background:var(--surface); border-radius:0 var(--radius) var(--radius) 0;
+  padding:16px 18px; margin:20px 0; max-width:72ch; box-shadow:var(--shadow);
+}
+.callout .lbl{ font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; color:var(--accent-strong); text-transform:uppercase; margin-bottom:6px; font-weight:700;}
+.callout p:last-child{margin-bottom:0;}
+.callout.warn{ border-left-color:var(--warn); }
+.callout.warn .lbl{ color:var(--warn);}
+.callout.teal{ border-left-color:var(--teal);}
+.callout.teal .lbl{ color:var(--teal);}
+
+/* quote card for historical quotes */
+.histquote{
+  font-family:var(--font-display); font-style:italic; font-size:19px; color:var(--ink-soft);
+  border-left:2px solid var(--line-strong); padding:4px 0 4px 18px; margin:18px 0; max-width:60ch;
+}
+.histquote cite{ display:block; font-family:var(--font-mono); font-style:normal; font-size:12px; color:var(--muted); margin-top:6px;}
+
+/* tables */
+.tablewrap{ overflow-x:auto; margin:18px 0 26px 0; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+table{ border-collapse:collapse; width:100%; min-width:520px; background:var(--surface);}
+table caption{ text-align:left; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:10px 14px; border-bottom:1px solid var(--line);}
+th,td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); font-size:14.5px; white-space:nowrap;}
+th{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); background:var(--surface-2); font-weight:600;}
+td.num, th.num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{ background:var(--surface-2);}
+td small{color:var(--muted); display:block; font-size:12px; white-space:normal;}
+
+/* timeline (module1) */
+.timeline{ display:flex; gap:0; margin:26px 0 30px 0; overflow-x:auto; padding-bottom:10px;}
+.tl-item{ flex:1 0 150px; position:relative; padding:20px 14px 0 0; border-top:3px solid var(--line-strong);}
+.tl-item::before{ content:""; position:absolute; top:-6px; left:0; width:9px; height:9px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); box-shadow:0 0 0 1px var(--accent);}
+.tl-item .yr{ font-family:var(--font-mono); font-size:12px; color:var(--accent-strong); font-weight:700;}
+.tl-item h5{ margin:4px 0 6px 0; font-family:var(--font-display); font-size:16px;}
+.tl-item p{ font-size:13px; color:var(--muted); margin:0; max-width:22ch;}
+
+/* chip block diagrams (module 2) */
+.chiprow{ display:flex; gap:18px; overflow-x:auto; margin:22px 0 10px 0; padding-bottom:14px;}
+.chipcard{ flex:0 0 172px; }
+.chipcard .yr{ font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-bottom:6px;}
+.chipcard .name{ font-family:var(--font-display); font-weight:700; font-size:15px; margin-bottom:8px;}
+.diegrid{
+  border:2px solid var(--ink-soft); border-radius:2px; background:var(--surface-2);
+  padding:6px; display:grid; gap:4px; height:150px;
+}
+.die-b{ border-radius:2px; display:flex; align-items:center; justify-content:center; text-align:center; font-family:var(--font-mono); font-size:9.5px; font-weight:600; padding:2px; line-height:1.15;}
+.die-core{ background:var(--accent); color:var(--accent-ink);}
+.die-cache{ background:var(--teal); color:#04231f;}
+.die-misc{ background:var(--surface-3); color:var(--ink-soft);}
+
+/* step flow (module4 interrupt) */
+.stepflow{ display:flex; flex-direction:column; gap:0; margin:22px 0; max-width:72ch;}
+.step{ display:flex; gap:16px; position:relative; padding-bottom:26px;}
+.step:last-child{padding-bottom:0;}
+.step::before{ content:""; position:absolute; left:15px; top:34px; bottom:0; width:1px; background:var(--line-strong);}
+.step:last-child::before{display:none;}
+.step .stepnum{
+  flex:0 0 32px; height:32px; border-radius:50%; background:var(--surface); border:2px solid var(--accent-strong);
+  color:var(--accent-strong); font-family:var(--font-mono); font-weight:700; font-size:13px;
+  display:flex; align-items:center; justify-content:center; z-index:1;
+}
+.step .stext{ padding-top:4px;}
+.step .stext b{display:block; font-size:15px; margin-bottom:2px;}
+.step .stext span{ color:var(--muted); font-size:14px;}
+
+/* priority bars */
+.priolist{ display:flex; flex-direction:column; gap:10px; margin:20px 0; max-width:72ch;}
+.prio{ display:grid; grid-template-columns:120px 1fr 90px; gap:14px; align-items:center;}
+.prio .plabel{ font-family:var(--font-mono); font-size:13px; font-weight:600;}
+.prio .pbar{ height:10px; background:var(--surface-3); border-radius:6px; overflow:hidden;}
+.prio .pbar i{ display:block; height:100%; background:var(--accent);}
+.prio .pval{ font-family:var(--font-mono); font-size:12px; color:var(--muted); text-align:right;}
+
+/* svg diagram frame */
+.diagram{
+  border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);
+  padding:20px; margin:22px 0 28px 0; position:relative;
+}
+.diagram .dcap{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;}
+.diagram svg{ width:100%; height:auto; display:block;}
+.diagram::before, .diagram::after{ content:""; position:absolute; width:10px; height:10px; border:2px solid var(--line-strong); top:6px;}
+.diagram::before{ left:6px; border-right:none; border-bottom:none;}
+.diagram::after{ right:6px; border-left:none; border-bottom:none;}
+
+/* instruction format lab (module 10.4 interactive) */
+.instrlab{ border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 20px 22px 20px; margin:22px 0 26px 0;}
+.instrlab-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+.instrlab-cap{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+.instrlab-tabs{ display:flex; flex-wrap:wrap; gap:8px;}
+.instrlab-tab{ font-family:var(--font-mono); font-size:12.5px; padding:7px 12px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft); cursor:pointer;}
+.instrlab-tab:hover{ background:var(--surface-3);}
+.instrlab-tab.active{ background:var(--accent-strong); border-color:var(--accent-strong); color:var(--accent-ink); font-weight:700;}
+.instrlab-title{ font-family:var(--font-display); font-size:15px; font-weight:700; margin:14px 0 2px 0;}
+.instrlab-sem{ font-family:var(--font-mono); font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+.instrlab-asm{ font-family:var(--font-mono); font-size:clamp(14px,4vw,19px); font-weight:600; padding:12px 16px; background:var(--surface-2); border-radius:var(--radius); margin-bottom:16px; letter-spacing:.02em; overflow-wrap:break-word;}
+.instrlab-asm .tok{ padding:2px 4px; border-radius:3px; transition:background .25s, color .25s;}
+.instrlab-asm .tok.active{ background:var(--accent-strong); color:var(--accent-ink);}
+.instrlab-fieldswrap{ overflow-x:auto; padding-bottom:4px; margin-bottom:6px;}
+.instrlab-fields{ display:flex; gap:3px; min-width:560px;}
+.instrlab-field{ border:1px dashed var(--line-strong); border-radius:2px; padding:8px 4px; text-align:center; min-width:0; transition:background .25s, border-color .25s; flex-shrink:0;}
+.instrlab-field .fname{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; color:var(--muted); letter-spacing:.04em;}
+.instrlab-field .fwidth{ font-family:var(--font-mono); font-size:9.5px; color:var(--muted); opacity:.75;}
+.instrlab-field .fval{ font-family:var(--font-mono); font-size:13px; font-weight:700; color:var(--ink); min-height:16px; margin-top:4px;}
+.instrlab-field .fbin{ font-family:var(--font-mono); font-size:10.5px; color:var(--accent-strong); word-break:break-all; margin-top:2px; min-height:13px;}
+.instrlab-field.done{ border-style:solid; border-color:var(--line-strong); background:var(--surface-2);}
+.instrlab-field.active{ border-style:solid; border-color:var(--accent-strong); background:var(--accent-soft); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-strong) 20%, transparent); animation:instrlabPulse 1.1s ease-in-out infinite;}
+@keyframes instrlabPulse{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-2px);} }
+.instrlab-binrow{ display:flex; gap:3px; margin:14px 0 4px 0; flex-wrap:wrap;}
+.instrlab-bingroup{ font-family:var(--font-mono); font-size:13px; letter-spacing:.06em; padding:5px 6px; border-radius:2px; background:var(--surface-2); color:var(--line-strong); word-break:break-all;}
+.instrlab-bingroup.revealed{ background:var(--ink); color:var(--surface);}
+.instrlab-hex{ font-family:var(--font-mono); font-size:14.5px; font-weight:700; color:var(--muted); margin-top:10px; min-height:20px; transition:color .3s;}
+.instrlab-hex.ready{ color:var(--teal);}
+.instrlab-explain{ font-size:14px; color:var(--ink-soft); min-height:46px; padding:12px 14px; background:var(--surface-2); border-radius:var(--radius); margin:14px 0;}
+.instrlab-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.instrlab-controls button{ font-family:var(--font-mono); font-size:12.5px; padding:8px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft); cursor:pointer;}
+.instrlab-controls button:hover{ background:var(--surface-3);}
+.instrlab-controls button:disabled{ opacity:.4; cursor:default;}
+.instrlab-controls button.primary{ background:var(--accent-strong); border-color:var(--accent-strong); color:var(--accent-ink); font-weight:700;}
+.instrlab-controls .steplabel{ font-family:var(--font-mono); font-size:12px; color:var(--muted); margin-left:auto;}
+
+code{ font-family:var(--font-mono); font-size:.9em; background:var(--surface-2); border:1px solid var(--line); border-radius:2px; padding:1px 5px; color:var(--ink); overflow-wrap:break-word;}
+
+/* bus timing lab (module 12.5 interactive) */
+.buslab{ border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 20px 22px 20px; margin:22px 0 26px 0;}
+.buslab-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+.buslab-cap{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+.buslab-tabs{ display:flex; flex-wrap:wrap; gap:8px;}
+.buslab-tab{ font-family:var(--font-mono); font-size:12.5px; padding:7px 12px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft); cursor:pointer;}
+.buslab-tab:hover{ background:var(--surface-3);}
+.buslab-tab.active{ background:var(--teal); border-color:var(--teal); color:#fff; font-weight:700;}
+.buslab-stage{ overflow-x:auto; padding-bottom:4px;}
+.buslab-stage svg{ min-width:640px; width:100%; height:auto; display:block;}
+.buslab-explain{ font-size:14px; color:var(--ink-soft); min-height:64px; padding:12px 14px; background:var(--surface-2); border-radius:var(--radius); margin:14px 0;}
+.buslab-explain b{ display:block; font-family:var(--font-display); font-size:14.5px; color:var(--ink); margin-bottom:3px;}
+.buslab-controls{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.buslab-controls button{ font-family:var(--font-mono); font-size:12.5px; padding:8px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft); cursor:pointer;}
+.buslab-controls button:hover{ background:var(--surface-3);}
+.buslab-controls button:disabled{ opacity:.4; cursor:default;}
+.buslab-controls button.primary{ background:var(--teal); border-color:var(--teal); color:#fff; font-weight:700;}
+.buslab-controls .steplabel{ font-family:var(--font-mono); font-size:12px; color:var(--muted); margin-left:auto;}
+
+/* quiz */
+.quizblock{ margin-top:38px; border-top:1px dashed var(--line-strong); padding-top:22px;}
+.quizblock > .qtitle{ font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;}
+details.qcard{
+  border:1px solid var(--line); border-radius:var(--radius); margin-bottom:10px; background:var(--surface);
+  max-width:72ch;
+}
+details.qcard summary{
+  cursor:pointer; padding:13px 16px; font-weight:600; list-style:none; display:flex; gap:10px; align-items:flex-start;
+  font-size:14.5px;
+}
+details.qcard summary::-webkit-details-marker{display:none;}
+details.qcard summary::before{ content:"Q"; font-family:var(--font-mono); font-weight:700; color:var(--accent-strong); flex:0 0 auto;}
+details.qcard[open] summary{ border-bottom:1px solid var(--line);}
+details.qcard .a{ padding:13px 16px 15px 40px; color:var(--ink-soft); font-size:14.5px;}
+details.qcard .a b{color:var(--teal);}
+
+footer.pagefoot{ border-top:1px solid var(--line); margin-top:60px; padding:26px 0 60px 0; color:var(--muted); font-size:13px; font-family:var(--font-mono);}
+
+@media (max-width: 920px){
+  .shell{ grid-template-columns:1fr;}
+  .nav{
+    position:fixed; inset:53px 0 0 0; background:var(--bg); z-index:39; transform:translateX(-100%);
+    transition:transform .25s ease; height:calc(100vh - 53px); width:82vw; max-width:320px; box-shadow:var(--shadow);
+  }
+  .nav.open{ transform:translateX(0);}
+  .navtoggle{ display:inline-flex;}
+  main{ padding:0 20px 100px 20px;}
+  .prio{ grid-template-columns:96px 1fr 70px;}
+  .navbackdrop.open{
+    display:block; position:fixed; inset:53px 0 0 0; z-index:38;
+    background:rgba(6,14,22,.45); backdrop-filter:blur(1px);
+  }
+}
+@media (max-width: 640px){
+  .brand-sub{ display:none;}
+  .progresspill .bar{ display:none;}
+  .progresspill{ padding:6px 9px;}
+}
+</style>
+<!-- ============ BODY CONTENT ============ -->
+<div class="topbar">
+  <button class="iconbtn navtoggle" id="navToggleBtn" aria-label="打开目录">目录 ☰</button>
+  <div class="brand"><b>IE4756</b><span class="brand-sub"> · COMPUTER ARCHITECTURE 芯片蓝图</span></div>
+  <div class="spacer"></div>
+  <div class="progresspill"><span id="progressLabel">0 / 12 模块</span><span class="bar"><i id="progressBar"></i></span></div>
+  <button class="iconbtn" id="themeToggleBtn">主题</button>
+</div>
+
+<div class="navbackdrop" id="navBackdrop"></div>
+<div class="shell">
+  <nav class="nav" id="sideNav" aria-label="课程目录">
+    <p class="navhead">课程目录 · Contents</p>
+    <div class="navmod"><a href="#m1"><span class="navcheck" data-mod="m1" title="标记完成"></span><span class="tag">M01</span> 计算机世代简史</a>
+      <ul class="navsub">
+        <li><a href="#m1-s1">世代 0～2：从差分机到晶体管</a></li>
+        <li><a href="#m1-s2">世代 3～4：微处理器与 VLSI</a></li>
+        <li><a href="#m1-s3">第 5 代？量子计算机的真相</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m2"><span class="navcheck" data-mod="m2" title="标记完成"></span><span class="tag">M02</span> x86 处理器演化史</a>
+      <ul class="navsub">
+        <li><a href="#m2-s1">8086 / 8088：x86 的起点</a></li>
+        <li><a href="#m2-s2">Intel 386：32 位与保护模式</a></li>
+        <li><a href="#m2-s3">Pentium 1 / 2：缓存搬进芯片</a></li>
+        <li><a href="#m2-s4">P4 EE / AMD 64 X2：L3 与多核元年</a></li>
+        <li><a href="#m2-s5">Core i5 Nehalem：共享末级缓存</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m3"><span class="navcheck" data-mod="m3" title="标记完成"></span><span class="tag">M03</span> CPU 的组成部件</a>
+      <ul class="navsub">
+        <li><a href="#m3-s1">早期标准组件</a></li>
+        <li><a href="#m3-s2">现代组件的三大升级</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m4"><span class="navcheck" data-mod="m4" title="标记完成"></span><span class="tag">M04</span> 操作系统与多任务</a>
+      <ul class="navsub">
+        <li><a href="#m4-s1">现代计算机全景</a></li>
+        <li><a href="#m4-s2">合作式 vs 抢占式多任务</a></li>
+        <li><a href="#m4-s3">抢占式多任务：从笨办法到中断</a></li>
+        <li><a href="#m4-s4">中断触发的五个步骤</a></li>
+        <li><a href="#m4-s5">优先级与时间片轮转</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m5"><span class="navcheck" data-mod="m5" title="标记完成"></span><span class="tag">M05</span> 数字电路：ALU 与加法器</a>
+      <ul class="navsub">
+        <li><a href="#m5-s1">ALU 与 FPU 的分工</a></li>
+        <li><a href="#m5-s2">组合逻辑电路与门延迟</a></li>
+        <li><a href="#m5-s3">加法器（慢）：进位传播瓶颈</a></li>
+        <li><a href="#m5-s4">加法器（快）：进位超前分治法</a></li>
+        <li><a href="#m5-s5">乘法器：化乘为加</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m6"><span class="navcheck" data-mod="m6" title="标记完成"></span><span class="tag">M06</span> 晶体管与逻辑门</a>
+      <ul class="navsub">
+        <li><a href="#m6-s1">MOSFET 三代：PMOS→NMOS→CMOS</a></li>
+        <li><a href="#m6-s2">逻辑门如何用晶体管搭出来</a></li>
+        <li><a href="#m6-s3">常见错误接法</a></li>
+        <li><a href="#m6-s4">传输门：一个开关的艺术</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m7"><span class="navcheck" data-mod="m7" title="标记完成"></span><span class="tag">M07</span> 时序电路与触发器</a>
+      <ul class="navsub">
+        <li><a href="#m7-s1">D 触发器：1 比特记忆单元</a></li>
+        <li><a href="#m7-s2">复位与使能：让触发器听话</a></li>
+        <li><a href="#m7-s3">上电复位：保证起点已知</a></li>
+        <li><a href="#m7-s4">反馈移位寄存器：序列生成器</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m8"><span class="navcheck" data-mod="m8" title="标记完成"></span><span class="tag">M08</span> 抽象机器模型</a>
+      <ul class="navsub">
+        <li><a href="#m8-s1">一张地图：模型的层级</a></li>
+        <li><a href="#m8-s2">图灵机模型：最简单也最笨拙</a></li>
+        <li><a href="#m8-s3">RAM 模型：贴近真实计算机</a></li>
+        <li><a href="#m8-s4">指针机模型：只认得"摸得到"</a></li>
+        <li><a href="#m8-s5">程序即字符串：存储程序的跃迁</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m9"><span class="navcheck" data-mod="m9" title="标记完成"></span><span class="tag">M09</span> 计算机架构</a>
+      <ul class="navsub">
+        <li><a href="#m9-s1">冯·诺依曼架构：共同祖先</a></li>
+        <li><a href="#m9-s2">虚拟地址：64 位是假象</a></li>
+        <li><a href="#m9-s3">哈佛架构：把程序和数据分家</a></li>
+        <li><a href="#m9-s4">分离缓存：鱼与熊掌的折中</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m10"><span class="navcheck" data-mod="m10" title="标记完成"></span><span class="tag">M10</span> 指令集架构与 MIPS</a>
+      <ul class="navsub">
+        <li><a href="#m10-s1">什么是 ISA</a></li>
+        <li><a href="#m10-s2">CISC vs RISC</a></li>
+        <li><a href="#m10-s3">MIPS：RISC 的教学级活化石</a></li>
+        <li><a href="#m10-s4">三种指令格式：R / I / J</a></li>
+        <li><a href="#m10-s5">从 C 到比特：完整编译链路</a></li>
+        <li><a href="#m10-s6">CPU 数据通路与控制单元</a></li>
+        <li><a href="#m10-s7">多核机器与线程同步原语</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m11"><span class="navcheck" data-mod="m11" title="标记完成"></span><span class="tag">M11</span> 性能评估</a>
+      <ul class="navsub">
+        <li><a href="#m11-s1">六个维度</a></li>
+        <li><a href="#m11-s2">速度：不止是"GHz"</a></li>
+        <li><a href="#m11-s3">加速比 Speedup</a></li>
+        <li><a href="#m11-s4">CPI：每条指令要几个周期</a></li>
+        <li><a href="#m11-s5">数据率与容量</a></li>
+        <li><a href="#m11-s6">摩尔定律：自我实现的预言</a></li>
+      </ul>
+    </div>
+    <div class="navmod"><a href="#m12"><span class="navcheck" data-mod="m12" title="标记完成"></span><span class="tag">M12</span> 总线、I/O 与存储</a>
+      <ul class="navsub">
+        <li><a href="#m12-s1">为什么需要总线</a></li>
+        <li><a href="#m12-s2">三组信号线：控制/地址/数据</a></li>
+        <li><a href="#m12-s3">内存总线 vs I/O 总线</a></li>
+        <li><a href="#m12-s4">总线主控与仲裁</a></li>
+        <li><a href="#m12-s5">同步总线 vs 异步总线</a></li>
+        <li><a href="#m12-s6">CPU 怎么和设备对话</a></li>
+        <li><a href="#m12-s7">存储系统的四个指标</a></li>
+        <li><a href="#m12-s8">磁盘存储：机械时代的记忆</a></li>
+        <li><a href="#m12-s9">光盘与磁带：为什么没消失</a></li>
+        <li><a href="#m12-s10">闪存：没有机械部件的存储</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="mainContent">
+    <header class="hero">
+      <p class="eyebrow">交互式学习手册 · COMPUTER ARCHITECTURE PART 1</p>
+      <h1>从真空管到<em>超标量流水线</em>，<br>拆开一台计算机的全部秘密</h1>
+      <p class="lede">这是基于 NTU IE4756/IE6156/EE6156《Computer Architecture》课程 Part 1 全部讲义整理的自学手册：从计算机世代变迁、抽象机器模型、CPU 电路设计，到指令集架构、性能评估、总线与存储系统，带你把"一台计算机是怎么算出答案的"这条链路完整走一遍，搞懂每一层的"为什么"。</p>
+      <div class="meta">
+        <span class="chip">12 个模块</span>
+        <span class="chip">含电路图解</span>
+        <span class="chip">含自测问答</span>
+        <span class="chip">讲者 <b>Nguyen Hong Duc</b> · NTU</span>
+      </div>
+    </header>
+
+    <section class="module" id="m1">
+      <div class="modhead"><span class="ref">MODULE 01</span><h2>计算机世代简史</h2></div>
+      <p class="modintro">在谈论"CPU 怎么设计"之前，先搞清楚<strong>它是怎么变成今天这个样子的</strong>。计算机的世代划分不是按年份硬切的，而是按"用什么物理元件搭出逻辑门"划分——每一次元件的更新，都会把体积、功耗、成本压低一个数量级，进而把计算机从"整间房子"压缩成"口袋里的芯片"。这条主线，就是理解后面所有模块的地图。</p>
+
+      <div class="sub" id="m1-s1">
+        <h3><span class="num">01.1</span> 世代 0～2：从差分机到晶体管</h3>
+        <p class="lead-drop">第 0 代（约 1640–1940）里根本没有"电子"元件——Babbage 的差分机（1833）靠齿轮和曲柄做十进制运算，Zuse 的 Z1（1936）用机械继电器搭出了二进制逻辑。它们证明了"可编程计算"这件事在电子管出现前就已经被想清楚了，只是造价和速度都还停留在钟表匠的水平。</p>
+        <p>第 1 代（约 1950–1960）用<strong>电子管（真空管）</strong>取代了机械齿轮——EDSAC（1949）、UNIVAC I（1951）都是这个时代的代表。电子管确实比继电器快得多，但它体积大、极易烧坏、耗电惊人，一台计算机常常要占满一整个房间。1950 年有人曾预言"未来的计算机重量不会超过 1.5 吨"，这句今天看来的笑话，恰恰说明当时的人是以"房间"和"吨"作为计算机的度量单位的。</p>
+        <div class="histquote">"Computers in the future will weigh no more than 1.5 tons."<cite>— 1950 年的预测，如今被当作反面教材传颂</cite></div>
+        <p>第 2 代（约 1960–1970）迎来了<strong>晶体管（BJT，双极结型晶体管）</strong>。晶体管不需要真空、不会像灯泡一样烧丝，体积和功耗都大幅下降。PDP-1（1959）是这代的明星：它拥有史上第一个文本编辑器、第一个文字处理器，甚至第一款电子游戏《Spacewar!》——计算机第一次显得"好玩"而不只是"能算"。IBM 1130（1965–约1980）则代表了这个时代工程和商用市场的另一条线。</p>
+      </div>
+
+      <div class="sub" id="m1-s2">
+        <h3><span class="num">01.2</span> 世代 3～4：微处理器与 VLSI</h3>
+        <p class="lead-drop">第 3 代（约 1970–1980）是真正的分水岭：<strong>MOSFET（金属氧化物半导体场效应晶体管）</strong>加上固态存储器，让"把一整颗 CPU 刻在一块芯片上"第一次成为可能。</p>
+        <div class="tablewrap">
+          <table>
+            <caption>第三代三块里程碑芯片</caption>
+            <thead><tr><th>型号</th><th>年份</th><th class="num">位宽</th><th class="num">内存</th><th class="num">晶体管数</th><th>意义</th></tr></thead>
+            <tbody>
+              <tr><td>Intel 4004</td><td class="num">1971</td><td class="num">4-bit</td><td class="num">0.6 KB</td><td class="num">2,300</td><td>史上首款商用单芯片微处理器</td></tr>
+              <tr><td>Intel 8080</td><td class="num">1974</td><td class="num">8-bit</td><td class="num">64 KB</td><td class="num">4,500</td><td>首款廉价通用微处理器（衍生型号至今仍在生产）</td></tr>
+              <tr><td>Intel 8086</td><td class="num">1978</td><td class="num">16-bit</td><td class="num">1 MB</td><td class="num">29,000</td><td>首款商用 16 位微处理器，<b>x86 架构的奠基者</b>，率先使用微码，AMD 8088 是它的近亲兄弟</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>第 4 代（约 1980 至今）靠<strong>VLSI（超大规模集成）</strong>把晶体管密度再拉高好几个数量级——密到人工画版图已经不现实，于是现代 CPU 几乎全部靠<strong>软件自动综合</strong>电路（也就是把 CMOS 电路的构建也变成了一种"编程"）。Pentium 1（1993）已经有 300 万晶体管，到 Pentium 4（2006）时暴涨到 1.88 亿——13 年里翻了 60 多倍，这正是"摩尔定律"在真实产品上的体现。</p>
+      </div>
+
+      <div class="sub" id="m1-s3">
+        <h3><span class="num">01.3</span> 第 5 代？量子计算机的真相</h3>
+        <p>如果说有"第 5 代"，最常被提名的候选人是<strong>量子计算机</strong>。但它离取代经典 CPU 还很远，原因值得说清楚：</p>
+        <ul class="speclist">
+          <li>它需要大量<strong>稳定且带纠错能力的量子比特（qubit）</strong>，这在工程上极难实现——2024 年底才出现第一批商用级"双轨量子比特"硬件。</li>
+          <li>量子计算机<strong>依然需要一台经典计算机来验证它的输出</strong>——这意味着它无法被用来高效解决那些"连验证都很难"的问题。</li>
+          <li>量子计算目前<strong>可以被经典计算机模拟</strong>，只是效率很低。用复杂度理论的语言来说：<code>P ⊆ BQP ⊆ PSPACE</code>（P＝多项式时间可解，BQP＝有界错误量子多项式时间，PSPACE＝多项式空间可解）。</li>
+        </ul>
+        <div class="callout teal"><div class="lbl">留给你的开放问题</div><p>P 是否等于 PSPACE？换句话说：像「推箱子（Rush Hour）」这类谜题，是否存在一个多项式时间算法总能求解？这至今仍是计算机科学最大的未解之谜之一，量子计算机能否改写它，同样没有答案。</p></div>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-item"><span class="yr">~1640–1940</span><h5>第 0 代</h5><p>机械计算：Babbage 差分机、Zuse Z1</p></div>
+        <div class="tl-item"><span class="yr">~1950–1960</span><h5>第 1 代</h5><p>电子管：EDSAC、UNIVAC I</p></div>
+        <div class="tl-item"><span class="yr">~1960–1970</span><h5>第 2 代</h5><p>晶体管 BJT：PDP-1、IBM 1130</p></div>
+        <div class="tl-item"><span class="yr">~1970–1980</span><h5>第 3 代</h5><p>MOSFET：4004 → 8080 → 8086</p></div>
+        <div class="tl-item"><span class="yr">~1980–至今</span><h5>第 4 代</h5><p>VLSI：软件自动综合 CMOS 电路</p></div>
+        <div class="tl-item"><span class="yr">未来？</span><h5>第 5 代</h5><p>量子计算机，仍需经典机验证输出</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么"晶体管"取代"电子管"是划时代的一步，而不只是"更小的电子管"？</summary><div class="a">因为晶体管在<b>固态半导体</b>上工作，不需要真空腔体、不会像灯丝一样烧断、能耗和体积都比电子管低几个数量级，这才使得后续"把成千上万个逻辑门集成到一块芯片上"（第 3、4 代）在物理上变得可行。这不是量变，是可制造性的质变。</div></details>
+        <details class="qcard"><summary>Intel 8086 为什么被称为"x86 架构的奠基者"？</summary><div class="a">因为今天所有 x86 / x86-64 处理器（包括你电脑里的 Intel / AMD 芯片）在指令集层面都是 8086 指令集的<b>向后兼容扩展</b>——"x86"这个名字本身就来自 8086、80286、80386 这一串型号。</div></details>
+        <details class="qcard"><summary>量子计算机为什么不能简单地被称为"下一代通用计算机"？</summary><div class="a">因为它仍<b>依赖经典计算机验证输出</b>，且目前已知能被它加速的问题类别有限（复杂度上被夹在 P 和 PSPACE 之间），它更像是经典计算机的"协处理器"，而不是替代品。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m2">
+      <div class="modhead"><span class="ref">MODULE 02</span><h2>x86 处理器演化史</h2></div>
+      <p class="modintro">如果把一颗 CPU 的芯片版图（die）拍成照片，你会发现<strong>历代 x86 处理器的进化史，本质上是一部"缓存不断长大、核心不断变多"的历史</strong>。下面这条芯片示意图，按时间顺序展示了同一批经典处理器内部版图的构成变化——颜色越暖代表运算核心，越冷代表缓存。</p>
+
+      <div class="chiprow">
+        <div class="chipcard"><span class="yr">1978 / 1981</span><div class="name">8086 / 8088</div>
+          <div class="diegrid" style="grid-template-columns:1fr 1fr; grid-template-rows:repeat(3,1fr);">
+            <div class="die-b die-misc">寄存器</div><div class="die-b die-misc">内存控制</div>
+            <div class="die-b die-core">ALU</div><div class="die-b die-misc">总线控制</div>
+            <div class="die-b die-misc">微码引擎</div><div class="die-b die-misc">微码 ROM</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">1985–1990</span><div class="name">Intel 386</div>
+          <div class="diegrid" style="grid-template-columns:1fr 1fr; grid-template-rows:repeat(4,1fr);">
+            <div class="die-b die-core">ALU</div><div class="die-b die-cache">Cache</div>
+            <div class="die-b die-misc">预取 Pre-Fetch</div><div class="die-b die-misc">指令 Fetch</div>
+            <div class="die-b die-misc">微码引擎</div><div class="die-b die-misc">微码 ROM</div>
+            <div class="die-b die-misc" style="grid-column:1/3;">总线控制</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">1993–1999</span><div class="name">Pentium 1</div>
+          <div class="diegrid" style="grid-template-columns:1fr 1fr; grid-template-rows:repeat(5,1fr);">
+            <div class="die-b die-cache">指令缓存</div><div class="die-b die-cache">数据缓存</div>
+            <div class="die-b die-misc">指令 Fetch</div><div class="die-b die-misc">分支预测</div>
+            <div class="die-b die-misc">总线控制</div><div class="die-b die-misc">微码引擎</div>
+            <div class="die-b die-core">ALU</div><div class="die-b die-core">FPU</div>
+            <div class="die-b die-misc" style="grid-column:1/3;">微码 ROM</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">1997–1999</span><div class="name">Pentium 2</div>
+          <div class="diegrid" style="grid-template-columns:1fr; grid-template-rows:2fr 1.4fr;">
+            <div class="die-b die-misc">核心逻辑（ALU / 分支预测 / 双缓存 / 微码）</div>
+            <div class="die-b die-cache">片上 L2 Cache（首次）</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">2003</span><div class="name">Pentium 4 EE</div>
+          <div class="diegrid" style="grid-template-columns:1fr; grid-template-rows:2fr 1fr 1fr;">
+            <div class="die-b die-misc">核心逻辑（单核）</div>
+            <div class="die-b die-cache">L2 Cache</div>
+            <div class="die-b die-cache">L3 Cache（消费级首次）</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">2005</span><div class="name">AMD 64 X2</div>
+          <div class="diegrid" style="grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr 0.7fr;">
+            <div class="die-b die-core">Core 1</div><div class="die-b die-core">Core 2</div>
+            <div class="die-b die-cache">Core1 L2</div><div class="die-b die-cache">Core2 L2</div>
+            <div class="die-b die-misc" style="grid-column:1/3;">双核，各自独立缓存</div>
+          </div>
+        </div>
+        <div class="chipcard"><span class="yr">2008</span><div class="name">Core i5 Nehalem</div>
+          <div class="diegrid" style="grid-template-columns:1fr 1fr; grid-template-rows:0.6fr 1fr 1fr 0.8fr;">
+            <div class="die-b die-misc" style="grid-column:1/3;">内存控制器</div>
+            <div class="die-b die-core">Core</div><div class="die-b die-core">Core</div>
+            <div class="die-b die-core">Core</div><div class="die-b die-core">Core</div>
+            <div class="die-b die-cache" style="grid-column:1/3;">共享 L3 Cache</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub" id="m2-s1">
+        <h3><span class="num">02.1</span> 8086 / 8088：x86 的起点</h3>
+        <p>1981 年的第一台 IBM PC 用的是 <strong>AMD 8088</strong>（Intel 8086 的低成本变体，外部数据总线砍半到 8 位以降低系统成本）。剥开它的主板，你会看到 CPU、浮点协处理器（FP Coprocessor，负责浮点运算，因为那时 FPU 还没被塞进 CPU 本体）分别是两块独立芯片。CPU 内部已经能看出现代处理器的雏形：寄存器堆、内存控制、总线控制、ALU，以及<strong>微码引擎 + 微码 ROM</strong>——这是理解"CPU 如何执行指令"的关键组件，我们会在模块 03 详细展开。</p>
+      </div>
+      <div class="sub" id="m2-s2">
+        <h3><span class="num">02.2</span> Intel 386：32 位与保护模式</h3>
+        <p>386（1985–1990）是 Intel 第一颗<strong>32 位</strong> CPU，更重要的是它第一次完整支持了<strong>保护模式（protected mode）</strong>——这是"健壮多任务"的硬件地基：每个程序可以拥有自己独立的内存地址空间，一个程序跑飞了不会轻易踩到别的程序或操作系统的内存。芯片内部也第一次出现了片上 <strong>Cache</strong> 和独立的<strong>预取（Pre-Fetch）</strong>单元，为流水线化执行做准备。</p>
+      </div>
+      <div class="sub" id="m2-s3">
+        <h3><span class="num">02.3</span> Pentium 1 / 2：缓存开始搬进芯片</h3>
+        <p>Pentium 1（1993–1999）第一次采用<strong>分离式缓存架构（split-cache）</strong>——指令缓存（Instruction Cache）和数据缓存（Data Cache）物理上是两块独立的存储，互不干扰，这样取指令和读写数据可以同时进行，不会互相排队。芯片里还首次出现了独立的<strong>分支预测器（Branch Predictor）</strong>。Pentium 2（1997–1999）则更进一步，把原本需要通过主板单独芯片提供的 <strong>L2 缓存</strong>直接搬上了 CPU 本体，大幅缩短了二级缓存的访问延迟。</p>
+      </div>
+      <div class="sub" id="m2-s4">
+        <h3><span class="num">02.4</span> P4 Extreme Edition / AMD 64 X2：L3 与多核元年</h3>
+        <p>2003 年的 <strong>Pentium 4 Extreme Edition</strong> 是第一款面向消费者、带片上 <strong>L3 缓存</strong>的处理器——但它依然只有<strong>单核</strong>。真正的转折点在 2005 年，<strong>AMD 64 X2</strong> 成为最早一批亲民价位的<strong>双核</strong>处理器：两个核心（Core 1 / Core 2）各自拥有独立的 L2 缓存，彼此独立执行程序，这也是"多核并行"第一次走进普通消费者的电脑。</p>
+      </div>
+      <div class="sub" id="m2-s5">
+        <h3><span class="num">02.5</span> Core i5 Nehalem：共享末级缓存</h3>
+        <p>2008 年的 <strong>Intel Core i5（Nehalem）</strong>把多核架构又推进了一步：多个核心不再各自为战，而是<strong>共享同一块片上 L3 缓存</strong>，配合内存控制器、指令队列和 PCIe 控制器直接集成在芯片上。共享末级缓存的好处是——如果一个核心刚访问过的数据，另一个核心恰好也要用，就不必再穿过缓慢的主存，这为后续所有多核 CPU 的缓存层级设计定了基调，一直沿用至今。</p>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么"分离式缓存"（指令缓存 / 数据缓存分开）比"统一缓存"更快？</summary><div class="a">因为取指令（读代码）和读写数据是<b>几乎每个时钟周期都会同时发生</b>的两件事。如果共用一块缓存，两者就要排队抢访问端口；分开之后，取指令和存取数据可以真正并行，互不阻塞。</div></details>
+        <details class="qcard"><summary>"共享 L3 缓存"和"每个核心各自的 L2 缓存"分别解决什么问题？</summary><div class="a">私有 L2 离核心近、延迟低，用来存该核心最近频繁用到的数据；共享 L3 容量更大，用来在<b>多个核心之间搬运/共享</b>数据，避免每个核心都要单独跑去主存拿同一份数据。</div></details>
+        <details class="qcard"><summary>386 的"保护模式"为什么是"健壮多任务"的前提？</summary><div class="a">因为它让每个进程拥有独立、受硬件保护的地址空间——一个程序的 bug 顶多让自己崩溃，无法直接改写其他程序或操作系统的内存，这是模块 04 会讲的"抢占式多任务"能够安全实现的硬件基础。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m3">
+      <div class="modhead"><span class="ref">MODULE 03</span><h2>CPU 的组成部件</h2></div>
+      <p class="modintro">把模块 02 里那些芯片版图拆成"零件清单"，会发现零件本身其实分两批：早期就有的"标配三件套"，以及后来为了榨取速度而陆续加上的"性能加速件"。</p>
+
+      <div class="sub" id="m3-s1">
+        <h3><span class="num">03.1</span> 早期标准组件</h3>
+        <p>早期一代微处理器的内部，基本上只需要三块核心电路就能跑起来：</p>
+        <ul class="speclist">
+          <li><strong>ALU（算术逻辑单元）</strong>：负责整数加减乘、位运算等"算术逻辑"层面的计算，是 CPU 真正"做数学题"的地方。</li>
+          <li><strong>FPU（浮点单元）</strong>：专门负责浮点数运算。</li>
+          <li><strong>I/O 总线控制</strong>：负责和 I/O 总线（外部设备、内存等）对接、收发数据。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m3-s2">
+        <h3><span class="num">03.2</span> 现代组件的三大升级</h3>
+        <p>后期世代在这三件套之上，陆续叠加了三种"用电路换速度"的加速机制——它们都不改变 CPU 能做什么，只改变它能<strong>多快</strong>做：</p>
+        <h4>① 独立的数据缓存与指令缓存</h4>
+        <p>如模块 02 所述，把缓存拆成两块独立的物理存储，让取指令和存取数据互不阻塞。</p>
+        <h4>② 微码引擎 + 微码 ROM</h4>
+        <p>每一条 CPU 指令并不是直接"硬接线"执行的，而是先被翻译成若干条更简单的<strong>微指令（micro-instruction）</strong>，再交给微码引擎逐条执行；这些翻译规则存放在<strong>微码 ROM</strong>里。这样做的好处是：把复杂指令拆成简单的微操作后，可以把时钟频率拉得更高，让"简单指令"跑得更快，代价是复杂指令需要多个时钟周期完成。</p>
+        <h4>③ 分支预测（Branch Prediction）</h4>
+        <p>CPU 在执行到一个条件跳转（if/循环判断）指令时，还不知道跳转结果就已经<strong>猜测</strong>接下来最可能执行哪条指令，并提前开始执行——完全不等分支指令本身算完。如果猜错了，就把猜测执行的结果撤销重来。这看起来像"赌博"，但现代 CPU 的分支预测命中率其实非常高（通常在 90% 以上），一旦猜对就是纯赚的时钟周期。</p>
+        <div class="callout"><div class="lbl">为什么值得赌</div><p>分支预测的本质是一笔期望值划算的赌注：预测对了，流水线不用停顿，白赚好几个周期；预测错了，撤销重来的代价也就是"多等一会儿"，并不会算错结果。只要命中率够高，这笔账长期看必然是划算的。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>微码引擎存在的意义是什么？直接用硬件"死接线"执行每条指令不是更快吗？</summary><div class="a">复杂指令如果要"死接线"直接执行，电路必须在一个时钟周期内做完所有事，时钟频率就被最复杂的指令拖累。拆成微指令后，简单操作可以用更高频率快速跑完，复杂指令则多花几个周期——总体吞吐反而更高，也让指令集设计更灵活（甚至能后续通过微码更新修 bug）。</div></details>
+        <details class="qcard"><summary>分支预测猜错了，CPU 怎么"撤销"已经执行的结果？</summary><div class="a">CPU 会在提交（commit）最终结果之前，把猜测执行阶段的中间结果暂存在流水线里而不直接写回寄存器/内存；一旦发现预测错误，就丢弃这些暂存结果、清空流水线中猜错的那部分，再从正确的分支重新取指执行。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m4">
+      <div class="modhead"><span class="ref">MODULE 04</span><h2>操作系统与多任务</h2></div>
+      <p class="modintro">CPU 硬件本身其实<strong>一次只能跑一个程序</strong>。今天我们习惯一边听歌一边写代码一边挂着下载，靠的完全是操作系统在"欺骗"我们——它让 CPU 在极短时间内飞速切换任务，快到人眼完全察觉不到。这套"欺骗术"到底是怎么设计的，正是本模块的主题。</p>
+
+      <div class="sub" id="m4-s1">
+        <h3><span class="num">04.1</span> 现代计算机全景</h3>
+        <ul class="speclist">
+          <li><strong>操作系统（OS）</strong>：本质上也（大致）是一个程序，它借助 CPU 核心去调度、运行成百上千个用户程序。</li>
+          <li><strong>CPU</strong>：一块硬件，内含 1 个或多个核心（core），每个核心在任意时刻只能运行 1 个程序。</li>
+          <li><strong>RAM 模型</strong>：一种抽象模型，近似地把"1 个用户程序 + 主存"当作一台独立的 RAM 机器来分析算法复杂度。</li>
+          <li><strong>分离缓存架构</strong>：把 RAM 模型进一步具体化成"带缓存的 CPU"这一更贴近真实硬件的模型，用于分析程序在真实缓存层级下的表现。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m4-s2">
+        <h3><span class="num">04.2</span> 合作式 vs 抢占式多任务</h3>
+        <p>让多个程序"看起来同时运行"，历史上出现过两种思路：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>两种多任务调度方式对比</caption>
+            <thead><tr><th>方式</th><th>原理</th><th>代表系统</th><th>致命问题</th></tr></thead>
+            <tbody>
+              <tr><td><strong>合作式多任务</strong><br><small>Cooperative</small></td><td>每个程序运行一小段后，<em>主动</em>把控制权交还给操作系统</td><td>Windows 3.1 / 95 / 98 上的旧版 16 位程序</td><td>只要一个程序耍赖不归还控制权（或直接卡死），<strong>整个系统一起崩溃</strong></td></tr>
+              <tr><td><strong>抢占式多任务</strong><br><small>Pre-emptive</small></td><td>操作系统<em>定期强制</em>收回控制权，切换到别的程序</td><td>Windows 95 起用于全部 32 位程序，Windows XP 起用于所有程序</td><td>需要 CPU 硬件专门支持（见下）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sub" id="m4-s3">
+        <h3><span class="num">04.3</span> 抢占式多任务：从"笨办法"到中断机制</h3>
+        <p><strong>笨办法（不可行）：</strong>让操作系统自己去逐条解释执行每个用户程序的指令。问题是——操作系统既不能直接跳进用户程序的代码执行（跳过去就再也拿不回控制权了），也不能自己在 CPU 上直接运行用户程序（这样它自己就成了唯一在跑的程序）。只能自己写一套子程序去"模拟执行"每一条用户指令，这慢到完全不能用。</p>
+        <p><strong>正确做法：</strong>CPU 硬件层面提供两条特殊指令——<code>set-interrupt</code>（设置中断）和 <code>return-from-interrupt</code>（从中断返回）。操作系统在运行任何用户程序之前，先执行一次 <code>set-interrupt</code>，设定"多久之后触发一次中断"以及"中断触发时要跳去哪个地址"（即中断处理程序的入口）。设置好之后，操作系统就可以放心地直接跳到用户程序的地址去运行——因为它知道，无论如何，CPU 都会在设定的时间点<strong>自动</strong>把控制权还给它。</p>
+      </div>
+
+      <div class="sub" id="m4-s4">
+        <h3><span class="num">04.4</span> 中断触发的五个步骤</h3>
+        <p>每当中断计时器时间到，CPU 会把当前内部状态（包括程序计数器 PC）压入栈中，并跳转到中断处理程序，依次完成：</p>
+        <div class="stepflow">
+          <div class="step"><div class="stepnum">1</div><div class="stext"><b>保存现场</b><span>保存必要的寄存器（通常是全部）以及被中断程序的上下文（例如它的内存地址空间）。</span></div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stext"><b>决定下一个运行谁</b><span>通常依据优先级层级，再结合层级内部的时间片轮转来挑选下一个程序。</span></div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stext"><b>（可选）重新设置中断</b><span>视需要重新执行 set-interrupt，调整下一次中断的时间上限或处理程序地址。</span></div></div>
+          <div class="step"><div class="stepnum">4</div><div class="stext"><b>恢复下一个程序的现场</b><span>把选中的下一个程序的上下文和寄存器值恢复回 CPU。</span></div></div>
+          <div class="step"><div class="stepnum">5</div><div class="stext"><b>执行 return-from-interrupt</b><span>恢复 CPU 内部状态并跳转过去；但如果切换到的是一个全新程序，则直接跳转即可，不需要真正"返回"。</span></div></div>
+        </div>
+      </div>
+
+      <div class="sub" id="m4-s5">
+        <h3><span class="num">04.5</span> 优先级与时间片轮转</h3>
+        <p>现代操作系统通常把程序分成从高到低的五个优先级层级：</p>
+        <div class="priolist">
+          <div class="prio"><span class="plabel">Real-time</span><span class="pbar"><i style="width:100%"></i></span><span class="pval">~2 ms 片</span></div>
+          <div class="prio"><span class="plabel">Interactive</span><span class="pbar"><i style="width:78%"></i></span><span class="pval">~10 ms 片</span></div>
+          <div class="prio"><span class="plabel">Normal</span><span class="pbar"><i style="width:55%"></i></span><span class="pval">~10 ms 片</span></div>
+          <div class="prio"><span class="plabel">Background</span><span class="pbar"><i style="width:30%"></i></span><span class="pval">~100 ms+</span></div>
+          <div class="prio"><span class="plabel">Idle</span><span class="pbar"><i style="width:14%"></i></span><span class="pval">~100 ms+</span></div>
+        </div>
+        <p style="margin-top:-6px; font-size:13.5px; color:var(--muted);">柱长代表典型优先级高低，右侧为该层级常见的时间片长度（并非精确比例）。</p>
+        <ul class="speclist">
+          <li><strong>Real-time</strong>：留给 OS 自身代码和 I/O 驱动程序代码。</li>
+          <li><strong>Interactive</strong>：留给需要即时响应用户输入的交互式程序。</li>
+          <li><strong>Normal</strong>：普通用户程序的默认层级。</li>
+          <li><strong>Background</strong>：后台任务。</li>
+          <li><strong>Idle</strong>：不重要、可以随时被拖延的任务。</li>
+        </ul>
+        <p>在同一优先级层级内部，各程序按<strong>时间片轮转（round-robin）</strong>依次获得一段固定的小时间片。这个时间片长度是个精细的权衡：</p>
+        <div class="callout warn"><div class="lbl">时间片太短会怎样</div><p>过多 CPU 时间被浪费在"处理中断和调度"这件事本身上——切换的管理开销比真正干活的时间还多。</p></div>
+        <div class="callout warn"><div class="lbl">时间片太长会怎样</div><p>系统会变得反应迟钝、明显卡顿——你点一下鼠标，可能要再等上百毫秒才轮到界面程序响应。</p></div>
+        <p>因此现代操作系统一般把 real-time 的时间片设在约 2 毫秒，interactive / normal 设在约 10 毫秒，background / idle 则放宽到 100 毫秒甚至更长。</p>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么操作系统不能简单地"跳转"到用户程序代码去执行，然后就撒手不管？</summary><div class="a">因为一旦跳过去，控制权就完全交给了用户程序——如果没有硬件中断机制强制在某个时间点把控制权收回来，操作系统就再也无法重新获得 CPU，也就无法调度其它程序或响应系统事件了。</div></details>
+        <details class="qcard"><summary>set-interrupt 指令具体设置了哪两样东西？</summary><div class="a">一是<b>中断触发的时间点/时限</b>，二是<b>中断处理程序的入口地址</b>——即时间到了之后 CPU 应该自动跳去执行哪段属于操作系统的代码。</div></details>
+        <details class="qcard"><summary>real-time 优先级为什么要用最短的时间片？</summary><div class="a">real-time 层级跑的是 OS 自身和 I/O 驱动代码，这些任务往往需要对硬件事件做出<b>极低延迟</b>的响应；时间片越短，下一次调度机会来得越快，响应延迟的上限也就越低——代价是调度开销占比会更高，因此不能无限缩短。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m5">
+      <div class="modhead"><span class="ref">MODULE 05</span><h2>数字电路：ALU 与加法器</h2></div>
+      <p class="modintro">从这里开始，我们从"CPU 有哪些部件"下潜到"这些部件到底是怎么用逻辑门搭出来的"。先从最核心的 ALU 讲起，再深入它内部最关键、也最能体现电路设计智慧的一块——加法器。</p>
+
+      <div class="sub" id="m5-s1">
+        <h3><span class="num">05.1</span> ALU 与 FPU 的分工</h3>
+        <p>ALU（算术逻辑单元）至少要包含四类子电路：</p>
+        <ul class="speclist">
+          <li><strong>加法器（Adder）</strong>：两个整数相加。</li>
+          <li><strong>取反器（Negator）</strong>：对一个整数取负（通常借助补码技巧复用加法器电路）。</li>
+          <li><strong>乘法器（Multiplicator）</strong>：两个整数相乘。</li>
+          <li><strong>按位运算器（Bitwise operators）</strong>：AND / OR / XOR 等位运算。</li>
+        </ul>
+        <p>FPU（浮点单元）实现的是遵循 <strong>IEEE 754</strong> 标准的浮点运算，之所以常常和 ALU 分开做成独立单元，是因为浮点运算涉及指数对齐、尾数归一化等额外步骤，电路复杂得多、也慢得多——把它单独拎出来，可以避免拖慢整数运算的关键路径。</p>
+      </div>
+
+      <div class="sub" id="m5-s2">
+        <h3><span class="num">05.2</span> 组合逻辑电路与门延迟</h3>
+        <p>ALU 和 FPU 的地基都是<strong>组合逻辑电路（combinatorial circuit）</strong>：由逻辑门组成、信息只沿"输入 → 输出"单方向流动、不存在反馈环路的电路。基本逻辑门就是那六位老朋友：<strong>Not、And、Or、Nand、Nor、Xor</strong>。</p>
+        <p>当一个逻辑门的输入被保持在某个稳定值之后，输出并不会瞬间变化到位——电信号需要一点点时间才能稳定到正确的值，这段时间叫<strong>门延迟（gate delay）</strong>。评估一个组合逻辑电路好不好，主要看三个指标：</p>
+        <ul class="speclist">
+          <li><strong>门延迟数</strong>：从输入稳定到输出稳定，最长需要经过多少级逻辑门？这直接决定了整个电路能跑多快。</li>
+          <li><strong>最大扇入（fan-in）</strong>：电路里单个逻辑门最多接了多少个输入？扇入越大，那个门自身的延迟就越大。</li>
+          <li><strong>最大扇出（fan-out）</strong>：电路里单个逻辑门的输出，最多被多少个下游门当作输入使用？扇出越大，驱动能力消耗越大，延迟也随之上升，并且存在物理上限。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m5-s3">
+        <h3><span class="num">05.3</span> 加法器（慢）：进位传播的瓶颈</h3>
+        <p>怎么把两个 n 位整数加起来？最直观的办法——从最低位开始逐位相加，把进位（carry bit）一位一位地向高位传递，俗称"行波进位加法器（ripple-carry adder）"。问题在于：第 n 位的结果，理论上要<strong>等前面全部 n-1 位的进位都算完</strong>才能确定，这需要 <strong>Θ(n)</strong> 级门延迟。当 n = 64（也就是今天最常见的 64 位整数）时，这个延迟长到完全无法接受——如果每次加法都要等 64 级门延迟，CPU 的时钟频率会被砍掉一大截。</p>
+      </div>
+
+      <div class="sub" id="m5-s4">
+        <h3><span class="num">05.4</span> 加法器（快）：进位超前的分治法</h3>
+        <p>目标：把 n 位加法的门延迟从 Θ(n) 压到 <strong>O(log n)</strong>。关键的思路转变是——与其老老实实按位传递进位，不如用<strong>分治法</strong>递归地"预先算好"每一段区间可能产生的进位。定义一个函数：</p>
+        <ul class="speclist">
+          <li><code>carry(k,m,0)</code> = 只把第 k 位到第 m 位这一段相加（不考虑外部进位输入）时，产生的进位。</li>
+          <li><code>carry(k,m,1)</code> = 同样这一段相加，但<strong>假设</strong>还额外加了一个输入进位 1 时，产生的进位。</li>
+        </ul>
+        <p>关键的合并公式是：<code>carry(k,m,0) = carry(k,p,carry(p+1,m,0))</code>，<code>carry(k,m,1) = carry(k,p,carry(p+1,m,1))</code>（p 是 k、m 之间的某个分割点）。也就是说，一段区间的进位，可以由它拆分成的两个子区间的进位<strong>合并</strong>得到——而这个合并操作本身只需要 O(1) 级门延迟。</p>
+        <div class="callout"><div class="lbl">妙处所在</div><p>请注意 <code>carry(k,m,0)</code> 和 <code>carry(k,m,1)</code> 是<strong>同时、提前</strong>算好的两个答案——"如果外部进位是 0 会怎样"和"如果外部进位是 1 会怎样"，都不需要真的知道外部进位是多少就能算。真正的外部进位一旦确定，只要在这两个现成答案里<strong>选一个</strong>即可，不需要重新计算。这正是"用空间换时间"的分治法精髓。</p></div>
+        <p>具体计算顺序是按位数<strong>倍增</strong>展开的树状结构：先算好所有单比特的 <code>carry(k,k,c)</code>，再两两合并成 <code>carry(2k-1,2k,c)</code>，再合并成 <code>carry(4k-3,4k,c)</code>……每一轮区间长度翻倍，直到覆盖全部 n 位。既然每翻一倍只需要一轮 O(1) 延迟的合并，翻倍 log₂n 次就能覆盖 n 位，总延迟自然是 <strong>O(log n)</strong>。下面是 n = 8 时这棵"合并树"的样子：</p>
+
+        <div class="diagram">
+          <div class="dcap">Fig. 5-1 · 8 位超前进位加法器的分治合并树</div>
+          <svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="进位超前加法器的二叉合并树示意图，8个叶子节点逐层两两合并到根节点carry(1,8)">
+            <g stroke="var(--line-strong)" stroke-width="1.5" fill="none">
+              <line x1="40" y1="300" x2="95" y2="220"/><line x1="150" y1="300" x2="95" y2="220"/>
+              <line x1="260" y1="300" x2="315" y2="220"/><line x1="370" y1="300" x2="315" y2="220"/>
+              <line x1="480" y1="300" x2="535" y2="220"/><line x1="590" y1="300" x2="535" y2="220"/>
+              <line x1="700" y1="300" x2="755" y2="220"/><line x1="810" y1="300" x2="755" y2="220"/>
+              <line x1="95" y1="220" x2="205" y2="140"/><line x1="315" y1="220" x2="205" y2="140"/>
+              <line x1="535" y1="220" x2="645" y2="140"/><line x1="755" y1="220" x2="645" y2="140"/>
+              <line x1="205" y1="140" x2="425" y2="60"/><line x1="645" y1="140" x2="425" y2="60"/>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="12.5" text-anchor="middle">
+              <!-- leaves -->
+              <g>
+                <rect x="0" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="40" y="304" fill="var(--ink-soft)">carry(1,1)</text>
+                <rect x="110" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="150" y="304" fill="var(--ink-soft)">carry(2,2)</text>
+                <rect x="220" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="260" y="304" fill="var(--ink-soft)">carry(3,3)</text>
+                <rect x="330" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="370" y="304" fill="var(--ink-soft)">carry(4,4)</text>
+                <rect x="440" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="480" y="304" fill="var(--ink-soft)">carry(5,5)</text>
+                <rect x="550" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="590" y="304" fill="var(--ink-soft)">carry(6,6)</text>
+                <rect x="660" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="700" y="304" fill="var(--ink-soft)">carry(7,7)</text>
+                <rect x="770" y="284" width="80" height="32" rx="5" fill="var(--surface-2)" stroke="var(--line-strong)"/><text x="810" y="304" fill="var(--ink-soft)">carry(8,8)</text>
+              </g>
+              <!-- level1 -->
+              <g>
+                <rect x="55" y="204" width="80" height="32" rx="5" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="95" y="224" fill="var(--teal)">carry(1,2)</text>
+                <rect x="275" y="204" width="80" height="32" rx="5" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="315" y="224" fill="var(--teal)">carry(3,4)</text>
+                <rect x="495" y="204" width="80" height="32" rx="5" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="535" y="224" fill="var(--teal)">carry(5,6)</text>
+                <rect x="715" y="204" width="80" height="32" rx="5" fill="var(--teal-soft)" stroke="var(--teal)"/><text x="755" y="224" fill="var(--teal)">carry(7,8)</text>
+              </g>
+              <!-- level2 -->
+              <g>
+                <rect x="163" y="124" width="84" height="32" rx="5" fill="var(--accent-soft)" stroke="var(--accent-strong)"/><text x="205" y="144" fill="var(--accent-strong)">carry(1,4)</text>
+                <rect x="603" y="124" width="84" height="32" rx="5" fill="var(--accent-soft)" stroke="var(--accent-strong)"/><text x="645" y="144" fill="var(--accent-strong)">carry(5,8)</text>
+              </g>
+              <!-- root -->
+              <g>
+                <rect x="381" y="44" width="88" height="34" rx="5" fill="var(--accent)" stroke="var(--accent-strong)"/><text x="425" y="65" fill="var(--accent-ink)" font-weight="700">carry(1,8)</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <p>实际电路里，这棵树还会有一趟<strong>反向的传递</strong>：自底向上先把 <code>carry(k,m,0)</code> 和 <code>carry(k,m,1)</code> 两种情况都预先算好，再让真正的外部进位从根节点开始<strong>沿树往下传递</strong>，每个节点只需要把结果转发给自己的两个子节点——而不是让某一根信号线直接扇出去驱动全部 n 位，从而把最大扇出也控制在很小的常数范围内。</p>
+      </div>
+
+      <div class="sub" id="m5-s5">
+        <h3><span class="num">05.5</span> 乘法器：化乘为加</h3>
+        <p>两个 n 位整数怎么相乘？最经典的思路就是<strong>竖式乘法（schoolbook multiplication）</strong>——把乘法拆解成 n 个"移位后的加数"，问题就转化为：如何把这 n 个 b 位整数快速加总起来？答案是直接复用我们刚刚搭好的<strong>快速加法器</strong>，把这 n 次加法排成一棵<strong>平衡二叉树</strong>：</p>
+        <ul class="speclist">
+          <li>树一共有 O(log n) 层；</li>
+          <li>每一层要做一次加法，每次加法用快速加法器需要 O(log n) 级门延迟；</li>
+          <li>因此总门延迟是 O(log n) × O(log n) = <strong>O(log²n)</strong>。</li>
+        </ul>
+        <p>现代 CPU 内部实际使用的乘法器电路（如 Wallace tree / Booth 编码等）还能做得更快，但那些属于更专精的优化技巧，理解到这一层"用加法器树实现乘法"的思路，就已经抓住了本质。</p>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么行波进位加法器（慢速版）在 n=64 时会成为性能瓶颈？</summary><div class="a">因为它的门延迟是 Θ(n)，即随位宽线性增长；n=64 意味着最坏情况下要串行等待 64 级门延迟，这会直接限制 CPU 时钟频率能拉多高，是典型的"看似简单但不可扩展"的设计。</div></details>
+        <details class="qcard"><summary>快速加法器为什么要同时计算 carry(k,m,0) 和 carry(k,m,1) 这两个版本？</summary><div class="a">因为在自底向上合并的阶段，我们还<b>不知道</b>某一段的真实进位输入是 0 还是 1（它取决于更左边区间的计算结果，而那个结果可能还没算出来）。提前把两种可能都算好，等真正的进位输入确定后只需"查表选择"，不需要重新计算，这样才能把总延迟压到 O(log n)。</div></details>
+        <details class="qcard"><summary>为什么乘法器的门延迟是 O(log²n) 而不是 O(log n)？</summary><div class="a">因为乘法器本质是"n 个数相加"，需要一棵 O(log n) 层的加法树；但树上<b>每一层的加法本身</b>又要用掉 O(log n) 级门延迟（因为用的是快速加法器），两者相乘就是 O(log n) × O(log n) = O(log²n)。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m6">
+      <div class="modhead"><span class="ref">MODULE 06</span><h2>晶体管与逻辑门</h2></div>
+      <p class="modintro">继续往下潜，潜到硅片本身。逻辑门不是抽象的数学符号，它是用一种叫 <strong>MOSFET（金属氧化物半导体场效应晶体管）</strong>的微型开关搭出来的。这一模块讲清楚：晶体管怎么变成开关，开关怎么拼成门，门电路又是怎么在设计时"翻车"的。</p>
+
+      <div class="sub" id="m6-s1">
+        <h3><span class="num">06.1</span> MOSFET 三代：PMOS → NMOS → CMOS</h3>
+        <p>MOSFET 大体分两种极性——<strong>NMOS</strong>（栅极为高电平 1 时导通，是个"输入 1 才通"的开关）和 <strong>PMOS</strong>（栅极为低电平 0 时导通，是个"输入 0 才通"的开关），二者行为互补。芯片设计史上，用它们搭电路经历了三代演进：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>MOSFET 电路三代演进</caption>
+            <thead><tr><th>世代</th><th>技术</th><th>特点</th><th>代表芯片</th></tr></thead>
+            <tbody>
+              <tr><td>第 1 代</td><td>PMOS 电路</td><td>只用 PMOS 管搭建全部逻辑</td><td>Intel 4004（1971）</td></tr>
+              <tr><td>第 2 代</td><td>NMOS 电路</td><td>只用 NMOS 管，比 PMOS 更快、更省电</td><td>Intel 8080（1974）</td></tr>
+              <tr><td>第 3 代</td><td><strong>CMOS</strong>（互补 MOS）</td><td>PMOS + NMOS 协同工作，见下文</td><td>Intel 8086（1978）及以后几乎所有芯片</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>CMOS（Complementary MOS，互补金属氧化物半导体）</strong>是现代芯片的绝对主流方案，原因是它同时解决了信号质量和功耗两大难题：</p>
+        <ul class="speclist">
+          <li><strong>极高的信号完整性</strong>：用一组 PMOS 子电路负责把输出<strong>拉高</strong>到 1（上拉网络），另一组 NMOS 子电路负责把输出<strong>拉低</strong>到 0（下拉网络）。两组网络分工明确、互补配合，输出电压能被稳稳地拉到轨道电压，因此可以支持更高速度、更强的抗噪声能力。</li>
+          <li><strong>几乎零静态功耗</strong>：正常情况下，上拉和下拉网络里总有一组是完全断开的，电流路径被彻底切断，只有在输出<strong>翻转（切换）</strong>的一瞬间才会短暂耗电。这意味着更低的发热，也意味着可以把晶体管越堆越密而不至于把芯片烧穿。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m6-s2">
+        <h3><span class="num">06.2</span> 逻辑门如何用晶体管搭出来</h3>
+        <p>下面用一个通用的 CMOS 门结构来说明：任何一个 CMOS 逻辑门，骨架都是"电源 VDD — PMOS 上拉网络 — 输出节点 — NMOS 下拉网络 — 地 GND"这样一条链路，输入信号同时喂给两组网络。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 6-1 · CMOS 逻辑门的通用骨架结构</div>
+          <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CMOS逻辑门通用结构：VDD经PMOS上拉网络连到输出节点，输出节点经NMOS下拉网络连到GND，输入同时驱动两个网络">
+            <g stroke="var(--line-strong)" stroke-width="1.5" fill="none">
+              <line x1="210" y1="20" x2="210" y2="48"/>
+              <line x1="210" y1="128" x2="210" y2="152"/>
+              <line x1="210" y1="152" x2="300" y2="152"/>
+              <line x1="210" y1="232" x2="210" y2="256"/>
+              <line x1="60" y1="152" x2="90" y2="152"/>
+              <line x1="60" y1="88" x2="60" y2="216"/>
+              <line x1="60" y1="88" x2="90" y2="88"/>
+              <line x1="60" y1="216" x2="90" y2="216"/>
+            </g>
+            <rect x="90" y="48" width="240" height="80" rx="6" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+            <text x="210" y="93" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="var(--accent-strong)" font-weight="600">PMOS 上拉网络</text>
+            <rect x="90" y="152" width="240" height="80" rx="6" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.6"/>
+            <text x="210" y="197" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" fill="var(--teal)" font-weight="600">NMOS 下拉网络</text>
+            <circle cx="210" cy="10" r="3" fill="var(--ink)"/>
+            <text x="222" y="16" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-soft)">VDD（1）</text>
+            <circle cx="210" cy="266" r="3" fill="var(--ink)"/>
+            <text x="222" y="272" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-soft)">GND（0）</text>
+            <circle cx="300" cy="152" r="4" fill="var(--ink)"/>
+            <text x="312" y="157" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)" font-weight="600">输出 Y</text>
+            <text x="20" y="157" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)" font-weight="600" text-anchor="start">输入</text>
+          </svg>
+        </div>
+        <p>基本门的搭法就是围绕这个骨架变化：</p>
+        <ul class="speclist">
+          <li><strong>Not（非门）</strong>：最简单的情形——上拉网络就是一个 PMOS，下拉网络就是一个 NMOS。输入为 0 时 PMOS 导通、NMOS 关断，输出被拉到 1；输入为 1 时反过来，输出被拉到 0。</li>
+          <li><strong>Nand / Nor</strong>：把多个 PMOS / NMOS 按"串联对应并联"的对偶方式组合——例如二输入 Nand 的下拉网络是两个 NMOS <strong>串联</strong>（必须两个输入都为 1 才导通，输出才被拉低），上拉网络则是两个 PMOS <strong>并联</strong>（只要有一个输入为 0 就导通，输出就被拉高）；Nor 正好反过来。</li>
+          <li><strong>And / Or</strong>：CMOS 天生只能直接做出"取反"的门（Nand / Nor），如果要得到不取反的 And / Or，做法很直接——在 Nand / Nor 后面再串一级 Not 门反相回来。</li>
+          <li><strong>Xor（异或门）</strong>：真值表更复杂，需要更精巧的晶体管网络（不是简单的串并联能表达），因此实际电路里 Xor 的晶体管数量通常明显多于同为二输入门的 And / Or。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m6-s3">
+        <h3><span class="num">06.3</span> 常见错误接法</h3>
+        <div class="callout warn"><div class="lbl">易犯的错误</div><p><strong>PMOS 不能用来"下拉"，NMOS 不能用来"上拉"。</strong>PMOS 传导 1（高电平）很干净利落，但试图用它去拉出一个干净的 0 时，输出会停在一个"发虚"的中间电压，而不是真正的地电位；NMOS 则恰好相反，传导 0 很干净，但拉不出一个真正干净的 1。</p></div>
+        <p>如果设计时把上拉网络错误地全部换成 NMOS，或者把下拉网络错误地全部换成 PMOS，电路表面上看起来逻辑关系没错，但实际测出来的电压是一个模糊、偏离标准电平的"半高不低"值——下游电路读到这种电压，很容易发生误判，是数字电路设计里一类经典的隐蔽错误，不能只靠"逻辑对不对"来检查，必须清楚每种晶体管各自"擅长"传导哪种电平。</p>
+      </div>
+
+      <div class="sub" id="m6-s4">
+        <h3><span class="num">06.4</span> 传输门：一个开关的艺术</h3>
+        <p><strong>传输门（transmission gate）</strong>是一个"控制信号为 1 时才导通"的双向开关，由一对并联、极性相反的 PMOS 和 NMOS 组成——这样不管信号本身是想传 0 还是传 1，总有一个晶体管能干净地传导它，避免了上一节说的"发虚电压"问题。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 6-2 · 传输门的简化符号</div>
+          <svg viewBox="0 0 360 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="传输门符号：输入经过一个由Control和Control'共同控制的开关方块，到达输出">
+            <g stroke="var(--line-strong)" stroke-width="1.5" fill="none">
+              <line x1="20" y1="80" x2="150" y2="80"/>
+              <line x1="210" y1="80" x2="340" y2="80"/>
+              <line x1="180" y1="50" x2="180" y2="20"/>
+              <line x1="180" y1="110" x2="180" y2="140"/>
+            </g>
+            <rect x="150" y="60" width="60" height="40" rx="4" transform="rotate(45 180 80)" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+            <text x="20" y="70" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">输入</text>
+            <text x="290" y="70" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)">输出</text>
+            <text x="180" y="14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-soft)">Control</text>
+            <text x="180" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-soft)">Control′</text>
+          </svg>
+        </div>
+        <p>使用传输门时通常还需要同时提供控制信号的<strong>反相信号</strong>（图中的 Control′）——因为 PMOS 和 NMOS 需要相反极性的栅极信号才能同时导通或同时关断。如果电路里手边没有现成的反相信号，就得额外接一个 Not 门去生成它，这会多付出一级门延迟的代价。尽管如此，传输门依然是电路设计里极其好用的基本单元——模块 07 要讲的 D 触发器，内部就大量使用了它。</p>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么 CMOS 电路"几乎零静态功耗"，而单纯的 PMOS 或 NMOS 电路做不到这一点？</summary><div class="a">在 CMOS 里，上拉网络和下拉网络的导通状态永远互补——稳定状态下要么只有上拉导通、要么只有下拉导通，从 VDD 到 GND 之间没有直接通路。而纯 PMOS 或纯 NMOS 电路通常需要一个"永远开启"的负载器件来配合，这条负载路径会一直漏电、持续耗电。</div></details>
+        <details class="qcard"><summary>为什么 CMOS 天生擅长做 Nand / Nor，而不是直接做 And / Or？</summary><div class="a">因为 CMOS 门的输出，本质上是"上拉网络导通就拉高、下拉网络导通就拉低"，而这两个网络分别由 PMOS（输入 0 时导通）和 NMOS（输入 1 时导通）构成——这种结构自然产生的就是取反后的逻辑关系。要得到不取反的 And / Or，只能在后面再加一级 Not 门。</div></details>
+        <details class="qcard"><summary>传输门为什么需要 Control 和 Control′ 两路信号，而不是一路就够？</summary><div class="a">传输门由并联的 PMOS 和 NMOS 组成，两者需要用<b>相反极性</b>的栅极电压才能"同开同关"（NMOS 栅极为 1、PMOS 栅极为 0 时才都导通）。如果只给一路信号，两个晶体管会一个导通一个关断，开关就无法正常工作。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m7">
+      <div class="modhead"><span class="ref">MODULE 07</span><h2>时序电路与触发器</h2></div>
+      <p class="modintro">前面几个模块讲的都是<strong>组合逻辑</strong>——电路不记得任何"过去"，输出只由当前输入决定。但 CPU 显然需要"记忆"：寄存器要保存一个数直到你下次修改它。能记住一个比特的最小单元，就是本模块的主角——<strong>D 触发器（D Flip-Flop）</strong>。</p>
+
+      <div class="sub" id="m7-s1">
+        <h3><span class="num">07.1</span> D 触发器：1 比特记忆单元</h3>
+        <p>D 触发器是最基本的存储单元，CPU 寄存器内部大量使用它。课程里介绍的这个变体是<strong>上升沿触发（rising-edge-triggered）</strong>的：只有当 Clock 信号从 0 跳变到 1 的那一瞬间，输入端 Data 当时的值才会被"拍照"锁存进去，成为新的 Value；在其它任何时刻——包括 Clock 保持在 1 的整段时间里——Data 怎么变化都不会影响已经存好的 Value。这个特性叫做<strong>边沿触发</strong>，是它区别于"电平触发"锁存器的关键。这版电路用了 18 个 MOSFET，数量不算少，但换来的是很高的稳定性。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 7-1 · 上升沿触发：Value 只在 Clock 跳变瞬间更新</div>
+          <svg viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="时序波形图：Clock方波，Data在任意时刻变化，Value只在Clock每次上升沿时刻捕获当时的Data值并保持到下一次上升沿">
+            <g stroke="var(--line)" stroke-dasharray="3 4" stroke-width="1.2">
+              <line x1="110" y1="18" x2="110" y2="250"/><line x1="260" y1="18" x2="260" y2="250"/>
+              <line x1="410" y1="18" x2="410" y2="250"/><line x1="560" y1="18" x2="560" y2="250"/>
+              <line x1="710" y1="18" x2="710" y2="250"/>
+            </g>
+            <text x="14" y="54" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink-soft)">Clock</text>
+            <polyline points="70,70 110,70 110,30 185,30 185,70 260,70 260,30 335,30 335,70 410,70 410,30 485,30 485,70 560,70 560,30 635,30 635,70 710,70 710,30 785,30 785,70 830,70" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>
+            <text x="14" y="134" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink-soft)">Data</text>
+            <polyline points="70,150 150,150 150,110 300,110 300,150 480,150 480,110 650,110 650,150 830,150" fill="none" stroke="var(--ink-soft)" stroke-width="2.4" stroke-linejoin="round"/>
+            <text x="14" y="214" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink-soft)">Value</text>
+            <polyline points="70,235 260,235 260,195 410,195 410,235 560,235 560,195 710,195 710,235 830,235" fill="none" stroke="var(--teal)" stroke-width="2.8" stroke-linejoin="round"/>
+            <g fill="var(--accent-strong)">
+              <path d="M 105 12 L 115 12 L 110 20 Z"/><path d="M 255 12 L 265 12 L 260 20 Z"/>
+              <path d="M 405 12 L 415 12 L 410 20 Z"/><path d="M 555 12 L 565 12 L 560 20 Z"/>
+              <path d="M 705 12 L 715 12 L 710 20 Z"/>
+            </g>
+          </svg>
+          <p style="margin:10px 0 0 0; font-size:13px; color:var(--muted);">橙色三角标记每次时钟上升沿：Value（青色）只在这些瞬间"拍照"更新为当时的 Data 值，其余时间保持不变——即便 Data（灰色）在两次上升沿之间反复变化，也不会影响已锁存的 Value。</p>
+        </div>
+      </div>
+
+      <div class="sub" id="m7-s2">
+        <h3><span class="num">07.2</span> 复位与使能：让触发器听话</h3>
+        <p>基础版 D 触发器只有"存"这一个功能，实际用在 CPU 里还需要两个额外的控制信号：</p>
+        <h4>带 Reset（复位）</h4>
+        <p>加入一个 <strong>Reset</strong> 输入：只要 Reset = 1，Value 就被强制清零，无视 Data 和 Clock 在做什么；Reset = 0 时，触发器行为恢复正常。</p>
+        <h4>带 Enable（使能）</h4>
+        <p>加入一个 <strong>Enable</strong> 输入：只有当 Enable = 1 时，Clock 的上升沿才会被"承认"、真正去捕获 Data；如果 Enable = 0，即便 Clock 发生了上升沿，也会被直接忽略，Value 纹丝不动。这让我们可以用同一个全局时钟信号，却精确控制"这个寄存器这一拍到底要不要更新"。</p>
+        <div class="tablewrap">
+          <table>
+            <caption>Reset / Enable 对触发器行为的影响</caption>
+            <thead><tr><th>Reset</th><th>Enable</th><th>Clock 上升沿</th><th>结果</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td class="num">—</td><td>—</td><td>Value 强制为 0（优先级最高）</td></tr>
+              <tr><td class="num">0</td><td class="num">1</td><td>发生</td><td>Value 更新为当前 Data</td></tr>
+              <tr><td class="num">0</td><td class="num">1</td><td>未发生</td><td>Value 保持不变</td></tr>
+              <tr><td class="num">0</td><td class="num">0</td><td>发生或未发生</td><td>Value 保持不变（忽略本次时钟）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sub" id="m7-s3">
+        <h3><span class="num">07.3</span> 上电复位：保证起点已知</h3>
+        <p>这里藏着一个容易被忽略但极其重要的问题：<strong>触发器是边沿触发的</strong>——它只在 Clock 跳变的瞬间才会响应。那么问题来了：芯片刚上电的那一刻，谁也不知道每个触发器内部锁存的初始值到底是 0 还是 1（物理上完全是随机的），而如果没有发生任何时钟跳变，就没有任何办法通过正常的 Data/Clock 输入去"纠正"它。</p>
+        <div class="callout"><div class="lbl">上电复位（Power-On-Reset）</div><p>解决办法是给整个电路配一个独立的<strong>上电复位组件</strong>：芯片刚通电时，它会自动产生一个信号（例如先拉高、维持一段时间、再拉低），这个信号要<strong>足够长</strong>，长到能确保把芯片里所有的存储单元都成功复位一遍。把这个信号接到每个 D 触发器的 Reset 端，就能保证——无论上电前内部状态多么随机，上电复位一结束，所有触发器都从同一个已知状态（Value = 0）开始工作。</p></div>
+      </div>
+
+      <div class="sub" id="m7-s4">
+        <h3><span class="num">07.4</span> 反馈移位寄存器：序列生成器</h3>
+        <p><strong>反馈移位寄存器（feedback shift register）</strong>把若干个 D 触发器首尾相连，每个触发器的输出接到下一个触发器的输入，而<strong>最后一个触发器的输出又被反馈回最前面</strong>（往往经过一些逻辑门处理，比如取反）。这样，每一位新产生的比特都由前面固定数量的比特决定，随着时钟一拍一拍地推进，就能连续生成一整串比特序列——这是构建伪随机序列发生器、循环冗余校验（CRC）等电路的基础组件。课程讲义里给出了两种搭法：一种直接调用现成的内置 D 触发器模块，另一种则用我们在 07.1～07.3 自己从晶体管一步步搭出来的 D 触发器——两者在逻辑行为上完全等价，区别只在于"造轮子"还是"用轮子"。</p>
+        <div class="callout teal"><div class="lbl">串起整条链路</div><p>回头看这一路走过的台阶：<b>MOSFET（06）</b>组成<b>逻辑门（06）</b>，逻辑门组成<b>D 触发器（07.1）</b>，D 触发器加上控制信号成为<b>寄存器（07.2–07.3）</b>，寄存器首尾相连成为<b>移位寄存器（07.4）</b>——这正是模块 03 里提到的 ALU、缓存、微码引擎等所有部件，最终都要落回到的同一套物理积木上。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>"上升沿触发"和"电平触发（锁存器）"最本质的区别是什么？</summary><div class="a">电平触发的锁存器在 Clock 保持高电平的<b>整段时间</b>里，Data 的任何变化都会实时"透传"到 Value；而上升沿触发的触发器只在 Clock 从 0 跳变到 1 的<b>那一瞬间</b>采样一次 Data，之后即便 Clock 一直停在 1，Data 再怎么变化也不会影响 Value。后者的行为更可预测，是构建同步时序电路（比如整条 CPU 流水线）的标准做法。</div></details>
+        <details class="qcard"><summary>为什么说"没有上电复位电路，就不可能保证触发器从已知状态开始"？</summary><div class="a">因为触发器只在 Clock 跳变时响应，而芯片刚上电、第一次时钟跳变发生之前，内部锁存的值完全取决于随机的物理噪声。没有一个独立于正常 Clock/Data 逻辑之外的强制复位信号，就无法在"第一拍"到来之前把这个随机值清零到确定状态。</div></details>
+        <details class="qcard"><summary>Enable 和 Reset 同时出现时，为什么 Reset 的优先级通常更高？</summary><div class="a">Reset 通常用于把电路强制拉回一个安全、已知的起始状态（例如上电复位、异常恢复），这类需求必须能够<b>无条件</b>生效，不能被"这一拍要不要更新"这种更细粒度的 Enable 控制所阻挡，因此在电路设计上 Reset 一般会被赋予最高优先级。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m8">
+      <div class="modhead"><span class="ref">MODULE 08</span><h2>抽象机器模型：TM · RAM · PM</h2></div>
+      <p class="modintro">从这里开始，我们把视角切换一下——不再盯着某一颗具体的芯片，而是退后一步，问一个更根本的问题："计算"到底是什么？计算机科学家发明了一系列"抽象机器模型"，用极简的规则去逼近"计算"这件事的本质，方便分析算法复杂度、比较硬件设计的取舍。这些模型能按"抽象/具体"和"低层/高层"两个维度排成一张地图，理解了这张地图，才能看懂后面 ISA、性能评估这些具体课题各自站在地图的哪个格子里。</p>
+
+      <div class="sub" id="m8-s1">
+        <h3><span class="num">08.1</span> 一张地图：模型的层级</h3>
+        <p class="lead-drop">计算机科学里谈"模型"，其实分成四种，可以用两条轴线区分：<strong>抽象 vs 具体</strong>（要不要关心真实硬件的具体细节），<strong>低层 vs 高层</strong>（关心的是单步操作还是整段程序的行为）。</p>
+        <div class="tablewrap">
+          <table>
+            <caption>四类模型速查表</caption>
+            <thead><tr><th></th><th>低层（关心单步操作）</th><th>高层（关心整体行为）</th></tr></thead>
+            <tbody>
+              <tr><td><strong>抽象</strong>（不管真实硬件）</td><td><strong>机器模型</strong><br><small>TM、RAM、PM，以及它们的并行变体——本模块主角</small></td><td><strong>计算模型</strong><br><small>例如 Java 语言、动态多线程模型</small></td></tr>
+              <tr><td><strong>具体</strong>（对应真实硬件）</td><td><strong>指令集架构 ISA</strong><br><small>x86、ARM、MIPS——模块 10 的主角</small></td><td><strong>计算机架构</strong><br><small>冯·诺依曼架构、哈佛架构——模块 09 的主角</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>本模块要讲的 TM（图灵机）、RAM（随机访问机）、PM（指针机），都属于左上角这一格——它们故意"不管真实硬件长什么样"，只关心"一步操作能做什么"，这样才能公平地比较不同算法、不同硬件设计思路的效率上限，而不被某一代具体芯片的实现细节带偏。</p>
+      </div>
+
+      <div class="sub" id="m8-s2">
+        <h3><span class="num">08.2</span> 图灵机模型：最简单也最笨拙的"计算"</h3>
+        <p>一台<strong>图灵机（Turing Machine，TM）</strong>M（其中一种变体）拥有一条无限长的水平<strong>磁带（tape）</strong>和一个<strong>读写头（head）</strong>。磁带被分成一个个<strong>格子（cell）</strong>，每格存 0、1 或 −（空白）；输入是磁带开头的一段有限长二进制串，输出是运行结束时读写头所在格子下的二进制串。M 还有固定数量的<strong>状态（state）</strong>，从指定的<strong>初始状态</strong>、读写头停在第一个输入格子上方开始，直到进入指定的<strong>终止状态</strong>才停止。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 8-1 · TM 磁带：读写头当前停在第一个格子上方</div>
+          <svg viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="图灵机磁带示意图：一行格子依次存放1 1 1 0 1 1 0 0 0 1，读写头箭头停在第一个格子上方">
+            <g font-family="IBM Plex Mono, monospace" font-size="20" text-anchor="middle" font-weight="700">
+              <g stroke="var(--line-strong)" stroke-width="1.5" fill="var(--surface)">
+                <rect x="30" y="40" width="70" height="50"/><rect x="100" y="40" width="70" height="50"/>
+                <rect x="170" y="40" width="70" height="50"/><rect x="240" y="40" width="70" height="50"/>
+                <rect x="310" y="40" width="70" height="50"/><rect x="380" y="40" width="70" height="50"/>
+                <rect x="450" y="40" width="70" height="50"/><rect x="520" y="40" width="70" height="50"/>
+                <rect x="590" y="40" width="70" height="50"/><rect x="660" y="40" width="70" height="50"/>
+              </g>
+              <g fill="var(--accent-strong)">
+                <text x="65" y="73">1</text><text x="135" y="73">1</text><text x="205" y="73">1</text>
+                <text x="275" y="73">0</text><text x="345" y="73">1</text><text x="415" y="73">1</text>
+                <text x="485" y="73">0</text><text x="555" y="73">0</text><text x="625" y="73">0</text><text x="695" y="73">1</text>
+              </g>
+              <text x="10" y="73" fill="var(--muted)" font-size="18">…</text>
+              <text x="740" y="73" fill="var(--muted)" font-size="18">…</text>
+            </g>
+            <g fill="var(--teal)">
+              <path d="M 55 15 L 75 15 L 65 32 Z"/>
+              <rect x="30" y="0" width="70" height="15" rx="3" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.2"/>
+              <text x="65" y="11" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--teal)" font-weight="700">HEAD</text>
+            </g>
+          </svg>
+        </div>
+        <p>每一步，M 读取读写头下方的符号，<strong>完全根据这个符号和当前状态</strong>决定：往格子里写一个符号（0/1/−）、把读写头往指定方向移动一步（左/右/停留），并转移到指定的新状态。下面是一个具体例子——把磁带开头第一段全 0（或空白）翻成 1、其余保持不动的极简程序：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>示例状态转移表</caption>
+            <thead><tr><th>状态</th><th>读到的符号</th><th>动作</th></tr></thead>
+            <tbody>
+              <tr><td class="num">0（初始）</td><td class="num">0 / −</td><td>写 1；停留原地；转到状态 1</td></tr>
+              <tr><td class="num">0</td><td class="num">1</td><td>写 0；向右移动；转到状态 0</td></tr>
+              <tr><td class="num">1（终止）</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>优点：<strong>极其简单却是"通用"的</strong>（忽略效率的话，任何有限信息的计算都能被某台 TM 模拟），而且<strong>完全局部</strong>（每一步读写头访问/移动的范围都是固定、微小的一格）——这两条性质让 TM 成为理论计算机科学证明"什么能被计算"的最基础工具。缺点也同样极端：<strong>极其低效</strong>（判断输入是否形如 x+x 这种简单问题，也要 Ω(n²) 时间），而且<strong>极不实用</strong>（历史上没有真正实用意义的物理 TM 实现）。</p>
+        <div class="callout"><div class="lbl">"局部"是一体两面</div><p>TM 的"完全局部"既是它最大的优点，也是它最大的缺点：正因为每一步只能碰一格磁带，硬件实现起来无比简单（这也是为什么它常被用来证明计算的理论极限）；但也正因为如此，它没法像模块 08.3 的 RAM 模型那样"一步跳到任意内存地址"，算法效率天差地别。</p></div>
+      </div>
+
+      <div class="sub" id="m8-s3">
+        <h3><span class="num">08.3</span> RAM 模型：更贴近真实计算机的抽象</h3>
+        <p>一台<strong>随机访问机（Random-Access Machine，RAM）</strong>M（其中一种变体）以<strong>（机器）字（word）</strong>为单位处理数据：每个字固定 m 位（m 要"足够大"），被当作有符号整数或内存地址使用。M 拥有一块<strong>主存</strong>，格子 mem[0..2^m)，每格 mem[k] 有<strong>地址</strong> k、存一个字；输入在开始时存放于 mem[0..&lt;n)，输出是结束时主存的全部内容。M 还有固定数量的<strong>寄存器</strong> reg[0..c]，reg[0] 在开始时存 n，另有一个特殊寄存器 <strong>pc</strong> 维护当前指令编号。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 8-2 · RAM 模型的存储结构：寄存器 + 主存</div>
+          <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAM模型存储结构示意图：左侧pc寄存器与reg0到regc寄存器组，右侧主存mem0到mem2的m次方，前n格标注为输入区">
+            <g font-family="IBM Plex Mono, monospace" font-size="13">
+              <rect x="20" y="20" width="130" height="34" rx="4" fill="var(--accent)" stroke="var(--accent-strong)" stroke-width="1.4"/>
+              <text x="85" y="42" text-anchor="middle" fill="var(--accent-ink)" font-weight="700">pc</text>
+              <rect x="20" y="70" width="130" height="34" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="85" y="92" text-anchor="middle" fill="var(--ink)" font-weight="700">reg[0] = n</text>
+              <rect x="20" y="112" width="130" height="34" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="85" y="134" text-anchor="middle" fill="var(--ink-soft)">reg[1]</text>
+              <rect x="20" y="154" width="130" height="34" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="85" y="176" text-anchor="middle" fill="var(--muted)">⋮ reg[c]</text>
+              <text x="85" y="14" text-anchor="middle" fill="var(--muted)" font-size="11" letter-spacing="0.06em">寄存器</text>
+
+              <rect x="230" y="20" width="610" height="168" rx="4" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.6"/>
+              <rect x="240" y="30" width="150" height="60" rx="3" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.4"/>
+              <text x="315" y="55" text-anchor="middle" fill="var(--teal)" font-weight="700">mem[0..n)</text>
+              <text x="315" y="75" text-anchor="middle" fill="var(--teal)" font-size="11">输入区</text>
+              <text x="560" y="60" text-anchor="middle" fill="var(--muted)">mem[n .. &lt;2^m) — 程序运行时使用/输出</text>
+              <text x="560" y="130" text-anchor="middle" fill="var(--ink-soft)" font-size="15" font-weight="700">主存 mem[0 .. &lt;2^m)</text>
+              <text x="835" y="176" text-anchor="end" fill="var(--muted)" font-size="11">地址 k → mem[k]</text>
+            </g>
+          </svg>
+        </div>
+        <p>M 按顺序执行固定的<strong>程序</strong>（一串指令），每条指令是以下三类之一：</p>
+        <ul class="speclist">
+          <li><strong>[条件]跳转</strong>：跳到指定指令[如果指定寄存器为[非]零]（true=1，false=0）。</li>
+          <li><strong>基本运算</strong>：对指定寄存器执行指定基本运算（初始化、加减乘除、取模、判等、小于、not/and/or），结果存入指定寄存器（乘法还需要第二个寄存器存高位）。</li>
+          <li><strong>内存访问</strong>：执行一次"随机"访问——<strong>读</strong>：把 mem[reg[j]] 的值复制到 reg[k]；<strong>写</strong>：把 reg[k] 的值复制到 mem[reg[j]]，j、k 均可指定。</li>
+        </ul>
+        <p>下面这段程序把输入的全部数字加总——对比 C 代码和等价的 RAM 程序，能看出"寄存器+跳转+内存读写"三件套，其实就是高级语言循环、数组访问的最底层翻译：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>示例：求和程序（C 与 RAM 对照）</caption>
+            <thead><tr><th>C 程序</th><th>RAM 程序</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">int i = 0;
+int t = 0;
+while( i &lt; n )
+{
+  t = t+mem[i];
+  i = i+1;
+}
+mem[i] = t;</td><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">reg[1] ← 0
+reg[2] ← 0
+sumloop:
+reg[3] ← mem[reg[1]]
+reg[2] ← reg[2]+reg[3]
+reg[1] ← reg[1]+1
+reg[3] ← reg[1]&lt;reg[0]
+goto sumloop if reg[3] ≠ 0
+mem[reg[1]] ← reg[2]</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>if/else 和 while 循环，都能直接翻译成"[条件]跳转 + 标签"的组合：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>控制流翻译规则</caption>
+            <thead><tr><th>高级写法</th><th>RAM 代码</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">if( reg[k] ) { X }
+else { Y }</td><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">goto else1 if reg[k] = 0
+X
+goto end1
+else1:
+Y
+end1:</td></tr>
+              <tr><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">while( reg[k] ) { X }</td><td style="font-family:var(--font-mono); white-space:pre-line; font-size:13px;">goto end2 if reg[k] = 0
+while2:
+X
+goto while2 if reg[k] ≠ 0
+end2:</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>连"函数调用"这种听起来很高级的概念，也能在 RAM 模型里落地：在内存里划一块<strong>调用栈</strong>（例如 mem[2^m−k] 存栈底往上数第 k 个字），用一个特殊寄存器 <strong>sp</strong> 记录栈顶之后那格的地址。<code>push(reg[k])</code> 翻译成 <code>mem[sp]←reg[k]; sp←sp−1</code>；<code>reg[k]←pop()</code> 翻译成 <code>sp←sp+1; reg[k]←mem[sp]</code>。函数调用的完整套路是：<strong>调用前</strong>把要保护的寄存器和函数输入依次压栈，再把返回地址（pc+2）存入特殊寄存器 <strong>ra</strong>，跳到函数入口；<strong>函数体开始前</strong>按相反顺序把输入弹出到寄存器；<strong>返回时</strong>把函数输出压栈，再跳回 ra；<strong>调用结束后</strong>把输出和之前保护的寄存器依次弹出。</p>
+        <div class="callout teal"><div class="lbl">这就是"栈"的全部秘密</div><p>函数调用栈、局部变量、递归——这些我们在高级语言里习以为常的概念，拆到 RAM 模型这一层，其实只是"在内存里划一块区域，用一个寄存器当栈顶指针，配合 push/pop 两条翻译规则"而已，没有任何额外的魔法。</p></div>
+        <p>RAM 模型的优点：<strong>相当简单又几乎"通用"</strong>（任何 2^m 空间内的计算，都能被某个 m 位 RAM 完成）；<strong>非常高效</strong>（例如在有序表上二分查找只需 O(log n) 时间）；<strong>高度实用</strong>（是对"带内存的 CPU"相当贴切的抽象）。缺点是<strong>完全非局部</strong>——访问任意地址 k 的 mem[k]，模型里都只算一步，这在真实硬件上其实并不成立（真实内存有缓存层级、越远越慢，这也是模块 09.4 分离缓存架构要处理的问题）。更进一步，可以证明：任何在 O(n) 个字的输入上、占用 O(n^d) 个字内存的确定性字级计算，都能被某个使用 O(log n) 位字的 RAM 模拟——计算的有限状态对应程序里带标签的代码段，步间保留的有限个字对应寄存器，每一步的状态转移对应代码段里的分支情形。</p>
+      </div>
+
+      <div class="sub" id="m8-s4">
+        <h3><span class="num">08.4</span> 指针机模型：只认得"摸得到"的东西</h3>
+        <p><strong>指针机（Pointer Machine，PM）</strong>M 和 RAM 几乎一样，只有一处关键差异：<strong>M 只能通过指针访问内存</strong>。每个指针要么是 <strong>null</strong>，要么指向一个<strong>内存节点</strong>，节点有固定数量的<strong>字段</strong>，每个字段存一个字或一个指针；每个寄存器存一个字或一个指针；而<strong>指针只能被存储或判断是否相等</strong>——不能像地址一样做加减运算、也不能被当成数字比较大小。输入和输出都以指针结构（例如平衡二叉树）的形式存放，reg[0] 在开始时存指向输入的指针。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 8-3 · PM 模型：只能沿指针"摸"到下一个节点</div>
+          <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="指针机模型示意图：reg0指向根节点，根节点通过左右字段指针分别指向左子节点和右子节点，右子节点的右字段为null">
+            <g stroke="var(--line-strong)" stroke-width="1.5" fill="none">
+              <line x1="80" y1="45" x2="270" y2="60"/>
+              <line x1="330" y1="90" x2="230" y2="130"/>
+              <line x1="390" y1="90" x2="480" y2="130"/>
+              <line x1="480" y1="170" x2="480" y2="195"/>
+            </g>
+            <rect x="20" y="20" width="120" height="34" rx="4" fill="var(--accent)" stroke="var(--accent-strong)" stroke-width="1.4"/>
+            <text x="80" y="42" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--accent-ink)" font-weight="700">reg[0]</text>
+            <rect x="270" y="60" width="120" height="60" rx="4" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.6"/>
+            <text x="330" y="82" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--teal)" font-weight="700">节点 A</text>
+            <text x="330" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--teal)">左·右字段（指针）</text>
+            <rect x="170" y="130" width="120" height="50" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+            <text x="230" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--ink-soft)">节点 B（叶）</text>
+            <rect x="420" y="130" width="120" height="50" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+            <text x="480" y="152" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--ink-soft)">节点 C</text>
+            <text x="480" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">左字段 → 略</text>
+            <rect x="455" y="195" width="50" height="24" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.3"/>
+            <text x="480" y="212" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--warn)" font-weight="700">null</text>
+          </svg>
+        </div>
+        <p>基本控制流和函数调用的翻译方式和 RAM 模型完全一样。直觉上，PM 模型能做的事，恰好对应用 Java 里<strong>仅使用 Object 和 long 类型（以及由它们构建出的类型）</strong>能写出的程序——例如 2-3 树、红黑树（Java 的 TreeMap 底层用的正是它）。</p>
+        <p>PM 模型的优点：<strong>通用</strong>（内存不受字长限制，理论上无边界）；<strong>很好地刻画了问题的组合结构</strong>（例如可以证明对 n 个整数排序必须花 Ω(n·log n) 时间——这是比较排序的理论下界）；<strong>能得到高效实用的算法</strong>（例如 O(n·log n) 的归并排序，在真实场景里往往比理论上"更快"的 O(n·loglog n) 排序表现更好——因为后者常数因子、实现复杂度更高，big-O 更小不代表真实运行更快）。缺点是<strong>不反映现代计算机的真实能力</strong>——"随机访问"这件事，在真实硬件上是被稳稳支持的（正如 RAM 模型假设的那样），PM 模型故意不让你用，是为了得到更保守、更普适的理论下界，但也因此显得比现实"悲观"。</p>
+      </div>
+
+      <div class="sub" id="m8-s5">
+        <h3><span class="num">08.5</span> 程序即字符串：通往"存储程序"的关键一跃</h3>
+        <p>为了支持随机化算法，还可以给 RAM/PM 模型加一条基本运算 <strong>rand</strong>：把从 [0, reg[k]) 中均匀随机抽取的整数存入 reg[j]。现实中并不存在真正的随机源——真实计算机使用"近似随机"的源：<strong>PRNG（伪随机数生成器）</strong>是一种确定性算法，产生的比特序列在统计检验下"看起来"随机；部分 CPU 还内置基于热噪声的硬件随机比特发生器。</p>
+        <p>接下来是计算机科学最基础的思想之一：<strong>任何计算都能被描述成一个"程序"，这个程序能被编码成一个"字符串"，而这个字符串又能被另一个程序（甚至是它自己）处理</strong>。这正是图灵"通用图灵机（Universal TM，UTM）"的核心构想——它能在任意给定输入上运行任意给定（编码后）的 TM，甚至可以运行编码后的自己。</p>
+        <p>在这个想法出现之前，<strong>程序和数据是彼时彼刻分离的</strong>：最早的计算机基本上只能运行单一固定的程序（1642 年的 Pascaline、1673 年 Leibniz 的计算器、1822 年 Babbage 的差分机）；早期可编程计算机则只能运行外部提供的程序（1833 年 Babbage 的分析机、1936 年 Zuse 的 Z1、1944 年 Harvard Mark I、1965–约1980 年的 IBM 1130）。</p>
+        <div class="stepflow">
+          <div class="step"><div class="stepnum">1</div><div class="stext"><b>单一固定程序</b><span>Pascaline (1642)、Leibniz 计算器 (1673)、Babbage 差分机 (1822) —— 程序即硬件本身，换程序等于换机器</span></div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stext"><b>可运行外部程序</b><span>Babbage 分析机 (1833)、Zuse Z1 (1936)、Harvard Mark I (1944)、IBM 1130 (1965) —— 程序仍与内部数据分开存放</span></div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stext"><b>存储程序计算机</b><span>EDSAC (1949)、Altair 8800 (1974) —— 程序能存在机器内部了，但仍要靠开关/旋钮/打孔卡输入</span></div></div>
+          <div class="step"><div class="stepnum">4</div><div class="stext"><b>通用存储程序计算机</b><span>Univac I (1951)、Apple II (1977)、IBM PC (1981) —— 程序和数据用<b>同一种介质</b>存储，用户第一次能直接用键盘写程序（Apple II / IBM PC 甚至预装了 MS Basic）</span></div></div>
+        </div>
+        <p>换句话说，<strong>存储程序计算机</strong>能运行内部存储的程序；而<strong>通用存储程序计算机</strong>更进一步——它能运行"和内部数据存在同一种介质里"的程序。这个区别听起来微妙，却是决定"你能不能在自己电脑上装新软件"的分水岭。</p>
+        <div class="callout"><div class="lbl">为什么这是"跃迁"而不是渐进改良</div><p>一旦程序可以被当作数据一样编码、存储、传输、甚至被另一个程序生成或修改，"安装软件""升级系统""编译器编译自己"这些我们今天习以为常的事情才第一次在原理上成为可能——这正是模块 08.1 那张地图里，从"抽象机器模型"通向"计算机架构"的关键一跳，也是模块 09 讨论冯·诺依曼架构的必要前提。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>TM、RAM、PM 三种模型，"局部性"假设分别是什么？为什么这个假设的强弱会直接影响算法复杂度分析？</summary><div class="a">TM 完全局部（每步只碰磁带上一格）；RAM 完全非局部（访问任意地址 mem[k] 都算一步）；PM 介于两者之间（只能沿指针一跳一跳地"摸"到下一个节点，不能凭地址直接跳）。局部性越弱，模型能"作弊"的空间越大，同一个算法在不同模型下分析出的时间复杂度可能天差地别——例如排序在 PM 模型下有 Ω(n log n) 的下界，但如果允许 RAM 式的任意跳转+桶排序技巧，某些场景下可以打破这个下界。</div></details>
+        <details class="qcard"><summary>为什么"通用存储程序计算机"比"存储程序计算机"更进一步？两者的区别具体是什么？</summary><div class="a">存储程序计算机只要求程序能存在机器"内部"，但依然可能需要通过开关、旋钮或打孔卡这类专门的物理输入方式（如 EDSAC）；通用存储程序计算机则要求程序和内部数据用<b>同一种介质</b>存储、被同一套地址访问机制处理——这使得用户可以直接用键盘写程序、程序可以被当作数据处理（甚至自己修改自己），是"安装新软件"这件事在硬件层面成立的前提。</div></details>
+        <details class="qcard"><summary>RAM 模型的"完全非局部"既是优点又是缺点，这句话怎么理解？</summary><div class="a">是优点，因为它让分析算法效率变得直观又贴近实践——例如二分查找的 O(log n) 分析，正是假设"随机访问任意地址只需一步"才成立，这也确实是现代 CPU 努力想要提供的体验。但它同时是缺点，因为真实硬件的内存访问并不是真正等速的——越靠近 CPU 的缓存越快、主存越远越慢，RAM 模型完全忽略了这层现实，模块 09.4 的分离缓存架构正是为了在真实硬件里尽量逼近"访问速度一致"这个理想。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m9">
+      <div class="modhead"><span class="ref">MODULE 09</span><h2>计算机架构：冯·诺依曼与哈佛</h2></div>
+      <p class="modintro">模块 08.5 讲到"存储程序计算机"是通往现代计算机的关键一跃——但这个想法要落地成具体硬件，CPU、内存、I/O 设备到底该怎么摆放？这就是"计算机架构"要回答的问题，它站在模块 08.1 那张地图"具体、高层"的格子里，直接决定了我们买到的每一台电脑的骨架长什么样。</p>
+
+      <div class="sub" id="m9-s1">
+        <h3><span class="num">09.1</span> 冯·诺依曼架构：几乎所有电脑的共同祖先</h3>
+        <p><strong>冯·诺依曼架构（von Neumann architecture）</strong>是 1945 年 John von Neumann 基于 John Mauchly 和 John Presper Eckert 的想法描述的一种高层计算机架构：<strong>CPU</strong>（中央处理单元）拥有寄存器、<strong>PC</strong>（程序计数器）和 <strong>ALU</strong>（算术逻辑单元）；CPU 能访问一块<strong>主存</strong>，这块主存<strong>同时存放程序和数据</strong>；CPU 能与<strong>输入/输出设备</strong>交互。今天每一台"现代计算机"，都拥有某种与冯·诺依曼架构相关的骨架。</p>
+        <div class="callout teal"><div class="lbl">看似平淡，实则关键</div><p>"程序和数据放在同一块内存里"听起来是个平淡的技术细节，但正是这一点，让模块 08.5 讲的"通用存储程序计算机"成为可能——通用性的关键就是程序能和数据用同一种介质存储、同一套地址访问机制处理。冯·诺依曼架构，正是把这件事画成了具体的硬件蓝图。</p></div>
+      </div>
+
+      <div class="sub" id="m9-s2">
+        <h3><span class="num">09.2</span> 现代冯·诺依曼计算机的现实：虚拟地址</h3>
+        <p>一台<strong>冯·诺依曼计算机</strong>（即采用冯·诺依曼架构的计算机）是一种通用存储程序计算机，RAM 模型能很好地为它建模。但今天许多现代计算机是<strong>64 位</strong>的——而拥有 2^64 个内存格子在物理上是<strong>不可能</strong>的！这样的计算机使用<strong>虚拟地址（virtual addressing）</strong>来"看起来"支持 64 位内存地址。</p>
+        <div class="callout warn"><div class="lbl">算一算差距有多大</div><p>假设一台计算机有 16 GB 实际 RAM，那么它的物理内存只能存下 16·2³⁰·8/64 = 2³¹ 个字——距离 RAM 模型假设的 2⁶⁴ 个格子，差了整整 33 个二进制位（也就是几十亿倍）。现代操作系统会把不常用的内存部分转移到硬盘（比 RAM 慢得多）：假设有 1 TB 硬盘空间，也只能多存 2⁴⁰·8/64 = 2³⁷ 个字，依然远远不够填满 2⁶⁴ 个格子。</p></div>
+        <p>换句话说，"64 位地址空间"更像是操作系统和硬件联手维持的一种<strong>假象</strong>——虚拟地址背后到底怎么映射到物理内存、怎么在内存和硬盘之间倒腾，属于"内存（缓存与虚拟内存）"这个主题的细节，这部分会在课程 Part 2 里展开，这里先记住这个数量级差距就够了。</p>
+      </div>
+
+      <div class="sub" id="m9-s3">
+        <h3><span class="num">09.3</span> 哈佛架构：把程序和数据分家</h3>
+        <p><strong>哈佛架构（Harvard architecture）</strong>和冯·诺依曼架构相似，唯一的区别是：<strong>程序和数据分开存储、由 CPU 分开访问</strong>。这个名字最初是在微控制器的语境下被提出的，严格来说不应该套用在早期计算机上（那些早期"程序和数据分开"的机器，动机和现代微控制器并不相同）。典型例子是 <strong>PIC 微控制器</strong>：用闪存存指令，用 SRAM 存数据。</p>
+        <p>严格来说，哈佛架构<strong>不是通用的</strong>——如果你在哈佛架构上运行一个"通用"程序，你确实可以借此运行"以数据形式存储的程序"，但这样一来，你就<strong>失去了程序、数据分开访问路径带来的全部好处</strong>！也就是说，一旦你为了通用性打破了"分开"的约定，哈佛架构相对冯·诺依曼架构的速度优势也就随之消失了。</p>
+      </div>
+
+      <div class="sub" id="m9-s4">
+        <h3><span class="num">09.4</span> 分离缓存架构：鱼与熊掌的折中方案</h3>
+        <p>哈佛架构的"分开存取"确实更快，但牺牲了通用性；冯·诺依曼架构通用又灵活，但程序、数据挤在同一条访问路径上。<strong>分离缓存架构（split-cache architecture）</strong>是两者一个聪明的折中：<strong>主存依然是冯·诺依曼式的统一内存</strong>（程序和数据不分家，保留通用性），但 CPU 内部配备<strong>两块独立的缓存</strong>——指令缓存和数据缓存，让离核心最近、最频繁被访问的这一层，享受到接近哈佛架构"分开访问、互不阻塞"的速度红利。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 9-1 · 冯·诺依曼架构 vs 分离缓存架构</div>
+          <svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="左侧为冯诺依曼架构：主存通过程序加数据一条通道连到统一缓存再到CPU；右侧为分离缓存架构：主存通过程序通道连到指令缓存、数据通道连到数据缓存，两块缓存都在CPU内">
+            <g font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">
+              <text x="185" y="18" fill="var(--muted)" font-size="11" letter-spacing="0.06em">冯·诺依曼架构</text>
+              <rect x="85" y="28" width="200" height="44" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="185" y="55" fill="var(--ink)" font-weight="700">主存（程序+数据）</text>
+              <line x1="185" y1="72" x2="185" y2="100" stroke="var(--line-strong)" stroke-width="2"/>
+              <text x="200" y="90" fill="var(--muted)" font-size="10.5" text-anchor="start">程序+数据</text>
+              <rect x="55" y="100" width="260" height="170" rx="6" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+              <text x="185" y="122" fill="var(--accent-strong)" font-weight="700">CPU</text>
+              <rect x="85" y="134" width="200" height="36" rx="3" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.3"/>
+              <text x="185" y="156" fill="var(--teal)">统一 Cache</text>
+              <rect x="85" y="182" width="95" height="60" rx="3" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.3"/>
+              <text x="132" y="216" fill="var(--ink-soft)">Registers</text>
+              <rect x="195" y="182" width="95" height="60" rx="3" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.3"/>
+              <text x="242" y="216" fill="var(--ink-soft)">ALU</text>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">
+              <text x="670" y="18" fill="var(--muted)" font-size="11" letter-spacing="0.06em">分离缓存架构</text>
+              <rect x="570" y="28" width="200" height="44" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="670" y="55" fill="var(--ink)" font-weight="700">主存（程序+数据）</text>
+              <line x1="625" y1="72" x2="625" y2="100" stroke="var(--line-strong)" stroke-width="2"/>
+              <line x1="715" y1="72" x2="715" y2="100" stroke="var(--line-strong)" stroke-width="2"/>
+              <text x="625" y="88" fill="var(--muted)" font-size="10">程序</text>
+              <text x="715" y="88" fill="var(--muted)" font-size="10">数据</text>
+              <rect x="540" y="100" width="260" height="170" rx="6" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+              <text x="670" y="122" fill="var(--accent-strong)" font-weight="700">CPU</text>
+              <rect x="570" y="134" width="95" height="36" rx="3" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.3"/>
+              <text x="617" y="156" fill="var(--teal)" font-size="11.5">指令 Cache</text>
+              <rect x="675" y="134" width="95" height="36" rx="3" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.3"/>
+              <text x="722" y="156" fill="var(--teal)" font-size="11.5">数据 Cache</text>
+              <rect x="570" y="182" width="95" height="60" rx="3" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.3"/>
+              <text x="617" y="216" fill="var(--ink-soft)">Registers</text>
+              <rect x="675" y="182" width="95" height="60" rx="3" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.3"/>
+              <text x="722" y="216" fill="var(--ink-soft)">ALU</text>
+            </g>
+          </svg>
+        </div>
+        <p>换句话说：<strong>底层（主存）依然是冯·诺依曼式的统一存储</strong>，保留了通用性和灵活性；<strong>顶层（CPU 内的缓存）却借用了哈佛架构"分开访问"的思路</strong>，让取指令和读写数据可以真正并行、互不排队。这是工程上典型的"在正确的层级上做取舍"——不需要在整台机器的架构层面二选一，只需要在缓存这一层悄悄借来对方的优点。</p>
+        <div class="callout"><div class="lbl">回头看模块 02</div><p>模块 02.3 提到，<strong>Pentium 1</strong>（1993）是第一颗采用分离式缓存架构的处理器。现在我们知道了：它在"计算机架构"这个分类层面，仍然是一台地地道道的冯·诺依曼计算机（主存里程序和数据从不分家）；只是在缓存这一层，悄悄借用了哈佛架构"分开存取"的速度优势——这正是分离缓存架构存在的全部意义。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>哈佛架构为什么"严格来说不是通用的"？如果强行在哈佛架构上运行通用程序会发生什么？</summary><div class="a">哈佛架构要求程序和数据物理上分开存储、分开访问，这本身就排除了"把程序当数据处理"（例如运行时生成/修改程序）的可能性，因此不满足模块 08.5 定义的"通用"标准。如果强行运行一个通用程序，你确实能让它把某些数据当程序执行，但这必然要打通原本分开的两条访问路径，这样一来哈佛架构相对冯·诺依曼架构的速度优势也就荡然无存了——通用性和"分开存取"的速度红利在哈佛架构里是互斥的。</div></details>
+        <details class="qcard"><summary>分离缓存架构为什么不直接被归类为"哈佛架构"，而依然被视为冯·诺依曼架构的一种？</summary><div class="a">架构分类看的是<b>主存</b>这一层：分离缓存架构的主存依然是统一存储、程序数据不分家，完全符合冯·诺依曼架构的定义。"指令缓存/数据缓存分开"只发生在 CPU 内部离核心最近的缓存层级，是一种局部的性能优化手段，并不改变底层主存的组织方式，因此整体架构分类仍然是冯·诺依曼式的。</div></details>
+        <details class="qcard"><summary>为什么现代 64 位计算机需要"虚拟地址"这个假象？它具体解决了什么矛盾？</summary><div class="a">RAM 模型假设一台 m 位机器拥有 2^m 个真实内存格子，但真实的 64 位计算机不可能配备 2^64 个物理存储单元——这在物理上是不可能造出来的。虚拟地址通过操作系统和硬件的配合，让程序"看起来"能访问一整片 64 位地址空间，实际背后只映射到远小于 2^64 的物理 RAM（必要时还会借用硬盘空间），从而在不违反物理限制的前提下，维持住 RAM 模型"地址空间巨大"这一理想化假设的可用性。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m10">
+      <div class="modhead"><span class="ref">MODULE 10</span><h2>指令集架构与 MIPS</h2></div>
+      <p class="modintro">计算机架构告诉我们 CPU、内存、I/O 怎么摆放；但"CPU 到底认得哪些指令、每条指令的比特长什么样"，是另一层更具体的规范——<strong>指令集架构（ISA）</strong>，它站在模块 08.1 那张地图"具体、低层"的格子里。这一模块用课程指定的教学 ISA——<strong>MIPS</strong>——把整条链路走一遍：从寄存器、指令格式，到编码成 0/1，再到真正驱动一颗 Logisim CPU 跑起来。</p>
+
+      <div class="sub" id="m10-s1">
+        <h3><span class="num">10.1</span> 什么是 ISA</h3>
+        <p><strong>ISA（指令集架构，Instruction Set Architecture）</strong>是一个具体模型，精确规定了"一段由指令列表组成的程序会被怎样执行"。一份 ISA 规范至少要包括：</p>
+        <ul class="speclist">
+          <li><strong>可用寄存器</strong>（包括大小和初始值）——但 ISA 规范<strong>不</strong>包含"这些寄存器该怎么用"的使用惯例，那属于编译器/操作系统层面的约定。</li>
+          <li><strong>指令编码</strong>（包括定长/变长），通常以一个<strong>操作码（opcode）</strong>开头。</li>
+          <li><strong>每条指令的语义</strong>，通常用二进制补码表示有符号整数。</li>
+        </ul>
+      </div>
+
+      <div class="sub" id="m10-s2">
+        <h3><span class="num">10.2</span> CISC vs RISC</h3>
+        <div class="tablewrap">
+          <table>
+            <caption>两种指令集设计哲学</caption>
+            <thead><tr><th>流派</th><th>指令语义</th><th>指令数量</th><th>典型实现</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CISC</strong><br><small>复杂指令集计算机</small></td><td>每条指令可能语义复杂</td><td>指令很多，但大多冗余——约 80% 的程序只用到约 20% 的指令</td><td>几乎总是通过<strong>微码引擎</strong>实现</td></tr>
+              <tr><td><strong>RISC</strong><br><small>精简指令集计算机</small></td><td>每条指令语义基础，最多 1 次内存访问——更容易流水线化</td><td>指令不多，但足够通用</td><td>常常<strong>不经过</strong>翻译成微码，直接执行</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>现实中的 CPU 往往是<strong>CISC 外壳 + RISC 内核</strong>的混合体。AMD 工程师 David Christie 谈到 AMD K5（一颗 x86 处理器）时曾这样描述：</p>
+        <div class="histquote">"我们基于 29000 的指令集设计了一套微 ISA……这些微指令依然遵循基本的 RISC 原则：简单的寄存器到寄存器操作、寄存器字段固定位置编码、每次操作最多一次内存引用……x86 指令集的复杂性止步于译码器，对乱序执行核心几乎是透明的。"<cite>— David Christie, AMD，谈 AMD K5 微架构</cite></div>
+        <div class="callout teal"><div class="lbl">回头看模块 03</div><p>这正好解释了模块 03.2 提到的"微码引擎"到底图什么——CISC 处理器把复杂指令翻译成一串简单、RISC 风格的微指令，芯片内部真正执行的运算核心，其实一直是一颗"RISC 内核"；复杂性被挡在译码器这一层，没有渗透到执行电路里。</p></div>
+      </div>
+
+      <div class="sub" id="m10-s3">
+        <h3><span class="num">10.3</span> MIPS：RISC 的教学级活化石</h3>
+        <p><strong>MIPS</strong>（Microprocessor without Interlocked Pipelined Stages）被设计为 RISC 的先驱之一，曾用于任天堂 64 和 PlayStation 1/2，其中一些设计特征至今仍对现代 ISA 设计有参考价值。</p>
+        <p>MIPS 拥有 32 个通用 32 位寄存器（括号内为别名，蓝字为使用惯例——注意这些惯例不属于 ISA 本身，是软件约定）：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>MIPS 通用寄存器一览</caption>
+            <thead><tr><th>编号</th><th>别名</th><th>惯例用途</th></tr></thead>
+            <tbody>
+              <tr><td class="num">$0</td><td>$zero</td><td>硬接线为常数 0（写它没有效果）</td></tr>
+              <tr><td class="num">$1</td><td>$at</td><td>保留给汇编器使用</td></tr>
+              <tr><td class="num">$2–$3</td><td>$v0–$v1</td><td>函数调用返回值</td></tr>
+              <tr><td class="num">$4–$7</td><td>$a0–$a3</td><td>函数调用参数</td></tr>
+              <tr><td class="num">$8–$15, $24–$25</td><td>$t0–$t9</td><td>临时寄存器</td></tr>
+              <tr><td class="num">$16–$23</td><td>$s0–$s7</td><td>被调用者保存的临时寄存器</td></tr>
+              <tr><td class="num">$26–$27</td><td>$k0–$k1</td><td>保留给操作系统内核使用</td></tr>
+              <tr><td class="num">$28</td><td>$gp</td><td>全局指针（堆区，向上增长）</td></tr>
+              <tr><td class="num">$29</td><td>$sp</td><td>栈指针（调用栈，向下增长）</td></tr>
+              <tr><td class="num">$30</td><td>$fp</td><td>帧指针（其实没必要用，用了也可能有隐患）</td></tr>
+              <tr><td class="num">$31</td><td>$ra</td><td>返回地址</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>MIPS 另有 16 个 32 位浮点寄存器（MIPS III 及以后升级为 64 位），以及三个<strong>不能</strong>被指令直接当操作数使用的内部寄存器：<strong>PC</strong>（当前指令地址）、<strong>HI/LO</strong>（上一次乘/除运算的结果）。</p>
+        <p>内存可以是<strong>字寻址</strong>的——第 k 个字的地址就是 k（RAM 模型正是这样，PC 就是指令编号本身）；也可以是<strong>字节寻址</strong>的——第 k 个字节的地址就是 k，这在长地址变得廉价之后成为主流。如果每条指令占 4 字节，PC 往往就是"指令编号 × 4"，每执行完一条非跳转指令后加 4 而不是加 1。</p>
+      </div>
+
+      <div class="sub" id="m10-s4">
+        <h3><span class="num">10.4</span> 三种指令格式：R / I / J</h3>
+        <p>MIPS 只有三种指令格式，全部固定 32 位：</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 10-1 · MIPS 三种指令格式的位域划分</div>
+          <svg viewBox="0 0 900 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MIPS三种指令格式位域图：R型分为opcode、rs、rt、rd、shamt、funct六段；I型分为opcode、rs、rt、immediate四段；J型分为opcode、address两段">
+            <g font-family="IBM Plex Mono, monospace" font-size="11.5" text-anchor="middle">
+              <text x="30" y="18" text-anchor="start" fill="var(--accent-strong)" font-weight="700">R</text>
+              <g stroke="var(--line-strong)" stroke-width="1.3" fill="var(--surface-2)">
+                <rect x="60" y="4" width="130" height="28"/><rect x="190" y="4" width="130" height="28"/>
+                <rect x="320" y="4" width="130" height="28"/><rect x="450" y="4" width="130" height="28"/>
+                <rect x="580" y="4" width="130" height="28"/><rect x="710" y="4" width="130" height="28"/>
+              </g>
+              <g fill="var(--ink)">
+                <text x="125" y="22">opcode</text><text x="255" y="22">rs</text><text x="385" y="22">rt</text>
+                <text x="515" y="22">rd</text><text x="645" y="22">shamt</text><text x="775" y="22">funct</text>
+              </g>
+              <g fill="var(--muted)" font-size="9.5">
+                <text x="60" y="42">31</text><text x="190" y="42">25</text><text x="320" y="42">20</text>
+                <text x="450" y="42">15</text><text x="580" y="42">10</text><text x="710" y="42">5</text>
+              </g>
+
+              <text x="30" y="78" text-anchor="start" fill="var(--accent-strong)" font-weight="700">I</text>
+              <g stroke="var(--line-strong)" stroke-width="1.3" fill="var(--surface-2)">
+                <rect x="60" y="64" width="130" height="28"/><rect x="190" y="64" width="130" height="28"/>
+                <rect x="320" y="64" width="130" height="28"/><rect x="450" y="64" width="390" height="28"/>
+              </g>
+              <g fill="var(--ink)">
+                <text x="125" y="82">opcode</text><text x="255" y="82">rs</text><text x="385" y="82">rt</text>
+                <text x="645" y="82">immediate</text>
+              </g>
+              <g fill="var(--muted)" font-size="9.5">
+                <text x="60" y="102">31</text><text x="190" y="102">25</text><text x="320" y="102">20</text><text x="450" y="102">15</text>
+              </g>
+
+              <text x="30" y="138" text-anchor="start" fill="var(--accent-strong)" font-weight="700">J</text>
+              <g stroke="var(--line-strong)" stroke-width="1.3" fill="var(--surface-2)">
+                <rect x="60" y="124" width="130" height="28"/><rect x="190" y="124" width="650" height="28"/>
+              </g>
+              <g fill="var(--ink)">
+                <text x="125" y="142">opcode</text><text x="515" y="142">address / 4</text>
+              </g>
+              <g fill="var(--muted)" font-size="9.5">
+                <text x="60" y="162">31</text><text x="190" y="162">25</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <ul class="speclist">
+          <li><strong>J 型</strong>：1 个编码后的跳转地址——最"瘦"的格式，专门给无条件跳转用。</li>
+          <li><strong>I 型</strong>：1 个立即数 + 1 个输入寄存器 + 1 个输出寄存器——立即数直接嵌在指令里，省去一次额外取数。</li>
+          <li><strong>R 型</strong>：2 个输入寄存器 + 1 个输出寄存器，外加 <strong>shamt</strong>（移位量）和 <strong>funct</strong>（算术操作码，配合 opcode 一起决定具体做什么运算）。</li>
+        </ul>
+
+        <div class="callout">
+          <div class="lbl">记忆锚点 · 不用死背三张图</div>
+          <p>三种格式看着是三张不同的表，但只要抓住一条规律，它们就不再是三份要分别硬背的东西，而是同一个动作的三种分支：<strong>不管拿到哪种指令，CPU 永远、无条件先读最前面固定的 6 位（第 31~26 位）当作 opcode</strong>，然后才决定剩下 26 位该怎么切。opcode = 000000 时，CPU 才知道"这是 R 型，后面还要再切出 rs / rt / rd / shamt / funct 五块，具体做什么运算得看最后的 funct"；opcode 是 001000（addi）之类的值时，CPU 直接知道"这是 I 型，后面切成 rs / rt / immediate 三块就够了，不用再多问";opcode 是 000010（j）或 000011（jal）时，CPU 知道"这是 J 型，剩下 26 位整个就是地址，不用切"。换句话说：<strong>opcode 的位置和宽度在三种格式里永远一样，变的只是"读完 opcode 之后，剩下的 26 位怎么分"</strong>——这也是为什么三种格式全部固定 32 位、opcode 全部占最前 6 位。</p>
+        </div>
+
+        <div class="instrlab" id="instrlab">
+          <div class="instrlab-head">
+            <div class="instrlab-cap">互动演示 · 把一条真实指令拆到 32 个比特</div>
+            <div class="instrlab-tabs" id="instrlab-tabs"></div>
+          </div>
+          <div class="instrlab-title" id="instrlab-title"></div>
+          <div class="instrlab-sem" id="instrlab-sem"></div>
+          <div class="instrlab-asm" id="instrlab-asm"></div>
+          <div class="instrlab-fieldswrap"><div class="instrlab-fields" id="instrlab-fields"></div></div>
+          <div class="instrlab-binrow" id="instrlab-binrow"></div>
+          <div class="instrlab-hex" id="instrlab-hex"></div>
+          <div class="instrlab-explain" id="instrlab-explain"></div>
+          <div class="instrlab-controls">
+            <button id="instrlab-play" class="primary" type="button">▶ 自动演示</button>
+            <button id="instrlab-prev" type="button">◀ 上一步</button>
+            <button id="instrlab-next" type="button">下一步 ▶</button>
+            <button id="instrlab-reset" type="button">↺ 重置</button>
+            <span class="steplabel" id="instrlab-steplabel">0 / 0</span>
+          </div>
+        </div>
+        <script>
+        (function(){
+          var EX = {
+            r: {
+              tabLabel: 'R 型',
+              title: 'R 型 · add $t0, $t1, $t2',
+              sem: '语义：R[rd] := R[rs] + R[rt]，也就是 $t0 := $t1 + $t2',
+              asm: '<span class="tok" data-tok="op">add</span> <span class="tok" data-tok="rd">$t0</span>, <span class="tok" data-tok="rs">$t1</span>, <span class="tok" data-tok="rt">$t2</span>',
+              fields: [
+                {key:'opcode', tok:'op', width:6, dec:0, label:'opcode', note:'操作码 opcode = 000000。留意：所有 R 型指令的 opcode 都固定是全 0——光看这 6 位还分不出是 add 还是 sub，得等到最后的 funct 字段才最终拍板。'},
+                {key:'rs', tok:'rs', width:5, dec:9, label:'rs', note:'源寄存器 rs = 9 号寄存器，也就是 $t1。'},
+                {key:'rt', tok:'rt', width:5, dec:10, label:'rt', note:'源寄存器 rt = 10 号寄存器，也就是 $t2。R 型里 rs、rt 都是"输入"。'},
+                {key:'rd', tok:'rd', width:5, dec:8, label:'rd', note:'目的寄存器 rd = 8 号寄存器，也就是 $t0——运算结果最终写回这里。'},
+                {key:'shamt', tok:null, width:5, dec:0, label:'shamt', note:'移位量 shamt。这条指令不涉及移位，固定填 0（只有 sll / srl / sra 这类移位指令才真正用到它）。'},
+                {key:'funct', tok:'op', width:6, dec:32, label:'funct', note:'功能码 funct = 100000（十进制 32）。opcode 只告诉 CPU「这是 R 型」，具体做加法还是减法，要靠这最后 6 位最终拍板。'}
+              ]
+            },
+            i: {
+              tabLabel: 'I 型',
+              title: 'I 型 · addi $t0, $t1, 100',
+              sem: '语义：R[rt] := R[rs] + immediate，也就是 $t0 := $t1 + 100',
+              asm: '<span class="tok" data-tok="op">addi</span> <span class="tok" data-tok="rt">$t0</span>, <span class="tok" data-tok="rs">$t1</span>, <span class="tok" data-tok="imm">100</span>',
+              fields: [
+                {key:'opcode', tok:'op', width:6, dec:8, label:'opcode', note:'操作码 opcode = 001000（十进制 8）。和 R 型不同，I 型指令光靠 opcode 就能唯一确定是哪条指令，不需要 funct。'},
+                {key:'rs', tok:'rs', width:5, dec:9, label:'rs', note:'源寄存器 rs = 9 号寄存器，也就是 $t1。'},
+                {key:'rt', tok:'rt', width:5, dec:8, label:'rt', note:'目的寄存器 rt = 8 号寄存器，也就是 $t0。注意：I 型里 rt 是「输出」，但 R 型里 rt 是「输入」——同一个字段名，在不同格式里含义会反过来。'},
+                {key:'immediate', tok:'imm', width:16, dec:100, label:'immediate', note:'16 位立即数，直接编码十进制 100，运算时不用再去寄存器堆或内存多取一次数——这正是 I 型比 R 型少一个寄存器字段、却多出这 16 位的原因。'}
+              ]
+            },
+            j: {
+              tabLabel: 'J 型',
+              title: 'J 型 · j 0x00400020',
+              sem: '语义：PC := (PC 的最高 4 位) 拼上 (address << 2)，也就是跳到地址 0x00400020',
+              asm: '<span class="tok" data-tok="op">j</span> <span class="tok" data-tok="addr">0x00400020</span>',
+              fields: [
+                {key:'opcode', tok:'op', width:6, dec:2, label:'opcode', note:'操作码 opcode = 000010（十进制 2），唯一确定这是 j 指令。'},
+                {key:'address', tok:'addr', width:26, dec:1048584, label:'address', note:'26 位地址字段，几乎占满了剩下的全部比特——跳转指令唯一要做的事就是「给出目标地址」，不需要任何寄存器参与运算。存的其实是目标地址右移 2 位后的结果：因为 MIPS 指令天然 4 字节对齐，地址最低两位永远是 0，没必要浪费比特去存它们。'}
+              ]
+            }
+          };
+          var ORDER = ['r','i','j'];
+          var curKey = 'r', step = 0, timer = null;
+          var $tabs = document.getElementById('instrlab-tabs');
+          var $title = document.getElementById('instrlab-title');
+          var $sem = document.getElementById('instrlab-sem');
+          var $asm = document.getElementById('instrlab-asm');
+          var $fields = document.getElementById('instrlab-fields');
+          var $binrow = document.getElementById('instrlab-binrow');
+          var $hex = document.getElementById('instrlab-hex');
+          var $explain = document.getElementById('instrlab-explain');
+          var $steplabel = document.getElementById('instrlab-steplabel');
+          var $play = document.getElementById('instrlab-play');
+          var $prev = document.getElementById('instrlab-prev');
+          var $next = document.getElementById('instrlab-next');
+          var $reset = document.getElementById('instrlab-reset');
+          if(!$tabs) return;
+
+          ORDER.forEach(function(k){
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'instrlab-tab' + (k===curKey ? ' active' : '');
+            b.textContent = EX[k].tabLabel;
+            b.dataset.key = k;
+            b.addEventListener('click', function(){ stopPlay(); selectEx(k); });
+            $tabs.appendChild(b);
+          });
+
+          function bin(dec, width){ return dec.toString(2).padStart(width, '0'); }
+
+          function selectEx(key){
+            curKey = key; step = 0;
+            Array.prototype.forEach.call($tabs.children, function(b){ b.classList.toggle('active', b.dataset.key===key); });
+            var ex = EX[key];
+            $title.textContent = ex.title;
+            $sem.textContent = ex.sem;
+            $asm.innerHTML = ex.asm;
+            $fields.innerHTML = '';
+            ex.fields.forEach(function(f){
+              var box = document.createElement('div');
+              box.className = 'instrlab-field';
+              box.style.flex = f.width + ' 1 0%';
+              box.dataset.key = f.key;
+              box.innerHTML = '<div class="fname">'+f.label+'</div><div class="fwidth">'+f.width+' bit</div><div class="fval"></div><div class="fbin"></div>';
+              $fields.appendChild(box);
+            });
+            render();
+          }
+
+          function render(){
+            var ex = EX[curKey];
+            var total = ex.fields.length;
+            $steplabel.textContent = step + ' / ' + total;
+            var fieldBoxes = $fields.children;
+            var curTok = null;
+            for(var i=0;i<total;i++){
+              var f = ex.fields[i];
+              var box = fieldBoxes[i];
+              box.classList.remove('active','done');
+              var valEl = box.querySelector('.fval');
+              var binEl = box.querySelector('.fbin');
+              if(i < step){
+                box.classList.add(i === step-1 ? 'active' : 'done');
+                if(i === step-1) curTok = f.tok;
+                valEl.textContent = '= ' + f.dec;
+                binEl.textContent = bin(f.dec, f.width);
+              } else {
+                valEl.textContent = '';
+                binEl.textContent = '';
+              }
+            }
+            var toks = $asm.querySelectorAll('.tok');
+            toks.forEach(function(t){ t.classList.toggle('active', !!curTok && t.dataset.tok===curTok); });
+
+            $binrow.innerHTML = '';
+            ex.fields.forEach(function(f, i){
+              var g = document.createElement('span');
+              g.className = 'instrlab-bingroup' + (i < step ? ' revealed' : '');
+              g.textContent = i < step ? bin(f.dec, f.width) : '·'.repeat(f.width);
+              $binrow.appendChild(g);
+            });
+
+            if(step === total){
+              var full = ex.fields.map(function(f){ return bin(f.dec, f.width); }).join('');
+              var hexVal = '0x' + parseInt(full, 2).toString(16).toUpperCase().padStart(8,'0');
+              $hex.textContent = '完整指令（十六进制）：' + hexVal + '　·　二进制共 32 位';
+              $hex.classList.add('ready');
+            } else {
+              $hex.textContent = '完整指令（十六进制）：拆解完所有字段后才会拼出来…';
+              $hex.classList.remove('ready');
+            }
+
+            if(step === 0){
+              $explain.textContent = '点击下方"下一步"，或者直接点"自动演示"，看这条指令怎么一段段拼成 32 位机器码。';
+            } else if(step === total){
+              var kindName = curKey==='r' ? 'R 型' : (curKey==='i' ? 'I 型' : 'J 型');
+              $explain.textContent = '全部字段拆完了！这 32 位拼在一起，就是指令内存里存的真实内容——这就是一条完整的' + kindName + '指令。可以点"重置"再看一遍，或者切换标签对比另外两种格式。';
+            } else {
+              $explain.textContent = ex.fields[step-1].note;
+            }
+            $prev.disabled = step === 0;
+            $next.disabled = step === total;
+          }
+
+          function next(){
+            var total = EX[curKey].fields.length;
+            if(step < total){ step++; render(); }
+            if(step === total) stopPlay();
+          }
+          function prev(){ if(step>0){ step--; render(); } }
+          function reset(){ step = 0; render(); }
+          function stopPlay(){ if(timer){ clearInterval(timer); timer = null; } $play.textContent = '▶ 自动演示'; }
+          function startPlay(){ if(step >= EX[curKey].fields.length) reset(); timer = setInterval(next, 1500); $play.textContent = '⏸ 暂停'; }
+
+          $play.addEventListener('click', function(){ timer ? stopPlay() : startPlay(); });
+          $next.addEventListener('click', function(){ stopPlay(); next(); });
+          $prev.addEventListener('click', function(){ stopPlay(); prev(); });
+          $reset.addEventListener('click', function(){ stopPlay(); reset(); });
+
+          selectEx('r');
+        })();
+        </script>
+
+        <p>J 型指令只有两条——<strong>j</strong>（无条件跳转：PC := (PC[31:28]&lt;&lt;28) + address）和 <strong>jal</strong>（跳转并链接：R[31] := PC+4；PC := (PC[31:28]&lt;&lt;28) + address）。jal 本质上是把 RAM 模型里"保存返回地址、再跳转"两条指令合并成了一条——这正是模块 08.3 讲的函数调用惯例在真实 ISA 里的落地，MIPS 程序完全不需要手动操心 PC。</p>
+        <p>I 型指令覆盖了分支（beq/bne）、带立即数的算术（addi/addiu/slti/sltiu/andi/ori/xori）、取高位立即数（lui）和内存读写（lw/sw）；R 型指令覆盖了移位（sll/srl/sra 及其寄存器变体）、跳转寄存器（jr/jalr）、乘除法及其结果读取（mult/multu/div/divu/mfhi/mflo）、以及寄存器到寄存器的算术逻辑运算（add/addu/sub/subu/and/or/xor/nor/slt/sltu）——这些运算种类，正好呼应模块 05.1 里 ALU 该有的"四类子电路"（加法器、取反器、乘法器、按位运算器）。</p>
+
+        <div class="tablewrap">
+          <table>
+            <caption>I 型指令完整列表</caption>
+            <thead><tr><th>指令</th><th>Opcode</th><th>语义</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono);">beq $rs,$rt,offset</td><td style="font-family:var(--font-mono);">000100</td><td style="font-family:var(--font-mono); font-size:12px;">PC += 4 + (R[rs]=R[rt] ? offset : 0)，offset = extsign(imm)·4</td></tr>
+              <tr><td style="font-family:var(--font-mono);">bne $rs,$rt,offset</td><td style="font-family:var(--font-mono);">000101</td><td style="font-family:var(--font-mono); font-size:12px;">PC += 4 + (R[rs]≠R[rt] ? offset : 0)，offset = extsign(imm)·4</td></tr>
+              <tr><td style="font-family:var(--font-mono);">addi $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001000</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := R[rs] + extsign(imm)　// 可能溢出</td></tr>
+              <tr><td style="font-family:var(--font-mono);">addiu $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001001</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := R[rs] + extsign(imm)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">slti $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001010</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := (R[rs] &lt;<sub>有符号</sub> extsign(imm) ? 1 : 0)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sltiu $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001011</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := (R[rs] &lt;<sub>无符号</sub> extsign(imm) ? 1 : 0)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">andi $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001100</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := R[rs] &amp;<sub>按位</sub> extzero(imm)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">ori $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001101</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := R[rs] |<sub>按位</sub> extzero(imm)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">xori $rt,$rs,imm</td><td style="font-family:var(--font-mono);">001110</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := R[rs] ⊕<sub>按位</sub> extzero(imm)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">lui $rt,imm</td><td style="font-family:var(--font-mono);">001111</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := imm &lt;&lt; 16</td></tr>
+              <tr><td style="font-family:var(--font-mono);">lw $rt,imm($rs)</td><td style="font-family:var(--font-mono);">100011</td><td style="font-family:var(--font-mono); font-size:12px;">R[rt] := mem[ (R[rs] + extsign(imm)) / 4 ]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sw $rt,imm($rs)</td><td style="font-family:var(--font-mono);">101011</td><td style="font-family:var(--font-mono); font-size:12px;">mem[ (R[rs] + extsign(imm)) / 4 ] := R[rt]</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:13px; color:var(--muted);">这里的 (+) 一律是模 2³² 加法；extsign / extzero 分别是符号扩展 / 零扩展到 32 位。</p>
+
+        <div class="tablewrap">
+          <table>
+            <caption>R 型指令完整列表 · 第一部分（Opcode 恒为 000000，靠 Funct 区分）</caption>
+            <thead><tr><th>指令</th><th>Funct</th><th>语义</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono);">sll $rd,$rt,sha</td><td style="font-family:var(--font-mono);">000000</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rt] &lt;&lt;<sub>补零</sub> sha</td></tr>
+              <tr><td style="font-family:var(--font-mono);">srl $rd,$rt,sha</td><td style="font-family:var(--font-mono);">000010</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rt] &gt;&gt;<sub>补零</sub> sha</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sra $rd,$rt,sha</td><td style="font-family:var(--font-mono);">000011</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rt] &gt;&gt;<sub>补符号位</sub> sha</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sllv / srlv / srav $rd,$rt,$rs</td><td style="font-family:var(--font-mono);">000100 / 000110 / 000111</td><td style="font-family:var(--font-mono); font-size:12px;">同上三条，移位量改由 R[rs]%32 决定</td></tr>
+              <tr style="font-weight:700;"><td style="font-family:var(--font-mono);">jr $rs</td><td style="font-family:var(--font-mono);">001000</td><td style="font-family:var(--font-mono); font-size:12px;">PC := R[rs]</td></tr>
+              <tr style="font-weight:700;"><td style="font-family:var(--font-mono);">jalr $rd,$rs</td><td style="font-family:var(--font-mono);">001001</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := PC+4 ; PC := R[rs]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">mfhi $rd　/　mflo $rd</td><td style="font-family:var(--font-mono);">010000 / 010010</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := HI　/　R[rd] := LO</td></tr>
+              <tr><td style="font-family:var(--font-mono);">mult / multu $rs,$rt</td><td style="font-family:var(--font-mono);">011000 / 011001</td><td style="font-family:var(--font-mono); font-size:12px;">(HI&lt;&lt;32)+LO := R[rs] × R[rt]（有 / 无符号）</td></tr>
+              <tr><td style="font-family:var(--font-mono);">div / divu $rs,$rt</td><td style="font-family:var(--font-mono);">011010 / 011011</td><td style="font-family:var(--font-mono); font-size:12px;">(LO,HI) := (R[rs] / R[rt]，R[rs] % R[rt])（有 / 无符号）</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <div class="lbl">jr · jalr · jal 三兄弟</div>
+          <p><strong>jr $rs</strong>（R 型）只做一件事——跳过去：<code>PC := R[rs]</code>，不留任何痕迹。<strong>jal address</strong>（J 型）反过来：跳到一个编码在指令本身里的固定地址，同时把返回地址硬性存到 <code>$31</code>：<code>R[31] := PC+4 ; PC := ...</code>。<strong>jalr $rd,$rs</strong>（R 型）则是两者的结合体——跳转目标像 jr 一样来自寄存器（运行时才能确定，更灵活），但也像 jal 一样顺手保存返回地址；只是存到哪个寄存器可以由 rd 字段自由指定，不像 jal 那样锁死写 $31。三者的差别，本质上就是"跳转目标固定 vs 来自寄存器"和"要不要保存返回地址、存到哪里"这两个维度的排列组合。</p>
+        </div>
+
+        <div class="tablewrap">
+          <table>
+            <caption>R 型指令完整列表 · 第二部分（寄存器到寄存器的算术逻辑运算）</caption>
+            <thead><tr><th>指令</th><th>Funct</th><th>语义</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono);">add $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100000</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] + R[rt]　// 可能溢出</td></tr>
+              <tr><td style="font-family:var(--font-mono);">addu $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100001</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] + R[rt]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sub $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100010</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] − R[rt]　// 可能溢出</td></tr>
+              <tr><td style="font-family:var(--font-mono);">subu $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100011</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] − R[rt]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">and $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100100</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] &amp;<sub>按位</sub> R[rt]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">or $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100101</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] |<sub>按位</sub> R[rt]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">xor $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100110</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := R[rs] ⊕<sub>按位</sub> R[rt]</td></tr>
+              <tr><td style="font-family:var(--font-mono);">nor $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">100111</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := ¬<sub>按位</sub>(R[rs] |<sub>按位</sub> R[rt])</td></tr>
+              <tr><td style="font-family:var(--font-mono);">slt $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">101010</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := (R[rs] &lt;<sub>有符号</sub> R[rt] ? 1 : 0)</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sltu $rd,$rs,$rt</td><td style="font-family:var(--font-mono);">101011</td><td style="font-family:var(--font-mono); font-size:12px;">R[rd] := (R[rs] &lt;<sub>无符号</sub> R[rt] ? 1 : 0)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:13px; color:var(--muted);">这里的 (−) 是模 2³² 减法。</p>
+
+        <p>下面是几条真实指令的编码示例，能直观看到"格式"是怎么变成一串 0/1 的：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>指令编码示例</caption>
+            <thead><tr><th>指令</th><th>编码（二进制，按字段分组）</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono);">j 0x00400078</td><td style="font-family:var(--font-mono); font-size:12.5px;">000010 · 00 0001 0000 0000 0000 0001 1110</td></tr>
+              <tr><td style="font-family:var(--font-mono);">addiu $16,$16,4</td><td style="font-family:var(--font-mono); font-size:12.5px;">001001 · 10000 · 10000 · 0000 0000 0000 0100</td></tr>
+              <tr><td style="font-family:var(--font-mono);">sltu $10,$8,$10</td><td style="font-family:var(--font-mono); font-size:12.5px;">000000 · 01000 · 01010 · 01010 · 00000 · 101011</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>MIPS 还有一个历史遗留的怪癖——<strong>分支延迟槽（branch delay slot）</strong>：条件分支指令（如 beq、bne）之后紧跟的那个指令槎位，<strong>总会被执行</strong>，无论分支条件最终成立与否。这是为了方便流水线化分支指令而设计的：CPU 可以在还不知道分支结果之前，就开始执行延迟槽里的指令。但这个技巧很粗糙，一旦有了合理的分支预测（回忆模块 03.2！），它的收益就被完全抵消了——现代 CPU 的 ISA 里已经没有分支延迟槽，本课程里我们也<strong>不会</strong>使用分支延迟槽。</p>
+      </div>
+
+      <div class="sub" id="m10-s5">
+        <h3><span class="num">10.5</span> 从 C 到比特：一条完整的编译链路</h3>
+        <p>把 C 语言的一个求因数分解的小程序，逐层翻译成 MIPS 汇编、再编码成十六进制机器码，能完整看到"高级语言 → 汇编 → 比特"这条链路的每一环：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>示例：因数分解程序的三层表示（节选）</caption>
+            <thead><tr><th>C 程序（节选）</th><th>MIPS 汇编（节选）</th><th>十六进制编码（节选）</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono); white-space:pre-line; font-size:12px;">int n = mem[...];
+int k = 2;
+while( k*k &lt;= n )
+{
+  while(true){
+   if(n%k!=0) break;
+   mem[p/4]=k;
+   ...
+  }
+  k += 1;
+}</td><td style="font-family:var(--font-mono); white-space:pre-line; font-size:12px;">lui $4, 4097
+lw $8, 0($4)
+ori $9, $0, 2
+multu $9, $9
+mfhi $10
+sltu $10, $8, $10
+divu $8, $9
+mfhi $10
+...</td><td style="font-family:var(--font-mono); white-space:pre-line; font-size:12px;">3c041001
+8c880000
+34090002
+01290019
+0000501...
+...
+...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>课程用 Logisim 把这样一颗能运行 MIPS 指令的 CPU 真正搭了出来——它内部由<strong>指令内存</strong>（存放上面这样的机器码）、<strong>寄存器堆</strong>（32 个通用寄存器的物理实现）、<strong>ALU</strong>（做算术逻辑运算）、<strong>分支逻辑</strong>（判断是否跳转）、<strong>数据内存</strong>（对应 lw/sw）和一个把 opcode/funct 解码成一堆控制信号的<strong>控制单元</strong>组成。</p>
+        <div class="callout teal"><div class="lbl">串起全部模块</div><p>回头看，这颗 CPU 里的<strong>寄存器堆</strong>，正是模块 07 讲的 D 触发器阵列一排排拼起来的；<strong>ALU</strong>，正是模块 05 的加法器、乘法器电路；<strong>分支逻辑</strong>，正是模块 03.2 讲的分支预测思想在数字电路层面的具体判断逻辑；而<strong>控制单元</strong>用一整片逻辑门把 opcode/funct 解码成一串控制信号，正是模块 06 讲的逻辑门电路。指令集架构（ISA），说到底就是把这些底层积木组织起来、对外呈现的一份"使用说明书"——学完这一路，你已经从晶体管一直走到了一颗真正能跑程序的 CPU。</p></div>
+      </div>
+
+      <div class="sub" id="m10-s6">
+        <h3><span class="num">10.6</span> CPU 数据通路与控制单元</h3>
+        <p>ISA 只规定"每条指令该做什么"，真正让它跑起来，还需要一整套硬件把 opcode/funct 翻译成具体动作。课程用 Logisim 搭的这颗 CPU，大致由这几大块组成——每一块你其实都已经在前面的模块里单独学过：</p>
+        <ul class="speclist">
+          <li><strong>Instruction Memory（指令内存）</strong>：存放编码好的机器码，PC 指向哪条就取哪条。</li>
+          <li><strong>Register File（寄存器堆）</strong>：32 个通用寄存器的物理实现——模块 07 讲的 D 触发器阵列一排排拼起来，配合译码逻辑，按"读寄存器 ID"读出内容、按"写寄存器 ID"写入新值。</li>
+          <li><strong>ALU / MD</strong>：算术逻辑运算和乘除运算——模块 05 的加法器、乘法器电路。</li>
+          <li><strong>Data Memory（数据内存）</strong>：对应 lw/sw 这类访存指令。</li>
+          <li><strong>Branching（分支判断逻辑）</strong>：算出两个寄存器是否相等、目标地址该是多少，决定 PC 下一步该跳到哪。</li>
+          <li><strong>HI / LO</strong>：暂存乘除法的结果。</li>
+          <li><strong>Control Unit（控制单元）</strong>：整颗 CPU 的"翻译官"——输入只有 <strong>Opcode</strong> 和 <strong>Funct</strong> 这 12 位，输出却是一整排控制信号，逐一决定上面每个部件这一拍该干什么。</li>
+        </ul>
+        <p>控制单元本身，说穿了就是模块 06 讲的逻辑门电路——一片纯组合逻辑，没有存储、没有状态，输入变了输出立刻跟着变。它吐出来的控制信号大致有这些（名字来自课程电路里的实际标注）：</p>
+        <div class="tablewrap">
+          <table>
+            <caption>控制单元的典型输出信号</caption>
+            <thead><tr><th>信号名</th><th>决定的事情</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--font-mono);">Jump / Jump Register</td><td>PC 下一步是否要跳转；如果跳，目标是编码好的地址还是某个寄存器里的值</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Branch / Branch Not Equal</td><td>是否是条件分支指令，条件是"相等就跳"还是"不等就跳"</td></tr>
+              <tr><td style="font-family:var(--font-mono);">ALU Source</td><td>ALU 的第二个输入，来自寄存器（R 型）还是立即数（I 型）</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Signed Immediate</td><td>立即数扩展到 32 位时，用符号扩展还是零扩展</td></tr>
+              <tr><td style="font-family:var(--font-mono);">ALU Control Bits</td><td>ALU 这一拍具体做哪种运算（加/减/与/或/异或/比较……）</td></tr>
+              <tr><td style="font-family:var(--font-mono);">MD Control Bits / Use MD</td><td>要不要用乘除单元、用哪种（有/无符号乘、有/无符号除）</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Memory Read / Memory Write</td><td>这一拍要不要读数据内存、要不要写数据内存</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Register Write</td><td>这一拍要不要把结果写回寄存器堆</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Use Register Destination</td><td>写寄存器时，目标是 rd 字段（R 型）还是 rt 字段（I 型）</td></tr>
+              <tr><td style="font-family:var(--font-mono);">Move From Low/High</td><td>写回寄存器的内容是不是要从 HI/LO 里取</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout teal"><div class="lbl">这就是"加一条新指令"真正要做的事</div><p>给这样一颗 CPU 添加一条新指令，数据通路本身（ALU、寄存器堆、内存……）几乎不用大改——因为需要的基本运算能力早就在那儿了。真正要动脑筋的地方几乎总是<strong>控制单元</strong>：给定这条新指令的 opcode/funct 组合，该让控制单元吐出哪一组信号，才能让已有的这些部件按正确的顺序拼出想要的行为？如果某个信号组合是"前所未有"的（比如让 Register Write 和 Memory Write 在同一拍里都为 1），那还要回头检查一下，数据通路里对应的接线，是不是真的支持这种新组合同时生效。</p></div>
+      </div>
+
+      <div class="sub" id="m10-s7">
+        <h3><span class="num">10.7</span> 多核机器与线程同步原语</h3>
+        <p>现代 CPU 普遍拥有多个<strong>核心（core）</strong>，大多是<strong>异步</strong>的——每个核心按自己的节奏运行，不能假设不同核心在同一段时间内完成相同数量的指令。多数操作系统支持<strong>多线程</strong>：操作系统给每个核心最多分配一个线程，并定期打断每个核心、给它换上另一个线程（这正是模块 04.3～04.4 讲过的中断驱动多任务机制，在多核场景下的自然延伸）。</p>
+        <p>正因为如此，多线程程序<strong>必须通过内存来协调</strong>——单纯的读/写操作是不够的！假设两个核心同时对内存里的同一个计数器做"读出来、加一、写回去"，如果没有额外保护，两次自增很可能因为读写交错而<strong>丢失一次更新</strong>。这就需要硬件提供<strong>读-改-写（Read-Modify-Write）</strong>原子操作：</p>
+        <ul class="speclist">
+          <li><strong>TAS</strong>（Test-And-Set）：读取一个值，同时无条件把它设为"已占用"，整个过程不可被打断。</li>
+          <li><strong>FAA</strong>（Fetch-And-Add）：读取一个值，同时把它加上某个数，整个过程不可被打断。</li>
+          <li><strong>CAS</strong>（Compare-And-Swap）：只有当前值等于预期值时才更新为新值，并报告是否成功。</li>
+          <li><strong>LL/SC</strong>（Load-Linked / Store-Conditional）：先"打标记式"读取，之后配套的写入只有在此期间没有其他核心动过这个地址时才会成功。</li>
+        </ul>
+        <div class="callout warn"><div class="lbl">为什么普通读写不够用</div><p>"读出来、加一、写回去"这三步如果不是原子的，两个核心可能都读到旧值、都各自加一、再都写回去——结果两次自增合并成了一次，计数器凭空少加了一次。TAS/FAA/CAS/LL-SC 这些原语的共同点，就是把"读+改+写"打包成硬件层面<strong>不可分割</strong>的一步，从根源上避免这种交错。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么说现代 x86 处理器是"CISC 外壳 + RISC 内核"？这对芯片设计有什么好处？</summary><div class="a">x86 对外暴露的是复杂、历史悠久的 CISC 指令集，但芯片内部会把这些复杂指令翻译成简单的、遵循 RISC 原则（寄存器到寄存器、固定位置编码、每次操作最多一次内存访问）的微指令，再交给乱序执行核心处理。这样一来，指令集的复杂性被隔离在译码器这一层，执行核心可以只针对"简单、规整"的微指令做优化，不必直接和 CISC 的历史包袱打交道。</div></details>
+        <details class="qcard"><summary>MIPS 的 jal 指令，为什么被说成"合并了 RAM 模型函数调用惯例里的两条指令"？</summary><div class="a">回忆模块 08.3：RAM 模型的函数调用惯例要求"先把返回地址存入特殊寄存器 ra，再跳转到函数入口"，这是两个独立的动作。而 jal 一条指令就同时完成了 R[31]:=PC+4（保存返回地址）和跳转两件事，把两步合并成了一步，这也是为什么 MIPS 程序完全不需要手动维护 PC 或返回地址的加减逻辑。</div></details>
+        <details class="qcard"><summary>jr 和 jalr 都是"跳到寄存器里的地址"，两者到底差在哪一步？</summary><div class="a">jr $rs 只做 PC := R[rs] 这一件事，跳完就完了，不留任何痕迹。jalr $rd,$rs 在跳转之前，多做了一步 R[rd] := PC+4——先把"跳转前的下一条指令地址"存进 rd 指定的寄存器，再跳转。也就是说 jalr 比 jr 多了"顺手留个返回地址"这一步，这正是它能用来实现"通过寄存器地址调用函数、还能正常返回"的原因。</div></details>
+        <details class="qcard"><summary>控制单元的输入只有 Opcode 和 Funct 这 12 位，为什么说"给 CPU 加一条新指令，主要工作在控制单元而不是数据通路"？</summary><div class="a">因为数据通路里的部件（ALU、寄存器堆、数据内存……）提供的都是通用能力，早已能覆盖绝大多数新指令需要的基本操作（加法、按位运算、读写内存、读写寄存器……）。真正让某条具体指令"与众不同"的，是控制单元根据它的 opcode/funct 组合，选择性地把哪些信号置 1、哪些置 0——去驱动这些通用部件按特定顺序配合工作。所以设计一条新指令，核心工作通常是想清楚控制单元该输出哪一组信号，而不是重新发明某个运算部件。</div></details>
+        <details class="qcard"><summary>为什么两个核心同时对同一个内存位置做"读出来、加一、写回去"，可能会丢失一次更新？TAS/FAA/CAS/LL-SC 是怎么解决这个问题的？</summary><div class="a">因为"读、改、写"是三个分开的操作，两个核心的这三步可能交错执行：例如核心 A 读到值 5，核心 B 也读到值 5，两者都各自加一得到 6，再都写回 6——尽管本该有两次自增（5→6→7），最终却只体现了一次。TAS/FAA/CAS/LL-SC 这类硬件原语的共同思路，是把"读+改+写"合并成一步、在硬件层面保证它不可被其他核心插入打断，从根源上杜绝这种数据竞争。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m11">
+      <div class="modhead"><span class="ref">MODULE 11</span><h2>性能评估</h2></div>
+      <p class="modintro">芯片造出来之后，怎么知道它"好不好"？"性能"从来不是一个单一数字，而是一整组互相牵制的指标——速度、数据率、容量、体积、价格、功耗。这一模块把这些指标一一拆开，也顺便戳破几个"跑分刺客"常用的话术陷阱。</p>
+
+      <div class="sub" id="m11-s1">
+        <h3><span class="num">11.1</span> 六个维度</h3>
+        <ul class="speclist">
+          <li><strong>速度</strong>（跑得多快）</li>
+          <li><strong>数据率</strong>（数据传得多快）</li>
+          <li><strong>容量</strong>（内部能装多少）</li>
+          <li><strong>物理体积</strong>（外部有多大）</li>
+          <li><strong>金钱成本</strong>（多贵）</li>
+          <li><strong>功耗成本</strong>（多耗电）</li>
+        </ul>
+        <p>回忆模块 01～02 讲的处理器演化史：每一代新工艺，往往同时改善好几个维度——但也常常是拿一个维度去换另一个维度（比如更高的速度往往伴随更高的功耗）。下面几节先集中拆解"速度"和"数据率/容量"这两类最常被拿来吹嘘、也最容易被误读的指标。</p>
+      </div>
+
+      <div class="sub" id="m11-s2">
+        <h3><span class="num">11.2</span> 速度：不止是"GHz"</h3>
+        <ul class="speclist">
+          <li><strong>时钟速度（Clock speed）</strong>：单位 Hz（1/秒）。但很多指令要花超过 1 个时钟周期才能完成——单看频率高低，完全无法直接比较两颗不同架构 CPU 的实际速度。</li>
+          <li><strong>基准测试原始耗时</strong>：单位秒。基准程序（如 Livermore Loops）有用，但结果<strong>主观</strong>——换一套基准程序，排名可能完全反转。</li>
+          <li><strong>IPS</strong>（每秒指令数）：同样因为基准选择（如 Dhrystone）而带有主观性。</li>
+          <li><strong>FLOPS</strong>（每秒浮点运算数）：主要用于估计 FPU 的利用效率，但每个人对"一次浮点运算"的定义都不一样——比如有的评测口径武断地把一次除法算成 4 FLOPs，单精度和双精度又该怎么换算，都没有统一标准。</li>
+        </ul>
+        <div class="callout warn"><div class="lbl">跑分数字的陷阱</div><p>同一枚"跑分"数字，换一个基准测试程序、换一种 FLOP 计数口径，排名就可能反转。这也是为什么严谨的性能比较必须说清楚"用什么基准测出来的"——脱离基准口径谈"谁更快"，本身就是一句没有意义的话。</p></div>
+      </div>
+
+      <div class="sub" id="m11-s3">
+        <h3><span class="num">11.3</span> 加速比 Speedup</h3>
+        <p><strong>加速比（Speedup）</strong> = 新速度 / 旧速度 = 旧耗时 / 新耗时。</p>
+        <div class="callout"><div class="lbl">worked example</div><p>如果某项改进能把某种特殊场景的耗时减半，但这种场景只有 40% 的概率发生，那么平均加速比 = 1 / ( 0.6·1 + 0.4·1/2 ) = 1 / 0.8 = <strong>1.25</strong>——也就是平均只快了 25%，远低于"减半"给人的直觉印象。这其实正是<strong>阿姆达尔定律（Amdahl's Law）</strong>背后的核心直觉：一项优化能带来的整体加速比，永远被"它能覆盖到的场景占比"死死限制住。</p></div>
+        <p>在拥有 p 个处理器的多核机器上，情况更加保守：<strong>不能指望</strong>当 p → ∞ 时加速比 → p。比较现实的目标是让总耗时落在 <strong>O(w/p + polylog(n,p))</strong> 这个区间里，其中 n 是算法输入或数据结构的规模，w（工作量）是单个处理器（即串行）完成全部工作所需的时间。这个公式里的 "+polylog(n,p)" 项，代表协调多个处理器本身也要花时间——处理器越多，协调开销通常也跟着增长，这是加速比不能无限逼近 p 的根本原因。</p>
+      </div>
+
+      <div class="sub" id="m11-s4">
+        <h3><span class="num">11.4</span> CPI：每条指令要几个时钟周期</h3>
+        <p>程序 P 的 <strong>CPI（cycles per instruction，每指令周期数）</strong> = P 运行时耗费的时钟周期数 / P 执行的指令数。当 P 是一个足够热门、值得为它专门优化 CPU 的程序时，CPI 是个很有用的指标。</p>
+        <div class="callout teal"><div class="lbl">worked example</div><p>机器 A 主频 2 GHz、对程序 P 的 CPI 为 2.5；机器 B 主频 1.2 GHz、CPI 为 1.4。哪台更快，快多少？<br>A 每条指令耗时 2.5/2 = 1.25 纳秒；B 每条指令耗时 1.4/1.2 ≈ 1.167 纳秒。<br><strong>B 更快</strong>，快了 1.25 / (1.4/1.2) = 1.5/1.4 = 15/14 ≈ <strong>1.07 倍</strong>——单看主频，A 的 2 GHz 几乎是 B 的近两倍，但把 CPI 也算进去之后，真正更快的反而是主频更低的 B。这正是"只看 GHz 判断快慢"最容易踩的坑。</p></div>
+      </div>
+
+      <div class="sub" id="m11-s5">
+        <h3><span class="num">11.5</span> 数据率与容量</h3>
+        <p><strong>数据率（Data Rate）</strong>：单位 bps（每秒比特数）或 B/s（每秒字节数），适用于任何数据传输场景——RAM 读写、硬盘读写、USB 传输、局域网/无线传输……</p>
+        <p><strong>容量（Capacity）</strong>：单位通常是字节，适用于任何存储部件——L1/L2/L3 缓存、RAM、硬盘、外部存储……<strong>小心 GB ≠ GiB</strong>，但日常场景里"GB"常常被拿来当 GiB 用，容易在精确计算时产生误差。</p>
+        <div class="callout"><div class="lbl">一条长期存在的指数曲线</div><p>如果把历代游戏主机的 Dhrystone MIPS、RAM-CPU 总线速度、RAM 容量分别按年份画在对数坐标上，会发现它们几十年来都近似排成一条直线——这正是指数增长在真实产品上留下的痕迹。下一节要讲的摩尔定律，就是对这条曲线最广为人知的一种解释。</p></div>
+      </div>
+
+      <div class="sub" id="m11-s6">
+        <h3><span class="num">11.6</span> 摩尔定律：一个"自我实现"的预言</h3>
+        <p>摩尔在 1965 年做出的预测，某种程度上是<strong>自我实现</strong>的——整个半导体行业把它当作研发目标来使用。摩尔本人在 2005 年的一次采访中这样说：</p>
+        <div class="histquote">"摩尔定律其实是一个经济学问题……半导体产业协会制定了一份技术路线图，把这种指数增长的假设纳入考量，用来规划哪些研发必须完成才能保证行业继续待在这条曲线上。所以它某种意义上，变成了一个自我实现的预言。"<cite>— Gordon Moore，2005 年采访</cite></div>
+        <p>回忆模块 01.2 的芯片里程碑表格——Intel 4004（1971，2,300 个晶体管）→ 8080（1974，4,500）→ 8086（1978，29,000）→ Pentium 1（1993，300 万）→ Pentium 4（2006，1.88 亿），13 年翻了 60 多倍。这正是摩尔定律在真实产品上的具体体现，也解释了为什么"研发路线图"能让这条曲线维持这么多年：不是自然规律逼着晶体管变小，而是整个行业每年都在朝着"下一次翻倍"这个目标集体冲刺。</p>
+        <div class="callout warn"><div class="lbl">这条曲线终究会失效</div><p>摩尔定律显然不可能永远成立——晶体管不可能被做得比一个原子还小。在 2024 年的 SPIE 先进光刻大会上，一群光刻工程师"庆祝"了摩尔定律的死亡：芯片制造业已经无法在 20 nm 以下继续维持相同的单位面积成本。指数增长曾经真实存在了半个多世纪，但物理极限终究是物理极限。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么"时钟频率更高"不能直接等价于"这颗 CPU更快"？</summary><div class="a">因为不同 CPU 执行同一类指令所需的时钟周期数（CPI）可能不同——频率再高，如果每条指令要耗费更多周期，实际每条指令花费的时间（等于 CPI 除以频率）反而可能更长。11.4 节的 worked example 里，主频更低的机器 B（1.2GHz，CPI 1.4）反而比主频更高的机器 A（2GHz，CPI 2.5）快了约 1.07 倍，正说明了这一点。</div></details>
+        <details class="qcard"><summary>为什么多核机器的加速比不能随处理器数 p 无限增长而趋近于 p？</summary><div class="a">因为多个处理器之间需要协调（例如同步、通信、锁竞争），这部分协调开销通常随处理器数量增长而增长，反映在 Time∈O(w/p+polylog(n,p)) 公式里的 polylog(n,p) 项——它不会随 p 增大而消失，因此总耗时不可能无限逼近纯粹的 w/p，加速比自然也无法无限逼近 p。</div></details>
+        <details class="qcard"><summary>摩尔定律为什么被称为"自我实现的预言"？这跟"物理定律"有什么本质区别？</summary><div class="a">物理定律是自然规律，不受人的意愿影响；而摩尔定律最初只是一个基于历史数据的经验性预测。但半导体行业把它当作研发路线图的目标——为了"保持在这条曲线上"，行业每年主动投入研发去实现晶体管密度翻倍，这才让预测持续成为现实。这也解释了为什么它最终会失效：一旦"保持曲线"所需的研发成本或物理限制超过行业能承受的范围（例如 20nm 以下制程成本无法继续摊薄），这个自我实现的循环就会断裂。</div></details>
+      </div>
+    </section>
+
+    <section class="module" id="m12">
+      <div class="modhead"><span class="ref">MODULE 12</span><h2>总线、I/O 系统与存储</h2></div>
+      <p class="modintro">CPU 再强，如果没法和键盘、屏幕、硬盘"说话"，就是一块孤立的硅。这一模块补上系统里剩下的两块拼图：<strong>总线（bus）</strong>——设备之间怎么通信；<strong>存储（storage）</strong>——数据到底被"记"在哪种物理介质上，以及这份"记忆"要花多久才能取出来。</p>
+
+      <div class="sub" id="m12-s1">
+        <h3><span class="num">12.1</span> 为什么需要总线</h3>
+        <p>CPU 需要一个 I/O 总线接口，才能同时接上键盘、鼠标、屏幕、硬盘、打印机、USB 设备……<strong>总线（bus）</strong>是计算机内部各独立部件之间的通信系统。主要有三类：<strong>内存总线</strong>连接 CPU 与 RAM；<strong>I/O 总线</strong>连接 CPU 与其他部件；还有一些总线直接把部件连到 RAM 上。总线是计算机<strong>可扩展性</strong>（比如插上一个新设备）的关键，但每条总线都有硬性上限：能连接的<strong>最大设备数量</strong>，以及<strong>最大数据率</strong>。</p>
+      </div>
+
+      <div class="sub" id="m12-s2">
+        <h3><span class="num">12.2</span> 三组信号线：控制、地址、数据</h3>
+        <p>一条总线由<strong>控制 + 地址 + 数据</strong>三组线组成。控制线可能包括：内存写/读、I/O 写/读、传输确认（Transfer ACK）、总线请求/授予（Bus request/grant）、中断请求/确认（Interrupt request/ACK）、时钟、复位——注意"中断请求/确认"正是模块 04 讲的中断机制在总线层面的具体信号线。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 12-1 · 总线的三组信号线：控制 / 地址 / 数据</div>
+          <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="总线结构示意图：CPU、Memory、Device、Device四个部件分别以三条竖线连接到下方并列的控制总线、地址总线、数据总线三条横向总线">
+            <g font-family="IBM Plex Mono, monospace" font-size="12.5" text-anchor="middle">
+              <g fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4">
+                <rect x="30" y="10" width="110" height="34" rx="4"/><rect x="230" y="10" width="110" height="34" rx="4"/>
+                <rect x="430" y="10" width="110" height="34" rx="4"/><rect x="630" y="10" width="110" height="34" rx="4"/>
+              </g>
+              <g fill="var(--ink)">
+                <text x="85" y="32">CPU</text><text x="285" y="32">Memory</text>
+                <text x="485" y="32">Device</text><text x="685" y="32">Device</text>
+              </g>
+              <g stroke="var(--line-strong)" stroke-width="1.5">
+                <line x1="85" y1="44" x2="85" y2="80"/><line x1="285" y1="44" x2="285" y2="80"/>
+                <line x1="485" y1="44" x2="485" y2="80"/><line x1="685" y1="44" x2="685" y2="80"/>
+                <line x1="85" y1="80" x2="85" y2="130"/><line x1="285" y1="80" x2="285" y2="130"/>
+                <line x1="485" y1="80" x2="485" y2="130"/><line x1="685" y1="80" x2="685" y2="130"/>
+                <line x1="85" y1="130" x2="85" y2="180"/><line x1="285" y1="130" x2="285" y2="180"/>
+                <line x1="485" y1="130" x2="485" y2="180"/><line x1="685" y1="130" x2="685" y2="180"/>
+              </g>
+              <rect x="20" y="80" width="820" height="26" rx="4" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.4"/>
+              <text x="430" y="98" fill="var(--accent-strong)" font-weight="700">Control Bus 控制总线</text>
+              <rect x="20" y="130" width="820" height="26" rx="4" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.4"/>
+              <text x="430" y="148" fill="var(--teal)" font-weight="700">Address Bus 地址总线</text>
+              <rect x="20" y="180" width="820" height="26" rx="4" fill="var(--surface-3)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="430" y="198" fill="var(--ink-soft)" font-weight="700">Data Bus 数据总线</text>
+            </g>
+          </svg>
+        </div>
+        <p>请特别注意"<strong>共享</strong>"这两个字，它是理解后面所有总线设计的钥匙。上图里四个部件接的是<em>同一组</em>导线，所以同一时刻只能有<strong>一个</strong>设备驱动数据线——如果一个设备输出 1、另一个同时输出 0，电路上就是电源直接对地短路（<strong>总线冲突 / bus contention</strong>），轻则数据全错，重则烧毁驱动器。</p>
+        <p>硬件上的解决办法是：挂在总线上的设备输出端一律用<strong>三态门（tri-state buffer）</strong>。除了输出 0 和 1，它还有第三种状态——<strong>高阻态（Z）</strong>，相当于把自己从这根线上物理断开。任何时刻只有被允许发言的那个设备解除高阻，其余全部挂 Z。</p>
+        <div class="callout"><div class="lbl">和模块 05 的 MUX 对照着看</div><p>总线本质上就是<strong>用三态门实现的"分布式 MUX"</strong>。功能上两者做的是同一件事——多个信号源选一个送出去；区别在于实现方式：MUX 把所有输入线都拉到一个集中的选择器上（线多、但逻辑简单、无需协商），总线让每个设备就地接到共享线上、靠三态门自己决定要不要发言（线少、但必须有一套<strong>仲裁</strong>机制决定谁发言）。设备一多，总线的布线代价远小于 MUX——这就是为什么系统级互连用总线，而 ALU 内部选运算结果用 MUX。</p></div>
+        
+      </div>
+
+      <div class="sub" id="m12-s3">
+        <h3><span class="num">12.3</span> 内存总线 vs I/O 总线：专用与通用的取舍</h3>
+        <p>一台机器里不会只有一条总线，而是按"<strong>快而专</strong>"和"<strong>慢而通用</strong>"分成两类。这不是历史遗留的妥协，而是一个无法回避的物理与工程权衡。</p>
+
+        <p><strong>内存总线（memory bus）只接 RAM 一种设备</strong>，所以它可以把每一分性能都榨出来，原因有四条，每条都值得单独理解：</p>
+        <ul class="speclist">
+          <li><strong>专用</strong>：既然对面只可能是 DRAM，时序参数就可以按 DRAM 的极限<em>写死</em>——比如"发出地址后第 14 个周期，数据必然已经在线上"。不需要留任何兼容余量，更不需要问对方"你好了没"。省掉的每一次问答，都是省掉的延迟。</li>
+          <li><strong>短</strong>：CPU 到内存插槽物理上只有几厘米。信号在 PCB 上大约每纳秒跑 15～20 厘米，距离短意味着传播延迟小、时钟偏移小，于是才敢跑到很高的频率还保持同步（原因见 12.5）。</li>
+          <li><strong>宽</strong>：DDR 是 64 位并行，双通道就是 128 位，一个周期搬 8～16 字节。并行线能做这么宽，靠的也是"短"——线一长，并行线之间的偏移和串扰就压不住了。</li>
+          <li><strong>负载固定</strong>：主板设计时就已知会挂几条内存条、每条什么电气特性，于是可以做精确的阻抗匹配、等长布线，开机时还会跑一遍<strong>时序训练（training）</strong>逐根校准延迟。</li>
+        </ul>
+        <p>综合结果：DDR5 的访问延迟大约 60～80 ns，带宽几十 GB/s。</p>
+
+        <p><strong>I/O 总线的代价全部来自"通用"这个要求。</strong>它要同时伺候速度差好几个数量级的设备——键盘每秒几 KB，NVMe SSD 每秒几 GB。要让<em>任何厂商造的任何设备</em>插上就能用，就必须有<strong>总线标准</strong>（PCIe、USB、SATA、I²C……）。标准规定的东西非常多：机械连接器尺寸、电气电平、信号协议、事务包格式、设备枚举与配置流程、错误处理与重传。</p>
+        <p>标准化的代价是<strong>协议开销</strong>：数据不能裸奔，要打包（包头、地址、CRC 校验）、要握手确认、链路启动时还要做 link training；再加上通常要经过桥接芯片（芯片组 / PCIe root complex）多转换一层。</p>
+
+        <div class="tablewrap">
+          <table>
+            <caption>两类总线的对比：注意"带宽"和"延迟"是两个独立维度</caption>
+            <thead><tr><th>维度</th><th>内存总线</th><th>I/O 总线</th></tr></thead>
+            <tbody>
+              <tr><td><strong>接什么设备</strong></td><td>只接 RAM，种类单一、特性已知</td><td>任意通用设备，速度差几个数量级</td></tr>
+              <tr><td><strong>协议</strong></td><td>时序写死，几乎无协商开销</td><td>打包 + 校验 + 握手 + 枚举配置</td></tr>
+              <tr><td><strong>物理长度</strong></td><td>几厘米，可以同步高频</td><td>可能几十厘米到几米（USB 线缆）</td></tr>
+              <tr><td class="num"><strong>典型延迟</strong></td><td class="num">≈ 60–80 ns</td><td class="num">几百 ns ～ µs 级</td></tr>
+              <tr><td class="num"><strong>典型带宽</strong></td><td class="num">数十 GB/s（DDR5）</td><td class="num">数十 GB/s（PCIe 5.0 ×16 ≈ 63 GB/s）</td></tr>
+              <tr><td><strong>换来了什么</strong></td><td>极致速度，但完全不可扩展</td><td><strong>可扩展性</strong>：插上就能用</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn"><div class="lbl">这张表里最容易被忽略的一行</div><p>看最后两行：PCIe 5.0 ×16 的<strong>带宽</strong>已经追平甚至超过内存总线了，但<strong>延迟</strong>仍然差一个数量级。原因是——<strong>带宽可以堆，延迟堆不上去</strong>。带宽不够就加宽位宽、提高频率、多开几个通道，都是花钱能解决的；延迟由物理距离、协议往返次数、中间经过的层数决定，这些是每一次访问都要实打实付出的成本，加钱也绕不开。这就是 slide 里"in both latency and data rate"要把两者<em>分开</em>说的原因，也是考试里最常设的陷阱。</p></div>
+
+        <p>落到真实硬件上：一台典型桌面 PC 里，处理器通过桥接器/内存控制器连接缓存和 DRAM，再挂到一条 PCI/PCIe 总线上；音频、视频设备直接挂在这条总线上；LAN、SCSI（连接硬盘）以及通往扩展总线的扩展桥接器同样挂在这里。历史上这个分层就是<strong>北桥</strong>（接内存和显卡，快）和<strong>南桥</strong>（接硬盘、USB、网卡，慢）。现代 CPU 已经把内存控制器和 PCIe 控制器直接集成进芯片内部，但"<strong>近的快、远的慢；专用的快、通用的慢</strong>"这条分层逻辑一点没变。</p>
+      </div>
+
+      <div class="sub" id="m12-s4">
+        <h3><span class="num">12.4</span> 总线主控（Bus Master）与仲裁</h3>
+        <p>既然总线是共享介质、同一时刻只能有一个设备说话，那就必须先回答一个问题：<strong>谁有资格开口？</strong></p>
+        <p>能够<strong>主动发起（initiate）</strong>一次读/写事务的设备，叫<strong>总线主控方（bus master）</strong>；只能被动响应的叫<strong>从设备（slave / target）</strong>。</p>
+        <ul class="speclist">
+          <li><strong>CPU 永远是 master</strong>——它主动取指令、主动读写数据，从不坐等别人来访问它。</li>
+          <li><strong>RAM 永远是 slave</strong>——它只会响应，从不主动发起任何事务。内存条不会自己决定"我要把这段数据送给谁"。</li>
+          <li><strong>真正有意思的是第三类：具备主控能力的 I/O 设备</strong>——DMA 控制器、网卡、显卡、NVMe 控制器。它们可以<strong>绕过 CPU 直接读写内存</strong>，这就是 <strong>DMA（Direct Memory Access）</strong>。</li>
+        </ul>
+
+        <div class="callout teal"><div class="lbl">为什么 DMA 是这一节的重点</div><p>举个例子：网卡收到一个 1500 字节的以太网帧。如果网卡只是 slave，CPU 就必须执行几百条 <code>lw</code>/<code>sw</code>，一个字一个字把数据从网卡寄存器搬进内存——千兆网卡满速跑能把整颗 CPU 占死，什么正事都干不了。而如果网卡本身是 bus master，它自己发起总线事务把数据直接写进内存，写完只发一个中断说"好了，数据在这个地址"，CPU 的总代价就只是<strong>一次中断处理</strong>。这就是 12.6 里"DMA"那一条在硬件层面的真正含义——它不是一个软件技巧，而是<strong>把 I/O 设备提升为总线主控方</strong>这件事的结果。（现代 PCIe 设备的配置空间里有一个 <code>Bus Master Enable</code> 位，驱动必须置位，设备才被允许做 DMA。）</p></div>
+
+        <p><strong>一旦存在多个 master，就必然需要仲裁（arbitration）</strong>——因为同一时刻仍然只能有一个设备驱动总线，两个 master 同时发起事务的后果就是 12.2 说的总线冲突。仲裁方案主要有三类：</p>
+
+        <div class="tablewrap">
+          <table>
+            <caption>三种经典仲裁方案</caption>
+            <thead><tr><th>方案</th><th>怎么工作</th><th>优点</th><th>缺点</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>菊花链</strong><br><small>Daisy Chain</small></td>
+                <td>仲裁器发出一根 grant 信号，<em>串行</em>穿过所有 master。离仲裁器近的先看到：想用就截留，不想用就往下传。</td>
+                <td>线极少（不管多少设备都是那几根），逻辑简单</td>
+                <td>优先级由<strong>物理位置写死</strong>；排在末尾的设备在总线繁忙时可能永远轮不到（<strong>饿死 / starvation</strong>）；grant 串行穿过所有设备，设备越多仲裁越慢</td>
+              </tr>
+              <tr>
+                <td><strong>集中并行</strong><br><small>Centralized Parallel</small></td>
+                <td>每个 master 有独立的 request / grant 线接到中央仲裁器，仲裁器用任意策略挑选：固定优先级、轮转（round-robin）、公平队列、加权 QoS……</td>
+                <td>策略灵活，可保证公平、不会饿死；仲裁速度快</td>
+                <td>线数随设备数线性增长（n 个 master 要 2n 根线）；仲裁器本身是单点</td>
+              </tr>
+              <tr>
+                <td><strong>分布式自选</strong><br><small>Distributed / Self-selection</small></td>
+                <td>没有中央仲裁器。每个想用总线的 master 把自己的优先级编码放到共享仲裁线上（开漏输出 = 线与），所有设备同时观察并与自己的编码比较，发现有人更高就自动退出，剩下的那个自然获胜。CAN 总线就是这么做的。</td>
+                <td>无单点、可扩展、天生适合分布式系统</td>
+                <td>协议复杂；需要多根仲裁线来编码优先级</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>一次完整的仲裁时序是：<code>request（我要用） → arbitration（仲裁器决定） → grant（批准） → 使用总线 → release（释放）</code>。这里有个实用优化值得记：好的设计会做<strong>流水线化仲裁（pipelined arbitration）</strong>——在当前这次数据传输还在进行的同时，就并行地仲裁下一次归谁用。这样总线利用率能接近 100%，而不是"传完 → 停下来仲裁 → 再传"地走走停停。<em>这个"重叠起来做"的思路，和模块 09 里流水线的核心思想是同一个。</em></p>
+      </div>
+
+      <div class="sub" id="m12-s5">
+        <h3><span class="num">12.5</span> 同步总线 vs 异步总线</h3>
+        <p>决定了"谁说话"之后，还剩最后一个问题：<strong>说话的双方怎么对齐节奏？</strong>两条路线——靠共同的时钟，或者靠互相打招呼。</p>
+
+        <p><strong>同步总线（synchronous）</strong>：所有设备共用一根时钟线，整个事务按<strong>固定的周期数</strong>推进。协议直接写死："第 1 个周期 master 放地址，第 3 个周期 slave 的数据必须已经在数据线上，master 在第 3 拍的时钟沿采样。"没有任何询问、没有任何确认——<strong>时间到了，数据就该在那儿</strong>。协议因此极其简单，每个周期都能干活，所以快。</p>
+
+        <p><strong>异步总线（asynchronous）</strong>：没有共用时钟，靠<strong>握手协议（handshake）</strong>配合。经典的<strong>四相全互锁握手（four-phase fully interlocked handshake）</strong>每一步都必须等到对方的响应才能进行下一步，所以<em>无论线有多长、对方有多慢，协议永远不会出错</em>——慢设备就慢慢应答，快设备就快快应答，各取所需。</p>
+
+        <p>下面这个演示把两种方式的同一次"读内存"事务并排拆开，一拍一拍走一遍，重点看<strong>信息是靠什么在推进</strong>：</p>
+
+        <div class="buslab" id="buslab">
+          <div class="buslab-head">
+            <span class="buslab-cap">Interactive · 总线事务时序演示</span>
+            <div class="buslab-tabs" id="buslab-tabs"></div>
+          </div>
+          <div class="buslab-stage"><svg id="buslab-svg" viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="总线事务时序图演示"></svg></div>
+          <div class="buslab-explain" id="buslab-explain"></div>
+          <div class="buslab-controls">
+            <button id="buslab-play" class="primary">▶ 播放</button>
+            <button id="buslab-prev">← 上一步</button>
+            <button id="buslab-next">下一步 →</button>
+            <button id="buslab-reset">重置</button>
+            <span class="steplabel" id="buslab-steplabel"></span>
+          </div>
+        </div>
+
+        <script>
+        (function(){
+          var SVG=document.getElementById('buslab-svg');
+          if(!SVG) return;
+          var X0=110, X1=750, PW=160;
+          function rowY(i){ return 62+i*58; }
+          function lvl(tr, yH, yL){
+            var v=0, d='M '+X0+' '+yL;
+            for(var i=0;i<tr.length;i++){ d+=' L '+tr[i][0]+' '+(v?yH:yL); v=tr[i][1]; d+=' L '+tr[i][0]+' '+(v?yH:yL); }
+            return d+' L '+X1+' '+(v?yH:yL);
+          }
+          function clk(yH,yL){
+            var d='M '+X0+' '+yL;
+            for(var i=0;i<4;i++){ var a=X0+i*PW; d+=' L '+a+' '+yL+' L '+a+' '+yH+' L '+(a+PW/2)+' '+yH+' L '+(a+PW/2)+' '+yL; }
+            return d+' L '+X1+' '+yL;
+          }
+          function busPath(f,t,yH,yL){
+            var m=(yH+yL)/2;
+            return 'M '+f+' '+m+' L '+(f+9)+' '+yH+' L '+(t-9)+' '+yH+' L '+t+' '+m+' L '+(t-9)+' '+yL+' L '+(f+9)+' '+yL+' Z';
+          }
+          var MODES={
+            sync:{
+              tab:'同步总线 Synchronous',
+              phases:['周期 1','周期 2','周期 3','周期 4'],
+              rows:[
+                {label:'Clock', type:'clock'},
+                {label:'Address', type:'bus', f:110, t:670, txt:'地址有效'},
+                {label:'Read', type:'level', tr:[[110,1],[670,0]]},
+                {label:'Data', type:'bus', f:430, t:670, txt:'数据'}
+              ],
+              steps:[
+                {c:270, hl:[1,2], t:'周期 1 — 放地址', x:'Master 把地址放上地址总线，同时拉高 Read 控制线。注意：它不问任何人，也不等任何回应，放完就往下走。'},
+                {c:430, hl:[0], t:'周期 2 — 静默等待', x:'地址在总线上传播，内存内部解码行地址与列地址。这一拍总线上没有任何问答信号——协议规定了要等这一拍，那就等，零开销。'},
+                {c:590, hl:[3], t:'周期 3 — 数据必须就绪', x:'协议写死了：此刻数据必须已经在数据线上。内存要是慢了半拍，没有任何人会等它——Master 照样采样，采到的就是错的。速度的代价就在这里。'},
+                {c:750, hl:[0,3], t:'周期 4 — 采样并收尾', x:'Master 在时钟沿采样数据，随后撤销地址与 Read，事务结束。全程固定 4 拍，一个多余信号都没有——这就是同步总线快的原因。'}
+              ]
+            },
+            async:{
+              tab:'异步总线 Asynchronous',
+              phases:['① Master 发起','② Slave 应答','③ 撤销请求','④ 撤销应答'],
+              rows:[
+                {label:'Address', type:'bus', f:110, t:670, txt:'地址有效'},
+                {label:'Request', type:'level', tr:[[110,1],[430,0]]},
+                {label:'Data', type:'bus', f:270, t:670, txt:'数据'},
+                {label:'Ack', type:'level', tr:[[270,1],[590,0]]}
+              ],
+              steps:[
+                {c:270, hl:[0,1], t:'相位 ① — Master 发起', x:'Master 把地址放稳，然后拉高 Request（MSYN）。它不看时钟——自己什么时候准备好，就什么时候拉高。'},
+                {c:430, hl:[2,3], t:'相位 ② — Slave 应答', x:'Slave 看到 Request，按自己的速度准备数据；准备好了才把数据放上总线并拉高 Ack（SSYN）。慢设备就慢慢来，Master 会一直等着，绝不会采到垃圾。'},
+                {c:590, hl:[1], t:'相位 ③ — Master 撤销请求', x:'Master 看到 Ack，知道数据已经有效，采样，然后撤销 Request。注意这一步同样是在"回应对方"，而不是"时间到了"。'},
+                {c:750, hl:[3], t:'相位 ④ — Slave 撤销应答', x:'Slave 看到 Request 撤销，于是也撤销 Ack，双方回到初始状态。四相环环相扣，这就是"全互锁"。代价是每一相都要等信号在总线上走一个来回——线越长越慢。'}
+              ]
+            }
+          };
+          var order=['sync','async'], cur='sync', step=0, timer=null;
+          var tabs=document.getElementById('buslab-tabs');
+          var explain=document.getElementById('buslab-explain');
+          var lab=document.getElementById('buslab-steplabel');
+          order.forEach(function(k){
+            var b=document.createElement('button');
+            b.className='buslab-tab'; b.textContent=MODES[k].tab;
+            b.onclick=function(){ stop(); cur=k; step=0; render(); };
+            b.setAttribute('data-k',k); tabs.appendChild(b);
+          });
+          function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+          function render(){
+            var M=MODES[cur], S=M.steps[step], out='';
+            Array.prototype.forEach.call(tabs.children,function(b){
+              b.className='buslab-tab'+(b.getAttribute('data-k')===cur?' active':'');
+            });
+            out+='<g font-family="IBM Plex Mono, monospace" font-size="11.5">';
+            for(var i=0;i<4;i++){
+              var px=X0+i*PW;
+              out+='<text x="'+(px+PW/2)+'" y="30" text-anchor="middle" fill="var(--muted)">'+esc(M.phases[i])+'</text>';
+              if(i>0) out+='<line x1="'+px+'" y1="40" x2="'+px+'" y2="286" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"/>';
+            }
+            out+='</g>';
+            for(var r=0;r<M.rows.length;r++){
+              var row=M.rows[r], yH=rowY(r), yL=yH+28, m=(yH+yL)/2;
+              var on=S.hl.indexOf(r)>=0;
+              var col=on?'var(--teal)':'var(--line-strong)', w=on?2.6:1.6;
+              out+='<text x="6" y="'+(m+4)+'" font-family="IBM Plex Mono, monospace" font-size="12" fill="'+(on?'var(--teal)':'var(--muted)')+'">'+esc(row.label)+'</text>';
+              if(row.type==='clock'){
+                out+='<path d="'+clk(yH,yL)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"/>';
+              } else if(row.type==='level'){
+                out+='<path d="'+lvl(row.tr,yH,yL)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"/>';
+              } else {
+                out+='<line x1="'+X0+'" y1="'+m+'" x2="'+row.f+'" y2="'+m+'" stroke="var(--line)" stroke-width="1.4" stroke-dasharray="4 4"/>';
+                out+='<line x1="'+row.t+'" y1="'+m+'" x2="'+X1+'" y2="'+m+'" stroke="var(--line)" stroke-width="1.4" stroke-dasharray="4 4"/>';
+                out+='<path d="'+busPath(row.f,row.t,yH,yL)+'" fill="'+(on?'var(--teal-soft)':'var(--surface-2)')+'" stroke="'+col+'" stroke-width="'+w+'"/>';
+                out+='<text x="'+((row.f+row.t)/2)+'" y="'+(m+4)+'" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="'+(on?'var(--teal)':'var(--ink-soft)')+'">'+esc(row.txt)+'</text>';
+              }
+            }
+            if(S.c<X1){
+              out+='<rect x="'+S.c+'" y="12" width="'+(X1-S.c)+'" height="278" fill="var(--surface)" opacity="0.8"/>';
+            }
+            out+='<line x1="'+S.c+'" y1="16" x2="'+S.c+'" y2="286" stroke="var(--accent-strong)" stroke-width="1.6" stroke-dasharray="5 4"/>';
+            SVG.innerHTML=out;
+            explain.innerHTML='<b>'+esc(S.t)+'</b>'+esc(S.x);
+            lab.textContent='第 '+(step+1)+' / '+M.steps.length+' 步';
+            document.getElementById('buslab-prev').disabled=(step===0);
+            document.getElementById('buslab-next').disabled=(step===M.steps.length-1);
+          }
+          function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById('buslab-play').textContent='▶ 播放'; } }
+          document.getElementById('buslab-next').onclick=function(){ stop(); if(step<MODES[cur].steps.length-1){ step++; render(); } };
+          document.getElementById('buslab-prev').onclick=function(){ stop(); if(step>0){ step--; render(); } };
+          document.getElementById('buslab-reset').onclick=function(){ stop(); step=0; render(); };
+          document.getElementById('buslab-play').onclick=function(){
+            if(timer){ stop(); return; }
+            if(step>=MODES[cur].steps.length-1) step=0;
+            render();
+            this.textContent='⏸ 暂停';
+            timer=setInterval(function(){
+              if(step>=MODES[cur].steps.length-1){ stop(); return; }
+              step++; render();
+            },1900);
+          };
+          render();
+        })();
+        </script>
+
+        <h4 style="font-family:var(--font-display); font-size:16px; margin:26px 0 8px 0;">为什么同步总线"必须短"——时钟偏移（clock skew）</h4>
+        <p>这是本节最重要、也是最常考的一个因果链，值得完整推一遍。</p>
+        <p>时钟信号从时钟源出发，到达总线<strong>近端</strong>和<strong>远端</strong>的时间是<em>不一样</em>的：走线越长、挂的负载越多，这个到达时间差（就是 <strong>skew</strong>）越大。现在做个定量估算：假设总线跑 1 GHz，那么一个周期只有 1 ns；如果时钟走到总线另一头晚了 0.4 ns，远端设备眼中的"上升沿"就比近端晚了将近<strong>半个周期</strong>。它采样的时刻于是可能落在数据还没稳定、或者数据已经变成下一拍的窗口里——采到的就是垃圾。</p>
+
+        <div class="diagram">
+          <div class="dcap">Fig. 12-3 · 时钟偏移如何导致远端设备采到错误的数据</div>
+          <svg viewBox="0 0 780 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="时钟偏移示意图：数据总线上依次出现D1和D2两个有效数据窗口；近端时钟的上升沿落在D1窗口内采样正确；远端时钟因偏移延后，上升沿落到了D2窗口内，采到了错误的数据">
+            <g font-family="IBM Plex Mono, monospace" font-size="12">
+              <text x="6" y="36" fill="var(--muted)">Data Bus</text>
+              <g stroke="var(--line-strong)" stroke-width="1.6" fill="none">
+                <path d="M 120 42 L 130 24 L 300 24 L 310 42 L 300 60 L 130 60 Z" fill="var(--surface-2)"/>
+                <path d="M 320 42 L 330 24 L 500 24 L 510 42 L 500 60 L 330 60 Z" fill="var(--surface-2)"/>
+              </g>
+              <text x="200" y="47" fill="var(--ink)" font-weight="700">D1</text>
+              <text x="400" y="47" fill="var(--ink)" font-weight="700">D2</text>
+
+              <text x="6" y="118" fill="var(--teal)">近端 Clock</text>
+              <path d="M 120 130 L 180 130 L 180 100 L 240 100 L 240 130 L 340 130 L 340 100 L 400 100 L 400 130 L 520 130" fill="none" stroke="var(--teal)" stroke-width="2"/>
+              <line x1="180" y1="96" x2="180" y2="66" stroke="var(--teal)" stroke-width="1.4" stroke-dasharray="3 3"/>
+              <circle cx="180" cy="100" r="4" fill="var(--teal)"/>
+              <text x="188" y="80" fill="var(--teal)" font-size="11">↑ 在 D1 窗口内采样 ✓</text>
+
+              <text x="6" y="200" fill="var(--warn)">远端 Clock</text>
+              <path d="M 120 212 L 380 212 L 380 182 L 440 182 L 440 212 L 540 212 L 540 182 L 600 182 L 600 212 L 700 212" fill="none" stroke="var(--warn)" stroke-width="2"/>
+              <line x1="380" y1="182" x2="380" y2="62" stroke="var(--warn)" stroke-width="1.4" stroke-dasharray="3 3"/>
+              <circle cx="380" cy="182" r="4" fill="var(--warn)"/>
+              <text x="388" y="168" fill="var(--warn)" font-size="11">↑ 却落进了 D2 窗口 ✗ 采到错误数据</text>
+
+              <g stroke="var(--warn)" stroke-width="1.4">
+                <line x1="180" y1="232" x2="380" y2="232"/>
+                <path d="M 180 232 l 7 -4 v 8 z" fill="var(--warn)" stroke="none"/>
+                <path d="M 380 232 l -7 -4 v 8 z" fill="var(--warn)" stroke="none"/>
+              </g>
+              <text x="230" y="246" fill="var(--warn)" font-size="11.5">skew Δt — 走线越长、负载越多，它越大</text>
+            </g>
+          </svg>
+        </div>
+
+        <p>所以这条因果链是：<strong>频率越高 → 周期越短 → 能容忍的 skew 越小 → 总线必须越短</strong>。这是硬物理限制，不是设计水平问题，加钱也解决不了。同步总线的另一个缺点是所有设备被迫服从同一套时序，快设备被慢设备拖累（除非引入 wait state 让慢设备插入等待周期，但那又部分退化成了"问答"）。</p>
+
+        <div class="tablewrap">
+          <table>
+            <caption>同步 vs 异步：两条路线的完整权衡</caption>
+            <thead><tr><th>维度</th><th>同步（基于时钟）</th><th>异步（基于握手）</th></tr></thead>
+            <tbody>
+              <tr><td><strong>靠什么对齐</strong></td><td>共用一根时钟线，事务按固定周期数推进</td><td>Request / Acknowledge 互锁握手，逐步推进</td></tr>
+              <tr><td><strong>速度</strong></td><td><strong>快</strong>：零协商开销，每周期都在传数据</td><td><strong>慢</strong>：每次传输至少 4 次信号往返</td></tr>
+              <tr><td><strong>复杂度</strong></td><td>简单：本质上是"数拍子"</td><td>复杂：双方各是一个状态机，还要额外的握手线</td></tr>
+              <tr><td><strong>长度限制</strong></td><td><strong>必须短</strong>，受 clock skew 硬性约束</td><td><strong>可以很长</strong>，不依赖时钟对齐</td></tr>
+              <tr><td><strong>设备速度</strong></td><td>被迫统一时序，快设备被拖累</td><td><strong>天然兼容任意速度混挂</strong>，各按各的节奏</td></tr>
+              <tr><td><strong>典型用在</strong></td><td>内存总线、片内总线</td><td>老式 I/O 总线、长线缆、跨时钟域场景</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout"><div class="lbl">超出 slide 的一步：现代总线其实是混血</div><p>今天的高速总线两条路线都不是纯的。PCIe 用的是<strong>嵌入式时钟（embedded clock）</strong>——不单独拉时钟线，而是用 8b/10b、128b/130b 编码保证数据流里有足够的电平跳变，接收端用 CDR（时钟数据恢复）电路<em>从数据流本身把时钟提取出来</em>。这样既躲开了独立时钟线的 skew 问题，又保留了同步传输的高吞吐。</p><p>更值得注意的是 PCI → PCIe 的演进本质：从<strong>并行共享总线</strong>变成了<strong>串行点对点链路</strong>。原因正是上面那条物理限制——在 GHz 以上，并行线之间的 skew 和串扰根本压不住，所以宁可用一对差分线跑极高速率，再用多个 lane 并起来堆带宽。今天我们说 PCIe/USB 是"总线"，其实它们在拓扑上已经是交换式网络了，只是沿用了 bus 这个名字。</p></div>
+
+        <div class="callout teal"><div class="lbl">考试怎么答</div><p>这三页 slide 最典型的考法是简答题："why must a synchronous bus be short"、"what is a bus master and why is arbitration needed"、"compare the memory bus and the I/O bus"。答这类题时，<strong>把物理原因说出来</strong>——时钟偏移与周期长度的关系、共享介质上的驱动冲突、传播延迟与协议往返次数——得分远高于只背结论。判分点往往就在"为什么"那一句上。</p></div>
+      </div>
+
+      <div class="sub" id="m12-s6">
+        <h3><span class="num">12.6</span> CPU 怎么和设备对话</h3>
+        <p>CPU 与 I/O 设备通信有两种方式：<strong>PMIO</strong>（端口映射 I/O）使用专门的 CPU 指令，某些 I/O 端口地址被分配给设备，设备只处理落在自己端口地址上的事务；<strong>MMIO</strong>（内存映射 I/O）则直接使用普通的内存访问指令，内存地址空间的一部分被分配给设备，设备处理落在这些内存地址上的访问。</p>
+        <p>使用 I/O 设备的控制结构也有几种层次：</p>
+        <ul class="speclist">
+          <li><strong>程序化 I/O（软件轮询）</strong>：程序不断反复检查设备是否准备好——简单但白白浪费 CPU 时间。</li>
+          <li><strong>中断驱动 I/O</strong>：CPU 定期被时钟打断，顺带检查所有设备，一旦有设备就绪就触发中断。</li>
+          <li><strong>DMA（直接内存访问）</strong>：CPU 把总线控制权临时交给 DMA 控制器，由它直接在设备和内存之间搬运数据，不需要 CPU 逐字节盯着。</li>
+          <li><strong>I/O 处理器/控制器</strong>：把 DMA 控制器的思路进一步推广，交给更高级的 I/O 控制逻辑全权处理。</li>
+        </ul>
+        <div class="callout teal"><div class="lbl">回头看模块 04</div><p>"中断驱动 I/O"用的正是模块 04.3～04.4 讲过的同一套硬件机制——CPU 定期被计时器打断，顺便检查一下有没有设备就绪。这再次印证了"中断"是贯穿操作系统任务调度和 I/O 管理的同一根主线，而不是两套互不相关的技术。</p></div>
+      </div>
+
+      <div class="sub" id="m12-s7">
+        <h3><span class="num">12.7</span> 存储系统的四个指标</h3>
+        <p>任何存储系统都可以用四个指标衡量：<strong>容量</strong>（能存多少字节）、<strong>数据率</strong>（传输开始之后每秒能传多少 bps）、<strong>延迟</strong>（要多久才能开始传输）、<strong>成本</strong>。下面按机械程度从高到低，依次看磁盘、光盘、磁带、闪存四种存储介质。</p>
+      </div>
+
+      <div class="sub" id="m12-s8">
+        <h3><span class="num">12.8</span> 磁盘存储：机械时代的记忆</h3>
+        <p><strong>磁盘</strong>用于长期、非易失性的大容量存储。2025 年典型消费级硬盘容量约 2 TB，自 1997 年起大致每 2 年翻两番（比摩尔定律的"每 2 年翻一番"还激进）——又是一条熟悉的指数曲线。典型特性：寻道时间约 10 ms，传输速率约 100 MB/s，价格低廉（约 50 美元/2025 年）。</p>
+        <div class="diagram">
+          <div class="dcap">Fig. 12-2 · 磁盘机械结构：盘片 / 磁道 / 扇区 / 磁头</div>
+          <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="磁盘机械结构示意图：多层盘片同轴叠放，执行器带动磁臂移动磁头跨越各个磁道，磁道上标注扇区分界">
+            <g stroke="var(--line-strong)" stroke-width="1.4" fill="none">
+              <ellipse cx="380" cy="70" rx="230" ry="52"/><ellipse cx="380" cy="130" rx="230" ry="52"/><ellipse cx="380" cy="190" rx="230" ry="52"/>
+            </g>
+            <g stroke="var(--teal)" stroke-width="2" fill="none">
+              <ellipse cx="380" cy="70" rx="150" ry="34"/><ellipse cx="380" cy="130" rx="150" ry="34"/><ellipse cx="380" cy="190" rx="150" ry="34"/>
+            </g>
+            <g stroke="var(--accent-strong)" stroke-width="2" fill="none" stroke-dasharray="4 4">
+              <path d="M 380 36 L 380 104"/><path d="M 380 96 L 380 164"/><path d="M 380 156 L 380 224"/>
+            </g>
+            <g fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.6">
+              <rect x="20" y="55" width="16" height="150"/>
+            </g>
+            <g stroke="var(--ink-soft)" stroke-width="2">
+              <line x1="36" y1="65" x2="150" y2="70"/><line x1="36" y1="125" x2="150" y2="130"/><line x1="36" y1="185" x2="150" y2="190"/>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--ink)">
+              <text x="10" y="42">Actuator</text>
+              <text x="130" y="55">Arm/Head</text>
+              <text x="300" y="20">Outer Track</text>
+              <text x="330" y="255">Inner Track</text>
+              <text x="440" y="55" fill="var(--accent-strong)">Sector</text>
+              <text x="610" y="130" fill="var(--muted)">Platters</text>
+            </g>
+          </svg>
+        </div>
+        <p>磁盘有若干个<strong>盘片（Platter）</strong>，每个盘片的（通常两个）<strong>表面</strong>上都磁性记录着比特，记录在<strong>磁道（Track）</strong>上，磁道又划分成<strong>扇区（Sector）</strong>（例如 4 KB 一个）。每次读写时：<strong>执行器（Actuator）</strong>移动<strong>磁臂（Arm）</strong>（每个表面配一根），带动<strong>磁头（Head）</strong>跨越磁道（这个过程叫<strong>寻道 Seek</strong>），选中目标表面，等待目标扇区旋转到磁头下方，然后开始读或写。</p>
+        <p>磁盘访问的延迟由<strong>队列 + 控制器 + 寻道 + 旋转 + 传输</strong>组成，其中"控制器+寻道+旋转"这三段合称<strong>延迟（latency）</strong>（不含传输本身）。控制器（非机械部分）耗时通常只有微秒级。</p>
+        <div class="callout"><div class="lbl">worked example</div><p>一块转速 7200 RPM、寻道时间 10 ms 的磁盘：7200 RPM = 120 转/秒 ⇒ 每转约 8 ms；平均旋转延迟 ≈ 8ms/2 = 4 ms；<strong>平均延迟 ≈ 4ms + 10ms = 14 ms</strong>。相比 CPU 时钟周期常见的纳秒级，14 毫秒是天文数字般的等待——这正是为什么磁盘访问必须尽量减少次数、尽量批量化，也是缓存和虚拟内存系统存在的重要动机之一。</p></div>
+      </div>
+
+      <div class="sub" id="m12-s9">
+        <h3><span class="num">12.9</span> 光盘与磁带：为什么它们没有消失</h3>
+        <p><strong>光盘</strong>的存取时间比硬盘长得多，但作为存档介质的寿命也长得多。类型包括 ROM（只读）、R（一次写入）、RW（可读写）、RAM（随机存取）。容量：CD 系列约 700 MB；DVD 系列约 4.7 GB/层（最多 4 层）；HD DVD 约 15 GB/层（最多 3 层）；蓝光约 25 GB/层（最多 4 层）。机制上，光盘表面刻有一圈圈由<strong>坑（pit）</strong>嵌入<strong>底（land）</strong>组成的环形轨道，激光干涉用于检测两者之间的<strong>跳变</strong>：有跳变编码 1，无跳变编码 0——这种"靠状态跳变而不是靠状态本身编码信息"的思路，和模块 07 讲的边沿触发（靠信号跳变的瞬间采样，而不是靠电平本身）有着相似的设计精神。</p>
+        <p><strong>磁带</strong>使用和磁盘相同的读写记录技术，物理介质是涂有磁性氧化物的柔性聚酯薄膜；每条磁带只有少量并行磁道；关键限制是磁带是<strong>顺序访问</strong>的（不是随机访问！），容量却能达到约 10 TB/卷——比大多数硬盘还大，正因为顺序访问不需要复杂的寻道机械，可以把存储密度做得极高。</p>
+        <div class="callout teal"><div class="lbl">为什么"慢"的存储没被淘汰</div><p>磁带慢到没法当日常盘用（顺序访问，随便读一个文件可能要从头倒带），但密度高、寿命长、成本低，天生适合"写一次、多年不碰"的冷备份场景；光盘寻道时间也长，却因物理介质极其耐存放，被广泛用于档案保存。速度从来不是存储介质唯一的评价维度——12.4 节的四个指标里，容量、寿命（隐含在成本/可靠性里）同样重要，甚至在特定场景下比速度更重要。</p></div>
+      </div>
+
+      <div class="sub" id="m12-s10">
+        <h3><span class="num">12.10</span> 闪存：没有机械部件的存储</h3>
+        <p><strong>CF/SD/SDHC 卡</strong>：读取速度约 100–200 MB/s；写入速度约 10 MB/s（便宜款）到 100 MB/s（高端款）。<strong>SSD（固态硬盘）</strong>：容量 500 GB 到 2 TB，数据率更高、延迟更低，运行静音，价格约 100–300 美元——没有任何机械部件，是它们比磁盘快得多、也更耐用的根本原因。</p>
+        <p>闪存有两种常见的存储单元机制：</p>
+        <ul class="speclist">
+          <li><strong>浮栅 MOSFET（floating-gate MOSFET）</strong>：本质上和普通 MOSFET 一样，只是栅极被<strong>电学绝缘</strong>起来（因此叫"浮栅"），用来长期存储 MOSFET 的开/关状态。浮栅通过控制栅附近施加的高电压差来充电或放电——这个过程需要一点时间（写比读慢），而且会轻微损伤绝缘层（写入次数有限，现代浮栅 MOSFET 支持约 5 万次写入循环）。</li>
+          <li><strong>电荷陷阱闪存单元（charge-trap flash cell）</strong>：和 MOSFET 类似，但在通道和栅极之间多了一个电荷陷阱结构。例如一个 3 位电荷陷阱能存储 2³=8 种电荷等级，读取时通过测量阈值电压（通道开始导通所需的栅源电压）来判断电荷等级。相比浮栅 MOSFET：读取<strong>慢得多</strong>；信息密度<strong>高得多</strong>（因此便宜得多）；错误率<strong>高得多</strong>（写入次数只有约 3000 次）。</li>
+        </ul>
+        <div class="callout teal"><div class="lbl">回头看模块 06、07</div><p>闪存的存储单元本质上就是模块 06 讲过的 <strong>MOSFET</strong>，只是多加了一个"悬浮"或"陷阱"结构用来长期锁住电荷——这也解释了为什么闪存断电后数据不会丢失（非易失性），而模块 07 讲的 D 触发器断电就会清空（易失性）：区别只在于"记忆"到底是靠持续通电的电路状态维持，还是靠物理结构里被囚禁的电荷维持。前者快但离电就忘，后者慢但能"记"很久——这也是为什么 CPU 内部的寄存器/缓存用触发器，而长期存储用闪存，两者从来不是互相替代的关系。</p></div>
+      </div>
+
+      <div class="quizblock">
+        <p class="qtitle">自测 · Self-Check</p>
+        <details class="qcard"><summary>为什么"内存总线"和"I/O 总线"要分开设计，不能只用一条通用总线搞定所有连接？</summary><div class="a">因为两者的设计目标互相冲突：内存总线只服务 RAM 这一种确定的部件，可以针对性地做到极致的低延迟和高数据率；I/O 总线要兼容各种未知的、后续可能插入的通用设备，因此必须遵循统一标准、留出协议开销，天然慢得多。把两者分开，内存访问不用为了兼容通用设备标准而牺牲速度，通用设备也不需要削足适履去满足内存总线的严苛时序要求。</div></details>
+        <details class="qcard"><summary>为什么同步总线"必须足够短"？请把因果链完整说出来。</summary><div class="a">因为<b>时钟偏移（clock skew）</b>：时钟信号到达总线近端和远端的时间不同，走线越长、负载越多，这个时间差越大。同步总线的协议依赖"所有设备在同一个时钟沿看到同一件事"，一旦 skew 接近甚至超过数据的有效窗口，远端设备就会在数据尚未稳定、或已经变成下一拍的时刻采样，取到错误数据。<br><br>关键在于这条链是<b>被频率反向约束</b>的：频率越高 → 周期越短 → 能容忍的 skew 越小 → 总线必须越短。比如 1 GHz 时一个周期只有 1 ns，0.4 ns 的 skew 就已经接近半个周期。这是物理限制（信号传播速度有限），不是设计水平或成本问题。</div></details>
+        <details class="qcard"><summary>什么是 bus master？为什么一旦有多个 master 就必须引入仲裁？顺便说明 DMA 为什么重要。</summary><div class="a"><b>Bus master</b> 是能够主动<i>发起</i>读/写事务的设备；只能被动响应的叫 slave。CPU 永远是 master，RAM 永远是 slave。<br><br>必须仲裁的原因是<b>总线是共享介质</b>：同一时刻只能有一个设备驱动数据线，否则一个输出 1、另一个输出 0 会造成总线冲突（电源对地短路），数据全错甚至烧毁驱动器。所以需要一套机制在多个想发言的 master 中选出唯一一个。<br><br>DMA 的重要性在于它把 I/O 设备<b>提升为 master</b>：网卡收到一个 1500 字节的帧，若只是 slave，CPU 得执行几百条 lw/sw 逐字搬运，千兆网卡能把整颗 CPU 占死；作为 master，网卡自己把数据直接写进内存，完成后只发一个中断，CPU 的代价降为一次中断处理。</div></details>
+        <details class="qcard"><summary>菊花链仲裁的"饿死"问题是怎么产生的？集中并行仲裁是如何避免它的？</summary><div class="a">菊花链把 grant 信号<i>串行</i>穿过所有 master：离仲裁器近的设备先看到 grant，想用就截留，不想用才往下传。这意味着<b>优先级由物理位置写死</b>——只要前面的设备持续有请求，grant 永远传不到后面，末端设备就可能永远得不到总线，这就是饿死（starvation）。<br><br>集中并行仲裁给每个 master 独立的 request/grant 线接到中央仲裁器，于是仲裁策略与物理位置解耦：可以用轮转（round-robin）、公平队列或加权 QoS，保证每个设备在有限时间内必然被服务。代价是线数随设备数线性增长（n 个 master 需要 2n 根线），而且仲裁器成为单点。</div></details>
+        <details class="qcard"><summary>异步四相握手为什么"无论线多长、设备多慢都不会出错"？它的代价是什么？</summary><div class="a">因为它是<b>全互锁（fully interlocked）</b>的：每一步都必须等到对方的信号真正出现才能进行下一步——Master 拉高 Request 后<i>一直等</i>，直到 Slave 准备好数据并拉高 Ack 才采样；Master 撤销 Request 后，Slave 才撤销 Ack。正确性不依赖任何时间假设，只依赖事件顺序，所以线有多长、对方有多慢都不影响结果，快设备快应答、慢设备慢应答，各取所需。<br><br>代价有三：一次传输至少要经历 4 次信号在总线上的完整往返，线越长每次往返的传播时间越长，<b>延迟显著高于同步方式</b>；双方各需要一个状态机，控制逻辑复杂；还要额外占用握手线。</div></details>
+        <details class="qcard"><summary>磁带的容量能做到比多数硬盘还大，为什么它却不能取代硬盘做日常存储？</summary><div class="a">因为磁带是<b>顺序访问</b>介质，不支持随机访问——读取磁带中间某个文件，可能需要先"倒带"跳过前面所有内容，这个过程可能要花很长时间。而日常存储场景需要频繁、随机地打开各种文件，这正是磁带完全不适合的场景；但对于"写一次、长期不碰"的冷备份，顺序访问的缺点几乎不影响使用体验，磁带的高密度、长寿命、低成本反而成为优势。</div></details>
+        <details class="qcard"><summary>为什么电荷陷阱闪存单元比浮栅 MOSFET 便宜得多，但可靠性（写入次数上限）却更差？</summary><div class="a">电荷陷阱结构能在同一个单元里存储多个电荷等级（例如 3 位存 8 个等级），单位面积能塞进更多信息，因此制造成本大幅下降；但存储和读取多级电荷需要更精细地控制和测量阈值电压，每次充放电对结构的损伤也更明显，且区分相邻电荷等级的容错空间更小，这两方面共同导致它的读取速度更慢、写入次数上限（约 3000 次）远低于浮栅 MOSFET（约 5 万次）。</div></details>
+      </div>
+    </section>
+
+    <div class="callout" style="max-width:100%; margin-top:56px;">
+      <div class="lbl">走完全程</div>
+      <p>从 1833 年的差分机，到今天藏在手机里的十亿晶体管芯片，再到抽象出 TM/RAM/PM 模型去谈论"计算"本身——这份手册走的其实是一条完整的下潜再上浮路线：从计算机世代变迁（模块 01～02）下潜到 CPU 部件、晶体管与触发器（模块 03、05～07），中途插入抽象机器模型与计算机架构这条理论主线（模块 04、08～09），再一路上浮回到指令集架构、性能评估、总线与存储系统（模块 10～12），最终重新拼出"一台计算机是怎么把 0/1 变成你屏幕上的答案"这个完整故事。<strong>用更小的开关，搭出更快的门；用更快的门，搭出更聪明的电路；用更聪明的电路和更聪明的指令集，换来我们几乎感觉不到延迟的日常计算</strong>。回到侧边栏勾选你已经掌握的模块，或者用每节末尾的自测问答检验一下——这份手册会一直留在这里，供你随时回来复习。</p>
+    </div>
+
+    <footer class="pagefoot">IE4756/IE6156/EE6156 Computer Architecture Part 1 · 学习手册整理自课程讲义 PDF（Introduction / Models / CPU Design / ISA / Performance / Buses·IO·Storage，合计 133 页）· 内容仅供个人学习使用</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  // 主题切换：system -> light -> dark -> system
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeToggleBtn');
+  function readTheme(){ try{ return localStorage.getItem('cpu-theme'); }catch(e){ return null; } }
+  function writeTheme(v){ try{ localStorage.setItem('cpu-theme', v); }catch(e){} }
+  function applyTheme(v){
+    if(v === 'light' || v === 'dark'){ root.setAttribute('data-theme', v); }
+    else { root.removeAttribute('data-theme'); }
+    themeBtn.textContent = v === 'light' ? '主题·亮' : (v === 'dark' ? '主题·暗' : '主题·系统');
+  }
+  var cur = readTheme() || 'system';
+  applyTheme(cur);
+  themeBtn.addEventListener('click', function(){
+    cur = cur === 'system' ? 'light' : (cur === 'light' ? 'dark' : 'system');
+    writeTheme(cur); applyTheme(cur);
+  });
+
+  // 移动端目录开关
+  var nav = document.getElementById('sideNav');
+  var navToggleBtn = document.getElementById('navToggleBtn');
+  var navBackdrop = document.getElementById('navBackdrop');
+  function setNavOpen(open){
+    nav.classList.toggle('open', open);
+    navBackdrop.classList.toggle('open', open);
+  }
+  navToggleBtn.addEventListener('click', function(){ setNavOpen(!nav.classList.contains('open')); });
+  navBackdrop.addEventListener('click', function(){ setNavOpen(false); });
+  nav.addEventListener('click', function(e){ if(e.target.tagName === 'A'){ setNavOpen(false); } });
+
+  // 模块完成状态追踪
+  var mods = Array.prototype.slice.call(document.querySelectorAll('.module'));
+  function readDone(){ try{ return JSON.parse(localStorage.getItem('cpu-done')||'{}'); }catch(e){ return {}; } }
+  function writeDone(d){ try{ localStorage.setItem('cpu-done', JSON.stringify(d)); }catch(e){} }
+  var done = readDone();
+  function refreshProgress(){
+    var total = mods.length, n = 0;
+    mods.forEach(function(m){ if(done[m.id]){ n++; } });
+    document.getElementById('progressLabel').textContent = n + ' / ' + total + ' 模块';
+    document.getElementById('progressBar').style.width = (total? (n/total*100):0) + '%';
+    document.querySelectorAll('.navcheck').forEach(function(c){
+      var id = c.getAttribute('data-mod');
+      c.classList.toggle('done', !!done[id]);
+    });
+  }
+  document.addEventListener('click', function(e){
+    var c = e.target.closest('.navcheck');
+    if(!c) return;
+    e.preventDefault();
+    var id = c.getAttribute('data-mod');
+    done[id] = !done[id];
+    writeDone(done);
+    refreshProgress();
+  });
+  refreshProgress();
+
+  // 滚动高亮当前模块/小节
+  var subLinks = Array.prototype.slice.call(document.querySelectorAll('.navsub a'));
+  var modLinks = Array.prototype.slice.call(document.querySelectorAll('.navmod > a'));
+  var targets = Array.prototype.slice.call(document.querySelectorAll('.sub, .module'));
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        var id = en.target.id;
+        subLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#'+id); });
+        var modEl = en.target.closest('.module');
+        document.querySelectorAll('.navmod').forEach(function(nm){ nm.classList.remove('active'); });
+        if(modEl){
+          var link = document.querySelector('.navmod > a[href="#'+modEl.id+'"]');
+          if(link){ link.parentElement.classList.add('active'); }
+        }
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  targets.forEach(function(t){ io.observe(t); });
+})();
+</script>
+
+</body></html>

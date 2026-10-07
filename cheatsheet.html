@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IE4756 考前速查</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#f4f6f7; --surface:#ffffff; --surface-2:#eef1f3;
+  --ink:#16202b; --ink-2:#3d4c59; --muted:#6b7986;
+  --line:#d6dde3; --line-soft:#e6ebef;
+  --key:#0b5f52; --key-soft:#e2efec;
+  --warn:#a32c1c; --warn-soft:#fae9e5;
+  --note:#8a5a12; --note-soft:#f8efdf;
+  --grid:rgba(22,32,43,.035);
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fb:'Source Sans 3','Helvetica Neue',Arial,sans-serif;
+  --fm:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --line-soft:#232e38;
+  --key:#5cc0ac; --key-soft:#12302b;
+  --warn:#ef8b76; --warn-soft:#331b16;
+  --note:#d9a557; --note-soft:#302512;
+  --grid:rgba(228,234,239,.04);
+}}
+:root[data-theme="dark"]{
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --line-soft:#232e38;
+  --key:#5cc0ac; --key-soft:#12302b;
+  --warn:#ef8b76; --warn-soft:#331b16;
+  --note:#d9a557; --note-soft:#302512;
+  --grid:rgba(228,234,239,.04);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--fb); font-size:15px; line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+.wrap{max-width:900px; margin:0 auto; padding-block:34px 56px; padding-left:20px; padding-right:20px}
+
+.masthead{border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:8px}
+.masthead h1{font-family:var(--fd); font-weight:700; font-size:clamp(25px,5.4vw,36px); letter-spacing:-.018em; margin:0; text-wrap:balance}
+.masthead .sub{color:var(--muted); font-size:13.5px; margin-top:5px}
+.scope{display:flex; flex-wrap:wrap; gap:7px; margin:16px 0 30px}
+.chip{font-family:var(--fm); font-size:11.5px; padding:4px 9px; border-radius:2px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2)}
+.chip.ok{border-color:var(--key); color:var(--key); background:var(--key-soft)}
+.chip.no{border-color:var(--warn); color:var(--warn); background:var(--warn-soft)}
+
+h2{font-family:var(--fd); font-weight:600; font-size:19px; letter-spacing:-.008em; margin:38px 0 4px; padding-bottom:7px; border-bottom:1px solid var(--line)}
+h2 .en{font-family:var(--fm); font-size:11px; font-weight:400; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-left:9px}
+.lede{color:var(--muted); font-size:13.5px; margin:8px 0 18px}
+
+.grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:15px 16px}
+.card h3{font-family:var(--fd); font-weight:600; font-size:14.5px; margin:0 0 10px; color:var(--key); letter-spacing:.01em}
+.card h3 .src{font-family:var(--fb); font-weight:400; font-size:11.5px; color:var(--muted); margin-left:7px}
+.card p{margin:0 0 8px}
+.card p:last-child{margin-bottom:0}
+
+.eq{font-family:var(--fm); font-size:13px; background:var(--surface-2); border-left:2px solid var(--key);
+    padding:7px 10px; margin:0 0 9px; overflow-x:auto; white-space:nowrap; font-variant-numeric:tabular-nums}
+.eq b{font-weight:600; color:var(--key)}
+dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13.5px}
+dt{font-family:var(--fm); font-size:12px; color:var(--muted); white-space:nowrap}
+dd{margin:0}
+.tip{font-size:12.5px; color:var(--note); background:var(--note-soft); border-radius:2px; padding:6px 9px; margin-top:9px}
+.tip b{font-weight:600}
+
+.tbl{overflow-x:auto; border:1px solid var(--line); border-radius:3px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:520px}
+th,td{text-align:left; padding:7px 11px; border-bottom:1px solid var(--line-soft); vertical-align:top}
+th{font-family:var(--fd); font-weight:600; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase;
+   color:var(--muted); background:var(--surface-2); border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td.q{font-family:var(--fm); font-size:12px; white-space:nowrap; color:var(--key); font-weight:600}
+td code,p code,li code,dd code{font-family:var(--fm); font-size:12.3px; background:var(--surface-2); padding:1px 4px; border-radius:2px; overflow-wrap:break-word}
+.stars{font-family:var(--fm); font-size:11px; letter-spacing:-1px; color:var(--key); white-space:nowrap}
+.dim{color:var(--muted)}
+
+ol.steps{margin:0; padding-left:20px; font-size:13.5px}
+ol.steps li{margin-bottom:5px}
+ol.steps li::marker{font-family:var(--fm); font-size:12px; color:var(--key)}
+
+.traps{background:var(--surface); border:1px solid var(--warn); border-radius:3px; overflow:hidden}
+.traps .hd{background:var(--warn-soft); color:var(--warn); font-family:var(--fd); font-weight:600;
+           font-size:13px; padding:8px 14px; border-bottom:1px solid var(--warn)}
+.traps ul{margin:0; padding:12px 14px 14px 32px; font-size:13.5px}
+.traps li{margin-bottom:7px}
+.traps li::marker{color:var(--warn)}
+.traps li:last-child{margin-bottom:0}
+.traps b{font-weight:600; color:var(--warn)}
+
+footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--muted)}
+
+@media print{
+  :root{--ground:#fff; --surface:#fff; --surface-2:#f2f4f5; --grid:transparent;
+        --ink:#000; --ink-2:#222; --muted:#555; --line:#999; --line-soft:#ccc;
+        --key:#0b5f52; --key-soft:#eef5f3; --warn:#a32c1c; --warn-soft:#fbf0ee; --note:#7a5010; --note-soft:#faf5ea}
+  body{background-image:none; font-size:10.5pt}
+  .wrap{max-width:none; padding:0}
+  h2{margin-top:18px; break-after:avoid}
+  .card,.traps,.tbl{break-inside:avoid}
+  .grid{gap:9px}
+  footer{break-before:avoid}
+}
+@media (max-width:420px){ dl{grid-template-columns:1fr; gap:2px 0} dt{margin-top:6px} }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <h1>IE4756 考前速查</h1>
+  <div class="sub">Tutorial 1–5 全部结论 · 必背公式 · 易错点清单 · 考场动作</div>
+</header>
+
+<div class="scope">
+  <span class="chip ok">范围：讲义 1–6</span>
+  <span class="chip ok">Q1 数字电路</span>
+  <span class="chip ok">Q2 MIPS 编码</span>
+  <span class="chip no">Q3 Cache 超纲</span>
+  <span class="chip no">Q4 流水线 超纲</span>
+  <span class="chip">考前请以 NTULearn 公告为准</span>
+</div>
+
+<h2>必背公式<span class="en">Formulas</span></h2>
+<p class="lede">这七张卡片覆盖了三年真题里全部需要算数的题型。</p>
+
+<div class="grid">
+
+  <div class="card">
+    <h3>性能三件套<span class="src">讲义 5</span></h3>
+    <div class="eq">CPI = 总周期数 ÷ 总指令数</div>
+    <div class="eq">CPU 时间 = <b>IC × CPI ÷ f</b></div>
+    <div class="eq">MIPS rating = f ÷ (CPI × 10⁶)</div>
+    <div class="tip"><b>MIPS 下降 ≠ 变慢。</b>编译器删掉便宜指令会让平均 CPI 上升，但 IC 降得更多，时间反而变短。只认 IC × CPI ÷ f。</div>
+  </div>
+
+  <div class="card">
+    <h3>加速比与 Amdahl<span class="src">讲义 5</span></h3>
+    <div class="eq">加速比 = 旧时间 ÷ 新时间</div>
+    <div class="eq">改进占比 f、快 k 倍 ⇒ 1 ÷ ((1−f) + f/k)</div>
+    <div class="eq">上限（k→∞）= <b>1 ÷ (1−f)</b></div>
+    <div class="tip"><b>快用除、慢用乘。</b>「3 倍快」是时间 ×1/3，「2 倍慢」是时间 ×2。写反整题作废。</div>
+  </div>
+
+  <div class="card">
+    <h3>磁盘延迟<span class="src">讲义 6 · 第 15 页</span></h3>
+    <div class="eq">Queue + Ctrl + Seek + Rotate │ Transfer</div>
+    <dl>
+      <dt>每转</dt><dd>60000 ÷ RPM　(ms)</dd>
+      <dt>旋转延迟</dt><dd>每转 ÷ 2（平均等半圈）</dd>
+      <dt>Latency</dt><dd>Seek + Rotate，<b>不含 Transfer</b></dd>
+    </dl>
+    <div class="tip">15000 RPM → 250 RPS → 4 ms/转 → 平均旋转 <b>2 ms</b>。没给传输率就只算到 Latency，并写明这一点。</div>
+  </div>
+
+  <div class="card">
+    <h3>加法器门延迟<span class="src">讲义 3 · 27–29 页</span></h3>
+    <dl>
+      <dt>行波进位</dt><dd>每位 2 级；32 位 = 3 + 2×31 = <b>65</b>；Θ(n)</dd>
+      <dt>快加法器</dt><dd>1 + 5×2 + 5×2 + 1 = <b>22</b>；Θ(log n)</dd>
+      <dt>面积</dt><dd>Θ(n) 对 Θ(n log n)</dd>
+    </dl>
+    <div class="tip">n ≤ 4 时快加法器<b>反而更慢</b>（9 对 10），固定开销摊不开——这句能拿分。</div>
+  </div>
+
+  <div class="card">
+    <h3>MIPS 三种格式<span class="src">讲义 4</span></h3>
+    <div class="eq">R = 6-5-5-5-5-6　op rs rt rd shamt funct</div>
+    <div class="eq">I = 6-5-5-16　　 op rs rt immediate</div>
+    <div class="eq">J = 6-26　　　　 op address ÷ 4</div>
+    <dl>
+      <dt>R 型</dt><dd><code>$rd, $rs, $rt</code></dd>
+      <dt>I 型</dt><dd><code>$rt, $rs, imm</code></dd>
+      <dt>移位</dt><dd><code>$rd, $rt, sha</code>　源是 <b>rt</b>，rs 填 0</dd>
+      <dt>零扩展</dt><dd>andi · ori · xori · lui</dd>
+      <dt>符号扩展</dt><dd>addi · slti · lw · sw · beq · bne</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3>晶体管计数<span class="src">讲义 3 + 课件</span></h3>
+    <dl>
+      <dt>TG 锁存器</dt><dd>2 TG + 2 INV = <b>8 T</b></dd>
+      <dt>主从 D-FF</dt><dd>2 锁存器 + 时钟反相器 = <b>18 T</b></dd>
+      <dt>2:1 MUX</dt><dd>2 TG + 1 INV = <b>6 T</b></dd>
+      <dt>带 Enable</dt><dd>18 + 6 = <b>24 T</b></dd>
+      <dt>AND3</dt><dd>NAND3 + INV = 8 T，<b>2 级</b></dd>
+      <dt>两个 AND2</dt><dd>12 T，<b>4 级</b>（更差）</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3>三个抽象机<span class="src">讲义 2</span></h3>
+    <dl>
+      <dt>TM</dt><dd>完全局部；判 x+x 要 Ω(n²)；无实用实现</dd>
+      <dt>RAM</dt><dd>任意地址一步到；二分 O(log n)；贴近真机</dd>
+      <dt>PM</dt><dd>只能顺指针走；指针<b>只能判等</b>；能证排序 Ω(n·log n)</dd>
+    </dl>
+    <div class="tip">PM 的价值来自它<b>禁止</b>了地址算术——堵死基数排序，下界才证得出来。</div>
+  </div>
+
+</div>
+
+<h2>Tutorial 逐题结论<span class="en">One line each</span></h2>
+<p class="lede">星数 = 出现在笔试里的可能性。标「自学」的是讲义没讲、tutorial 自己让你查 Wikipedia 的题。</p>
+
+<div class="tbl">
+<table>
+  <thead><tr><th>题</th><th>一句话结论</th><th>权重</th></tr></thead>
+  <tbody>
+    <tr><td class="q">T1-1</td><td>小端减一 TM：<code>S0</code> 读 0 写 1 右移找第一个 1；找到写 0 停；撞空白说明 n=0，进 <code>S1</code> 一路写 0 左移复原。<b>3 个状态</b>。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T1-2</td><td>RAM 求最大：<b>t 初值取 mem[0]</b>（不能取 0，否则全负数出错），i 从 1 起，结尾 <code>mem[reg[0]] ← t</code>。全程不动 reg[0]。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T1-3</td><td>PM 压成 3 字段：f 字段节点 → 深度 ⌈log₂f⌉ 的二叉树，叶子存原字段。<b>字段号是编译期常数，路径写死，无需指针算术</b>。开销常数倍。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T1-4</td><td>打孔卡：一张 80 字节。缺点全部源于<b>程序不是可寻址数据</b>；冯·诺依曼架构是对此的回答。</td><td class="stars">★ <span class="dim">偏</span></td></tr>
+    <tr><td class="q">T2-1</td><td>TM 编码：状态编号 0…N−1（0 初始、N−1 终止）+ 固定宽度字段 + <b>规范顺序让位置代替键</b> + 一元码头部自定界。长度 O(N log N)。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T2-2</td><td>分离 I/D cache：<b>首要原因是取指与访存的结构冒险</b>（一个端口撞车）；其次访问模式不同、I-cache 免写回逻辑、互不污染、布局更近。等于在 L1 做哈佛架构。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T2-3</td><td>2 位饱和计数器：迟疑让循环退出那次只把 <code>11</code> 拉到 <code>10</code>，最高位不变 ⇒ <b>每遍只错 1 次</b>而非 2 次。</td><td class="stars">★ <span class="dim">自学</span></td></tr>
+    <tr><td class="q">T2-4</td><td>CPU 必须存 PC：跳转动作本身毁掉 PC；<b>没有任何指令能读 PC</b>；保存与跳转必须原子。三条理由各自都够。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T2-5</td><td>中断返回指令：只读标志位<b>软件写不回去</b>，需要一条被特许、只能复原快照、且原子完成的指令。与 T2-4 是同一原理的两半。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T3-P1</td><td>65 级 对 22 级；Θ(n) 对 Θ(log n)；面积 Θ(n) 对 Θ(n log n)；<b>下树回传是为了避免 32 的扇出</b>。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T3-P2-1</td><td>带 Enable 的 D 触发器 = D 前面加一个 2:1 MUX，另一路接 <b>Q 自反馈</b>。共 24 个晶体管。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T3-P2-2</td><td>计数器：<b>Enable = 低位全 1</b>，D = ¬Q。这就是 2025-26 Q1(c) 状态机的骨架。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T3-P2-3</td><td>PC = 32 个带 Enable 的 FF + 快加法器（第二输入 1）成环。Enable 用于<b>停顿</b>，跳转要再加一个 MUX。</td><td class="stars">★</td></tr>
+    <tr><td class="q">T4-1a</td><td><code>0x00000000</code> = <code>sll $0,$0,0</code> = <b>NOP</b>。全零字无害是刻意设计：跑飞进清零内存只会滑过去。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T4-1b</td><td><code>0x8c82fffc</code> = <code>lw $2, -4($4)</code>　（<code>0xfffc</code> 符号扩展 = −4）</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T4-2a</td><td><code>sw $1,-4($4)</code> = <code>0xAC81FFFC</code>　与 1b 低 16 位完全相同，只差 opcode 和 rt。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T4-2b</td><td><code>add $3,$1,$4</code> = <code>0x00241820</code></td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T4-3</td><td>shamt 扩容：(64 − 3) × (32 − 1) = <b>1891</b> 条。定长编码的浪费同时也是扩展余量。</td><td class="stars">★★</td></tr>
+    <tr><td class="q">T4-4</td><td>递归 eq/lt：<code>eq = eqH·eqL</code>，<code>lt = ltH + eqH·ltL</code>，32 位 11 级。<b>与快加法器同构</b>：eq↔propagate，lt↔generate。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T5-1</td><td>分支预测准确率 <b>a = 90%</b>。盈亏平衡 60%，理论上限 1.3636。1 位预测器 80% 只够 1.15×。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T5-2</td><td><b>700 ms</b>。每文件 5 + 2 = 7 ms，×100。「每个 1 MB」是干扰项——没给传输率。</td><td class="stars">★★★</td></tr>
+    <tr><td class="q">T5-3</td><td>文档→闪存；备份→<b>磁带</b>（10 TB/卷，顺序访问不碍事）；游戏→光盘分发 / SSD 运行；相机→SD（抗震·小·省电）；医学影像→<b>光盘 R</b>（归档寿命 + 不可篡改）+ 磁带。</td><td class="stars">★★</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>易错点<span class="en">Traps</span></h2>
+
+<div class="traps">
+  <div class="hd">这十二条每一条都真的有人栽过</div>
+  <ul>
+    <li><b>快用除、慢用乘。</b>「k times as fast」= 时间 ÷ k；「k times as slow」= 时间 × k。</li>
+    <li><b>MIPS rating 下降不等于变慢。</b>只信 IC × CPI ÷ f。</li>
+    <li><b>I 型第一个寄存器是 rt，R 型第一个是 rd。</b>下笔前回语义表确认参数名。</li>
+    <li><b>移位指令的源是 rt，不是 rs。</b><code>sra $rd,$rt,sha</code>，rs 字段填 0。</li>
+    <li><b>ori / andi / xori 是零扩展</b>，addi / lw / sw / beq / bne 是符号扩展。</li>
+    <li><b>分支偏移要不要除以 4，看语义表写的是 offset 还是 imm。</b>写 <code>offset = extsign(imm)·4</code> 才除；写 <code>imm</code> 就直接用。</li>
+    <li><b>求最大/最小值的初值取第一个元素</b>，取 0 会在全负数输入上出错。</li>
+    <li><b>RAM 模型：地址必须先进寄存器</b>（只有 <code>mem[reg[j]]</code>），比较要拆成「算 0/1」+「判零跳转」两步。</li>
+    <li><b>旋转延迟要除以 2</b>，因为平均等半圈。</li>
+    <li><b>磁盘 Latency 不含 Transfer。</b>讲义把括号画在 Transfer 之前。</li>
+    <li><b>状态机：输出位在一个周期里重复出现且后继不同时，输出位不足以当状态</b>，必须加状态位。</li>
+    <li><b>算门延迟前先写出你的假设</b>（几输入门、全加器怎么搭），否则算出别的数会被判错。</li>
+  </ul>
+</div>
+
+<h2>考场动作<span class="en">Procedures</span></h2>
+<p class="lede">三套照着做就不会错的流程。紧张的时候不要临场想，按步骤走。</p>
+
+<div class="grid">
+
+  <div class="card">
+    <h3>编码 / 译码</h3>
+    <ol class="steps">
+      <li>查表拿 opcode（R 型再拿 funct）</li>
+      <li><b>看表里的参数顺序</b>，别按汇编的书写顺序猜</li>
+      <li>寄存器写成 5 位，立即数写成 16 位（负数取补码）</li>
+      <li>按 6-5-5-5-5-6 或 6-5-5-16 拼成 32 位</li>
+      <li><b>重新按 4 位切开</b>，读成 8 个十六进制数字</li>
+    </ol>
+    <div class="tip">译码反着走：先摊成 32 位二进制，取高 6 位定格式，<code>000000</code> 就去看低 6 位 funct。</div>
+  </div>
+
+  <div class="card">
+    <h3>状态机设计</h3>
+    <ol class="steps">
+      <li>数一数循环有几个状态，够不够用输出位表示</li>
+      <li>不够就加位：先用二进制计数器数拍子</li>
+      <li>写转移表 → 标出无关项 → 逐位化简</li>
+      <li>化简结果就是各触发器的 D 输入</li>
+      <li><b>回代验证</b>：把每个状态代进去走一圈</li>
+    </ol>
+    <div class="tip">译码输出是状态的纯函数（Moore 型）：<b>状态负责计时，输出只是状态的函数</b>。</div>
+  </div>
+
+  <div class="card">
+    <h3>CPI 时间线</h3>
+    <ol class="steps">
+      <li>找出唯一会「等」的那条规则（通常是数据依赖）</li>
+      <li>把第一条指令的开始时刻设为 0</li>
+      <li>逐条算：<code>start = max(前一条 start + 1, 依赖就绪时刻)</code></li>
+      <li>一轮周期 ÷ 一轮指令数 = CPI</li>
+      <li><b>检查最坏情况</b>：换指令条数、换排列顺序，取最大值</li>
+    </ol>
+    <div class="tip">用不上的数据（比如非 M/D 的 3 周期）是故意的干扰项——要能说出<b>它为什么用不上</b>。</div>
+  </div>
+
+</div>
+
+<footer>
+  覆盖 Tutorial 1–5 全部 21 道题 · 依据讲义 1–6 与 2024S2 / 2025-26 真题整理 · 超纲标注仅为推断，考前请以 NTULearn 公告为准
+</footer>
+
+</div>
+
+</body></html>

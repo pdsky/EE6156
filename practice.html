@@ -1,0 +1,404 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IE4756 性能与 I/O 练习</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#f4f6f7; --surface:#ffffff; --surface-2:#eef1f3; --surface-3:#e4e9ec;
+  --ink:#16202b; --ink-2:#3d4c59; --muted:#6b7986;
+  --line:#d6dde3; --line-soft:#e6ebef;
+  --key:#0b5f52; --key-soft:#e2efec;
+  --warn:#a32c1c; --warn-soft:#fae9e5;
+  --note:#8a5a12; --note-soft:#f8efdf;
+  --grid:rgba(22,32,43,.035);
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fb:'Source Sans 3','Helvetica Neue',Arial,sans-serif;
+  --fm:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34; --surface-3:#26323d;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --line-soft:#232e38;
+  --key:#5cc0ac; --key-soft:#12302b;
+  --warn:#ef8b76; --warn-soft:#331b16;
+  --note:#d9a557; --note-soft:#302512;
+  --grid:rgba(228,234,239,.04);
+}}
+:root[data-theme="dark"]{
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34; --surface-3:#26323d;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --line-soft:#232e38;
+  --key:#5cc0ac; --key-soft:#12302b;
+  --warn:#ef8b76; --warn-soft:#331b16;
+  --note:#d9a557; --note-soft:#302512;
+  --grid:rgba(228,234,239,.04);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--fb); font-size:15px; line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;}
+.wrap{max-width:840px; margin:0 auto; padding-block:34px 60px; padding-left:20px; padding-right:20px}
+
+.masthead{border-bottom:2px solid var(--ink); padding-bottom:14px}
+.masthead h1{font-family:var(--fd); font-weight:700; font-size:clamp(24px,5.2vw,34px); letter-spacing:-.018em; margin:0; text-wrap:balance}
+.masthead .sub{color:var(--muted); font-size:13.5px; margin-top:5px}
+.howto{background:var(--note-soft); border:1px solid var(--note); border-radius:3px; padding:11px 14px; margin:18px 0 8px;
+  font-size:13.5px; color:var(--note)}
+.howto b{font-weight:600}
+
+h2{font-family:var(--fd); font-weight:600; font-size:18px; margin:34px 0 14px; padding-bottom:7px; border-bottom:1px solid var(--line)}
+h2 .en{font-family:var(--fm); font-size:11px; font-weight:400; color:var(--muted); letter-spacing:.06em; margin-left:9px}
+
+.q{background:var(--surface); border:1px solid var(--line); border-radius:3px; margin-bottom:16px; overflow:hidden}
+.qhd{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; background:var(--surface-2);
+  border-bottom:1px solid var(--line); padding:9px 15px}
+.qn{font-family:var(--fm); font-weight:600; font-size:13px; color:var(--key)}
+.qt{font-family:var(--fd); font-weight:600; font-size:13.5px}
+.qm{margin-left:auto; font-family:var(--fm); font-size:11.5px; color:var(--muted)}
+.qb{padding:14px 15px 4px}
+.qb p{margin:0 0 10px}
+.qb ol{margin:0 0 10px; padding-left:22px}
+.qb ol li{margin-bottom:5px}
+.qb ol li::marker{font-family:var(--fm); font-size:12.5px; color:var(--key)}
+
+.tblwrap{overflow-x:auto; margin:0 0 12px; border:1px solid var(--line); border-radius:3px}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:340px; font-variant-numeric:tabular-nums}
+th,td{text-align:left; padding:6px 12px; border-bottom:1px solid var(--line-soft)}
+th{font-family:var(--fd); font-weight:600; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); background:var(--surface-2); border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right}
+
+details{border-top:1px dashed var(--line); margin:0 -15px; padding:0 15px}
+summary{cursor:pointer; list-style:none; padding:10px 0; font-family:var(--fd); font-weight:600; font-size:13px; color:var(--key);
+  display:flex; align-items:center; gap:7px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸"; font-size:11px; transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+summary:focus-visible{outline:2px solid var(--key); outline-offset:2px; border-radius:2px}
+.sol{padding:0 0 14px; font-size:14px}
+.sol p{margin:0 0 9px}
+.sol .step{font-family:var(--fd); font-weight:600; font-size:12.5px; color:var(--ink-2); margin:12px 0 5px;
+  text-transform:none; letter-spacing:.01em}
+.eq{font-family:var(--fm); font-size:13px; background:var(--surface-2); border-left:2px solid var(--key);
+  padding:7px 11px; margin:0 0 9px; overflow-x:auto; white-space:nowrap}
+.ans{display:inline-block; font-family:var(--fm); font-size:14px; font-weight:600; color:var(--warn);
+  background:var(--warn-soft); border:1px solid var(--warn); border-radius:2px; padding:3px 10px; margin:2px 0 9px}
+.pt{background:var(--note-soft); border-radius:2px; padding:8px 11px; font-size:13px; color:var(--note); margin:10px 0 4px}
+.pt b{font-weight:600}
+code{font-family:var(--fm); font-size:12.6px; background:var(--surface-2); padding:1px 5px; border-radius:2px; overflow-wrap:break-word}
+footer{margin-top:40px; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--muted)}
+@media print{
+  :root{--ground:#fff;--surface:#fff;--surface-2:#f2f4f5;--grid:transparent;--ink:#000;--muted:#555;--line:#999;--line-soft:#ccc}
+  body{background-image:none; font-size:10.5pt}
+  .wrap{max-width:none;padding:0}
+  details{display:block} details>.sol{display:block!important}
+  .q{break-inside:avoid}
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <h1>IE4756 性能与 I/O 练习</h1>
+  <div class="sub">9 道原创题 · 对应讲义 5（性能）与讲义 6（总线 / I/O / 存储）· 全部数值已校验</div>
+</header>
+
+<div class="howto">
+  <b>用法</b>　答案默认折叠。先自己算完再点开，别偷看。每题下面都标了「陷阱」——那是真题里实际扣分的地方。
+</div>
+
+<h2>A 组　CPI 与性能<span class="en">Lecture 5</span></h2>
+
+<div class="q">
+  <div class="qhd"><span class="qn">A1</span><span class="qt">指令混合求 CPI、MIPS 与指令条数</span><span class="qm">8 分</span></div>
+  <div class="qb">
+    <p>一台 Load-Store 架构的计算机工作在 <b>800 MHz</b>。某基准程序的指令混合与各类指令的 CPI 如下表。</p>
+    <div class="tblwrap"><table>
+      <thead><tr><th>指令类别</th><th class="n">出现频率</th><th class="n">CPI</th></tr></thead>
+      <tbody>
+        <tr><td>Integer ALU</td><td class="n">50 %</td><td class="n">1</td></tr>
+        <tr><td>Load</td><td class="n">20 %</td><td class="n">3</td></tr>
+        <tr><td>Store</td><td class="n">10 %</td><td class="n">3</td></tr>
+        <tr><td>Branch</td><td class="n">15 %</td><td class="n">2</td></tr>
+        <tr><td>Floating-Point</td><td class="n">5 %</td><td class="n">16</td></tr>
+      </tbody>
+    </table></div>
+    <p>求平均 CPI 与 MIPS rating。已知该程序运行 <b>0.25 秒</b>，求执行的浮点指令条数。</p>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 平均 CPI = 按频率加权求和</div>
+    <div class="eq">0.50(1) + 0.20(3) + 0.10(3) + 0.15(2) + 0.05(16)</div>
+    <div class="eq">= 0.5 + 0.6 + 0.3 + 0.3 + 0.8 = 2.5</div>
+    <div class="ans">CPI = 2.5</div>
+    <div class="step">② MIPS rating</div>
+    <p>每秒 800×10⁶ 个周期，每条指令平均吃 2.5 个周期：</p>
+    <div class="eq">800×10⁶ ÷ 2.5 = 320×10⁶ 条/秒</div>
+    <div class="ans">320 MIPS</div>
+    <div class="step">③ 浮点指令条数</div>
+    <div class="eq">总指令数 = 320×10⁶ × 0.25 = 80×10⁶</div>
+    <div class="eq">浮点 = 5% × 80×10⁶ = 4×10⁶</div>
+    <div class="ans">4 × 10⁶ 条（400 万条）</div>
+    <div class="pt"><b>顺手记一笔：</b>浮点只占 5% 的指令条数，却贡献了 0.8 / 2.5 = <b>32% 的周期</b>。这个观察在下一题和 Amdahl 那题会直接用到。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">A2</span><span class="qt">新编译器：CPI 上升，程序却变快了</span><span class="qm">12 分</span></div>
+  <div class="qb">
+    <p>针对 A1 的同一台机器和同一个基准程序，新编译器可以<b>消除 50% 的 Integer ALU 指令</b>和 <b>20% 的 Floating-Point 指令</b>，但会让 <b>Load、Store、Branch 各增加 20%</b>。</p>
+    <p>求优化后的平均 CPI 与 MIPS rating，以及新编译器带来的加速比。对结果作出评论。</p>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 取 100 条指令作基准，把百分比变成条数</div>
+    <div class="tblwrap"><table>
+      <thead><tr><th>类别</th><th class="n">原条数</th><th class="n">新条数</th><th class="n">CPI</th><th class="n">新周期</th></tr></thead>
+      <tbody>
+        <tr><td>Integer ALU</td><td class="n">50</td><td class="n">25</td><td class="n">1</td><td class="n">25</td></tr>
+        <tr><td>Load</td><td class="n">20</td><td class="n">24</td><td class="n">3</td><td class="n">72</td></tr>
+        <tr><td>Store</td><td class="n">10</td><td class="n">12</td><td class="n">3</td><td class="n">36</td></tr>
+        <tr><td>Branch</td><td class="n">15</td><td class="n">18</td><td class="n">2</td><td class="n">36</td></tr>
+        <tr><td>Floating-Point</td><td class="n">5</td><td class="n">4</td><td class="n">16</td><td class="n">64</td></tr>
+        <tr><td><b>合计</b></td><td class="n"><b>100</b></td><td class="n"><b>83</b></td><td class="n">—</td><td class="n"><b>233</b></td></tr>
+      </tbody>
+    </table></div>
+    <p>原周期数 = 100 × 2.5 = <b>250</b>（与 A1 一致，可作验算）。</p>
+    <div class="step">② 新 CPI 与新 MIPS</div>
+    <div class="eq">新 CPI = 233 ÷ 83 = 2.807</div>
+    <div class="eq">新 MIPS = 800 ÷ 2.807 = 285.0</div>
+    <div class="ans">CPI ≈ 2.807　　MIPS ≈ 285.0</div>
+    <div class="step">③ 加速比（频率不变，比周期数即可）</div>
+    <div class="eq">250 ÷ 233 = 1.073</div>
+    <div class="ans">加速比 ≈ 1.073（快约 7.3%）</div>
+    <div class="step">④ 评论 —— 这才是这题的考点</div>
+    <p>CPI 从 2.5 <b>升</b>到 2.807，MIPS rating 从 320 <b>降</b>到 285，但程序实际<b>快了 7.3%</b>。</p>
+    <p>原因是编译器删掉的恰恰是最便宜的 ALU 指令（CPI = 1），剩下的指令里「贵指令」占比变高，平均 CPI 自然上升；但指令总数从 100 降到 83，总周期数从 250 降到 233，真正的工作量减少了。</p>
+    <div class="pt"><b>陷阱：</b>只看 CPI 或 MIPS 都会得出「变慢了」的错误结论。唯一可信的是 <code>CPU 时间 = IC × CPI ÷ f</code> —— IC 掉 17%，CPI 涨 12%，净效果是时间降到 93.2%。这句评论通常值 2–3 分。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">A3</span><span class="qt">Amdahl 定律：换 FPU 的加速上限</span><span class="qm">5 分</span></div>
+  <div class="qb">
+    <p>在 A2 的优化代码基础上，换装一个新的浮点单元，可以显著降低浮点指令的 CPI，且不影响时钟频率和其它功能。</p>
+    <p>用 Amdahl 定律求可能达到的<b>最大总加速比</b>。写明你的假设。</p>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 找出「可被改进的部分」占多大比例</div>
+    <p>A2 的优化代码共 233 个周期，其中浮点占 <b>4 × 16 = 64</b> 个：</p>
+    <div class="eq">f = 64 ÷ 233 = 0.2747</div>
+    <div class="step">② 套 Amdahl 上限</div>
+    <div class="eq">Speedup_max = 1 ÷ (1 − f) = 233 ÷ (233 − 64) = 233 ÷ 169</div>
+    <div class="ans">最大加速比 ≈ 1.379</div>
+    <div class="step">③ 必须写出的假设</div>
+    <ol>
+      <li>浮点部分的执行时间可压缩到趋近 0（数学极限，物理上做不到）</li>
+      <li>时钟频率不变</li>
+      <li>指令数与指令混合比例不变</li>
+      <li>非浮点部分完全不受影响</li>
+    </ol>
+    <div class="pt"><b>加分写法：</b>再给一个现实上界——浮点 CPI 最低也就到 1（一条指令总得占一个周期），此时总周期 = 233 − 64 + 4 = 173，加速比 = 233 ÷ 173 ≈ <b>1.347</b>。把 1.379 当理论上界、1.347 当实际上界一起写，改卷老师会喜欢。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">A4</span><span class="qt">倒推：预测器要多准才值得装</span><span class="qm">10 分</span></div>
+  <div class="qb">
+    <p>某 CPU 有 <b>50% 的时间</b>花在分支指令上。加装分支预测后，<b>预测正确</b>时一条分支快 <b>4 倍</b>，<b>预测错误</b>时慢 <b>2 倍</b>。</p>
+    <ol>
+      <li>要达到 1.25 倍的总加速比，预测准确率至少要多高？</li>
+      <li>准确率低到多少时，加装预测器反而得不偿失？</li>
+      <li>即使预测 100% 正确，总加速比的上限是多少？</li>
+    </ol>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 先把总时间拆成两块</div>
+    <p>设原总时间 = 1，准确率 = a。<b>快 4 倍 ⇒ 时间 × 1/4；慢 2 倍 ⇒ 时间 × 2。</b></p>
+    <div class="eq">T′ = 0.5 + 0.5 [ a/4 + 2(1 − a) ]</div>
+    <div class="step">② 解第 (1) 问</div>
+    <p>加速比 1.25 ⇒ T′ = 1 ÷ 1.25 = 0.8：</p>
+    <div class="eq">0.5 [ 0.25a + 2 − 2a ] = 0.3</div>
+    <div class="eq">0.25a + 2 − 2a = 0.6　⇒　−1.75a = −1.4</div>
+    <div class="ans">a = 0.8，即准确率至少 80%</div>
+    <div class="step">③ 第 (2) 问：盈亏平衡点</div>
+    <p>令加速比 = 1，即 T′ = 1：</p>
+    <div class="eq">0.25a + 2 − 2a = 1　⇒　−1.75a = −1　⇒　a = 4/7</div>
+    <div class="ans">a = 4/7 ≈ 57.1%</div>
+    <p>低于此值，预测器<b>反而让机器变慢</b>——因为猜错的惩罚（2 倍）比猜对的奖励（1/4）更重。</p>
+    <div class="step">④ 第 (3) 问：理论上限</div>
+    <div class="eq">a = 1 ⇒ T′ = 0.5 + 0.5 × 0.25 = 0.625</div>
+    <div class="ans">上限 = 1 ÷ 0.625 = 1.6</div>
+    <p>这就是 Amdahl 天花板：剩下那 50% 的非分支时间纹丝不动。</p>
+    <div class="tblwrap"><table>
+      <thead><tr><th class="n">准确率</th><th class="n">50%</th><th class="n">57.1%</th><th class="n">70%</th><th class="n">80%</th><th class="n">90%</th><th class="n">100%</th></tr></thead>
+      <tbody><tr><td class="n">加速比</td><td class="n">0.941</td><td class="n">1.000</td><td class="n">1.127</td><td class="n">1.250</td><td class="n">1.404</td><td class="n">1.600</td></tr></tbody>
+    </table></div>
+    <div class="pt"><b>陷阱：</b>「快 k 倍」是时间<b>除以</b> k，「慢 k 倍」是时间<b>乘以</b> k。写反了整题作废，这是这类题唯一的技术难点。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">A5</span><span class="qt">流水线 CPI 的最紧上界</span><span class="qm">5 分</span></div>
+  <div class="qb">
+    <p>某流水线 CPU 有如下特性：</p>
+    <ol>
+      <li>每条浮点除法指令最多 <b>24 个周期</b>完成；</li>
+      <li>其它指令最多 <b>4 个周期</b>完成（忽略 cache 缺失）；</li>
+      <li>任何<b>使用除法结果</b>的指令，要等最近一条除法完成后才开始执行；</li>
+      <li>其它指令都在前一条指令开始后的 <b>1 个周期</b>开始执行。</li>
+    </ol>
+    <p>程序 Q 在<b>每条除法之后</b>都紧跟 <b>1 条使用除法结果的指令</b>和<b>至少 3 条无关指令</b>。求该 CPU 运行 Q 时 CPI 的最紧上界。</p>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 先判断哪个数据用得上</div>
+    <p>「其它指令 4 个周期」是<b>干扰项</b>——规则 4 保证每周期能发射一条，没有任何指令在等它们的结果，所以这个 4 从头到尾用不上。唯一会造成停顿的是规则 3。</p>
+    <div class="step">② 排时间线（设除法在周期 0 开始）</div>
+    <div class="tblwrap"><table>
+      <thead><tr><th>指令</th><th class="n">开始周期</th><th>依据</th></tr></thead>
+      <tbody>
+        <tr><td>浮点除法</td><td class="n">0</td><td>起点</td></tr>
+        <tr><td>使用结果的指令</td><td class="n">24</td><td>规则 3：必须等除法完成</td></tr>
+        <tr><td>无关指令 ①</td><td class="n">25</td><td>比前一条晚 1 周期</td></tr>
+        <tr><td>无关指令 ②</td><td class="n">26</td><td>同上</td></tr>
+        <tr><td>无关指令 ③</td><td class="n">27</td><td>同上</td></tr>
+        <tr><td>下一条除法</td><td class="n">28</td><td>新一轮开始</td></tr>
+      </tbody>
+    </table></div>
+    <div class="eq">CPI ≤ 28 ÷ 5 = 5.6</div>
+    <div class="ans">CPI ≤ 5.6</div>
+    <div class="step">③ 为什么这是「最紧」的</div>
+    <p><b>自由度一（无关指令条数 k）：</b>一轮周期 = 25 + k，指令数 = k + 2，CPI = (25+k)/(k+2)。k = 3 时 5.6；k = 4 时 4.83；k = 5 时 4.29——单调递减，<b>k = 3 最坏</b>。</p>
+    <p><b>自由度二（排列顺序）：</b>若把 3 条无关指令排在使用结果的指令<b>之前</b>，它们就被塞进了 24 周期的空洞里：除法 0，无关 1、2、3，使用结果 24，下一条除法 25 ⇒ CPI = 25/5 = 5.0。比 5.6 小。</p>
+    <p>所以 5.6 是取遍所有合法情况的最大值，且该排法合法、可达 ⇒ 既是上界又可达 ⇒ <b>最紧</b>。</p>
+    <div class="pt"><b>通式：</b>除法延迟 L、后跟 k 条无关指令时，<code>CPI ≤ (L + k + 1) / (k + 2)</code>。本题 L = 24、k = 3 ⇒ 28/5。</div>
+  </div></details>
+</div>
+
+<h2>B 组　总线 / I/O / 存储<span class="en">Lecture 6</span></h2>
+
+<div class="q">
+  <div class="qhd"><span class="qn">B1</span><span class="qt">磁盘：延迟与传输各占多少</span><span class="qm">10 分</span></div>
+  <div class="qb">
+    <p>一块磁盘转速 <b>10000 RPM</b>，寻道时间 <b>5 ms</b>，传输率 <b>100 MB/s</b>。</p>
+    <ol>
+      <li>读取 <b>200 个各 1.2 MB</b> 的文件（分散存放）需要多久？其中延迟占多大比例？</li>
+      <li>若这些数据合并成<b>一个连续的 240 MB 文件</b>，又需要多久？加速多少倍？</li>
+    </ol>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 先算平均延迟</div>
+    <div class="eq">每转 = 60000 ÷ 10000 = 6 ms</div>
+    <div class="eq">平均旋转延迟 = 6 ÷ 2 = 3 ms　（平均等半圈）</div>
+    <div class="eq">平均延迟 = 寻道 5 + 旋转 3 = 8 ms</div>
+    <div class="step">② 第 (1) 问：200 个分散的小文件</div>
+    <p>每个文件都要重新寻道 + 等旋转，然后才传输：</p>
+    <div class="eq">传输 = 1.2 MB ÷ 100 MB/s = 12 ms</div>
+    <div class="eq">每文件 = 8 + 12 = 20 ms　⇒　200 × 20 = 4000 ms</div>
+    <div class="ans">4.0 秒，其中延迟占 8/20 = 40%</div>
+    <div class="step">③ 第 (2) 问：一个连续大文件</div>
+    <p>只需要<b>一次</b>寻道和旋转，之后连续传完：</p>
+    <div class="eq">8 ms + 240 MB ÷ 100 MB/s = 8 + 2400 = 2408 ms</div>
+    <div class="ans">2.408 秒，加速 4000 ÷ 2408 ≈ 1.66 倍</div>
+    <div class="pt"><b>考点：</b>同样的数据量，仅仅因为「分散 vs 连续」就差了 1.66 倍——<b>延迟是按次数收费的，传输是按字节收费的</b>。文件越小、个数越多，延迟占比越高。这也是为什么操作系统要做磁盘碎片整理，以及为什么 SSD（几乎没有寻道和旋转）对小文件的提升远大于对大文件。</div>
+    <div class="pt"><b>对照 Tutorial 5 Q2：</b>那道题<b>没给传输率</b>，所以只能算到 Latency（答案 700 ms）；这道题给了传输率，就必须把传输时间算进去。<b>题目给了什么参数，决定你能算到哪一步。</b></div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">B2</span><span class="qt">DMA 占用了多少 CPU 时间</span><span class="qm">8 分</span></div>
+  <div class="qb">
+    <p>一块视频采集卡以恒定 <b>163,840,000 bit/s</b> 产生数据。每个数据块先经一次 DMA 从采集卡传入主存缓冲区，再经一次 DMA 从缓冲区传到 SSD。DMA 块大小 <b>4096 字节</b>。CPU 主频 <b>200 MHz</b>，每次 DMA 传输需要 <b>800 个周期</b>设置、传输结束后再用 <b>400 个周期</b>处理中断。</p>
+    <ol>
+      <li>录制过程中，CPU 有多大比例的时间被占用？</li>
+      <li>数据率要达到多少，才会把 CPU 完全占满？</li>
+    </ol>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 一秒钟有多少个数据块</div>
+    <div class="eq">163,840,000 ÷ 8 = 20,480,000 字节/秒</div>
+    <div class="eq">20,480,000 ÷ 4096 = 5,000 块/秒</div>
+    <div class="step">② 每块要几次 DMA —— 最容易漏的一步</div>
+    <p>题干说得很明白：每块要<b>两次</b>（采集卡→主存，主存→SSD）：</p>
+    <div class="eq">5,000 × 2 = 10,000 次 DMA / 秒</div>
+    <div class="step">③ 每次占用 CPU 多少周期</div>
+    <p>DMA 的意义是搬运本身不用 CPU 管，但<b>两头的手续还得 CPU 做</b>：</p>
+    <div class="eq">800（设置）+ 400（中断服务）= 1,200 周期/次</div>
+    <div class="step">④ 占比</div>
+    <div class="eq">10,000 × 1,200 = 12,000,000 周期/秒</div>
+    <div class="eq">12,000,000 ÷ 200,000,000 = 0.06</div>
+    <div class="ans">占用 6%</div>
+    <div class="step">⑤ 第 (2) 问：占满需要多大数据率</div>
+    <div class="eq">每秒可用周期 200×10⁶ ÷ 1200 = 166,667 次 DMA</div>
+    <div class="eq">÷ 2 = 83,333 块 × 4096 B = 341,333,333 B/s</div>
+    <div class="ans">约 341 MB/s（≈ 2.73 Gbit/s）</div>
+    <div class="pt"><b>考点：</b>DMA 的威力就在这两个数字里。若改用程序查询 I/O，CPU 要亲手搬每一个字节，占用率会飙到几十个百分点；用了 DMA，CPU 只在每块的头尾出面一下，2000 万字节/秒才占 6%，而且要到 341 MB/s 才会被占满。这就是讲义 6 那句 "The CPU gives bus control temporarily to the DMA controller" 的定量版本。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">B3</span><span class="qt">同步总线的带宽、效率与时钟偏移</span><span class="qm">10 分</span></div>
+  <div class="qb">
+    <p>一条同步总线工作在 <b>200 MHz</b>，数据通路 <b>64 位</b>。每次事务用 <b>1 个周期</b>送地址，随后<b>每个周期</b>传一个数据字。</p>
+    <ol>
+      <li>传输一个 <b>64 字节</b>的块，需要多少时间？实际带宽和总线效率各是多少？</li>
+      <li>若每次只传 <b>1 个字（8 字节）</b>，效率又是多少？说明差别的原因。</li>
+      <li>若把时钟提到 <b>1 GHz</b>，而总线两端的时钟偏移（skew）固定为 <b>1 ns</b>，会发生什么？</li>
+    </ol>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 第 (1) 问</div>
+    <div class="eq">64 字节 ÷ 8 字节/字 = 8 个字</div>
+    <div class="eq">周期数 = 1（地址）+ 8（数据）= 9</div>
+    <div class="eq">时间 = 9 ÷ 200 MHz = 45 ns</div>
+    <div class="eq">带宽 = 64 B ÷ 45 ns = 1.422 GB/s</div>
+    <div class="eq">效率 = 8 ÷ 9 = 88.9%</div>
+    <div class="ans">45 ns　｜　1.42 GB/s　｜　效率 88.9%</div>
+    <div class="step">② 第 (2) 问</div>
+    <div class="eq">周期数 = 1 + 1 = 2，时间 = 10 ns</div>
+    <div class="eq">带宽 = 8 B ÷ 10 ns = 0.8 GB/s，效率 = 1/2 = 50%</div>
+    <div class="ans">效率只有 50%，带宽掉到 0.8 GB/s</div>
+    <p>原因：<b>地址那一个周期是固定开销</b>，它被摊薄在数据周期上。块越大摊得越薄（8 个数据字时开销只占 1/9），块越小占比越高。这就是为什么现代总线和 cache 都用「成块传输」。</p>
+    <div class="step">③ 第 (3) 问：时钟偏移</div>
+    <div class="eq">200 MHz ⇒ 周期 5 ns，1 ns 偏移 = 周期的 20%，还能容忍</div>
+    <div class="eq">1 GHz ⇒ 周期 1 ns，1 ns 偏移 = <b>整整一个周期</b></div>
+    <p>此时总线两端对「现在是第几个周期」的理解完全不一致，同步协议直接失效。</p>
+    <div class="pt"><b>这正是讲义 6 讲总线演进的理由：</b>频率一高，同步总线就撞上时钟偏移的墙。解决办法要么换成<b>异步总线</b>（用四相全互锁握手，不依赖共同时钟），要么像 PCIe 那样<b>把时钟嵌进数据流</b>里由接收端恢复，并从「并行共享」转向「串行点对点」。</div>
+  </div></details>
+</div>
+
+<div class="q">
+  <div class="qhd"><span class="qn">B4</span><span class="qt">带宽可以叠加，延迟不能</span><span class="qm">8 分</span></div>
+  <div class="qb">
+    <p>一个存储阵列有 <b>4 块磁盘</b>，每块的传输率 <b>150 MB/s</b>，平均访问延迟 <b>10 ms</b>。</p>
+    <ol>
+      <li>读取一个 <b>300 MB</b> 的文件，它被条带化（striping）均匀分布在 4 块盘上。需要多久？比单盘存放快多少？</li>
+      <li>读取一个 <b>4 KB</b> 的数据块（只在一块盘上）需要多久？增加盘数对这个操作有帮助吗？</li>
+      <li>由此总结一条原则。</li>
+    </ol>
+  </div>
+  <details><summary>查看详解</summary><div class="sol">
+    <div class="step">① 第 (1) 问：条带化读大文件</div>
+    <p>4 块盘<b>同时</b>工作，每块只需读 300 ÷ 4 = 75 MB：</p>
+    <div class="eq">10 ms + 75 MB ÷ 150 MB/s = 10 + 500 = 510 ms</div>
+    <p>若全部放在单块盘上：</p>
+    <div class="eq">10 ms + 300 ÷ 150 = 10 + 2000 = 2010 ms</div>
+    <div class="ans">510 ms，比单盘快约 3.94 倍</div>
+    <p>注意加速比是 3.94 而不是 4——那 10 ms 的延迟<b>没有被分摊掉</b>。</p>
+    <div class="step">② 第 (2) 问：读一个小块</div>
+    <div class="eq">传输时间 = 4 KB ÷ 150 MB/s ≈ 0.026 ms</div>
+    <div class="eq">总时间 = 10 + 0.026 ≈ 10.03 ms</div>
+    <div class="ans">10.03 ms，而且增加盘数<b>完全没有帮助</b></div>
+    <p>因为 99.7% 的时间花在那一块盘的机械寻道和旋转上，其它三块盘帮不上任何忙——一个 4 KB 的块没法被切成四份分给四块盘去找。</p>
+    <div class="step">③ 第 (3) 问：原则</div>
+    <div class="pt"><b>带宽可以叠加，延迟不能。</b>加设备、加通道、加宽总线，都能成倍提高<b>吞吐</b>；但单次操作的<b>延迟</b>由物理过程（磁头移动、盘片旋转、信号飞行时间）决定，并行化对它无能为力。<br><br>这条原则在整门课里反复出现：流水线提高吞吐但不缩短单条指令的延迟；cache 减少的是延迟而不是带宽；多核提高吞吐但单线程延迟不变。</div>
+  </div></details>
+</div>
+
+<footer>
+  9 道题全部为原创，数值已逐题程序校验 · 题型对应 2023-24 Q1、Tutorial 5 Q1/Q2、2025-26 Q2(d) 与讲义 6 的总线与存储章节
+</footer>
+
+</div>
+
+</body></html>

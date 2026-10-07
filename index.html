@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EE6156 复习站</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#f4f6f7; --surface:#ffffff; --surface-2:#eef1f3;
+  --ink:#16202b; --ink-2:#3d4c59; --muted:#6b7986;
+  --line:#d6dde3; --key:#0b5f52; --key-soft:#e2efec;
+  --rust:#8f4610; --rust-soft:#f5e4d1;
+  --grid:rgba(22,32,43,.035);
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fb:'Source Sans 3','PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;
+  --fm:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --key:#5cc0ac; --key-soft:#12302b;
+  --rust:#ffc083; --rust-soft:#2b2011; --grid:rgba(228,234,239,.04);
+}}
+:root[data-theme="dark"]{
+  --ground:#0f151a; --surface:#18212a; --surface-2:#1f2a34;
+  --ink:#e4eaef; --ink-2:#b6c2cd; --muted:#8798a6;
+  --line:#2c3944; --key:#5cc0ac; --key-soft:#12302b;
+  --rust:#ffc083; --rust-soft:#2b2011; --grid:rgba(228,234,239,.04);
+}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--fb);font-size:15.5px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px}
+.wrap{max-width:880px;margin:0 auto;padding-block:44px 64px;padding-left:20px;padding-right:20px}
+.eyebrow{font-family:var(--fm);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust);margin:0 0 12px}
+h1{font-family:var(--fd);font-weight:700;font-size:clamp(28px,6vw,42px);letter-spacing:-.02em;line-height:1.1;margin:0 0 12px;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:60ch;margin:0 0 30px}
+.order{font-family:var(--fm);font-size:12px;color:var(--muted);border-top:2px solid var(--ink);padding-top:12px;margin-bottom:16px}
+.list{display:flex;flex-direction:column;gap:12px}
+a.app{display:grid;grid-template-columns:44px 1fr auto;gap:4px 16px;align-items:start;text-decoration:none;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:16px 18px;transition:border-color .15s,transform .15s}
+a.app:hover{border-color:var(--key);transform:translateX(3px)}
+a.app:focus-visible{outline:2px solid var(--key);outline-offset:2px}
+.n{grid-row:span 2;font-family:var(--fm);font-weight:600;font-size:13px;color:var(--key);background:var(--key-soft);
+  border-radius:2px;text-align:center;padding:5px 0}
+.t{font-family:var(--fd);font-weight:600;font-size:17px}
+.d{grid-column:2;color:var(--muted);font-size:14px}
+.tag{grid-row:1;grid-column:3;font-family:var(--fm);font-size:11px;color:var(--rust);background:var(--rust-soft);
+  padding:3px 8px;border-radius:2px;white-space:nowrap}
+.note{margin-top:34px;padding:14px 16px;border-left:3px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-size:13.5px;max-width:70ch}
+.note b{font-weight:600}
+footer{margin-top:28px;font-family:var(--fm);font-size:11.5px;color:var(--muted)}
+@media (max-width:520px){ a.app{grid-template-columns:38px 1fr} .tag{grid-row:auto;grid-column:2;justify-self:start} }
+@media (prefers-reduced-motion:reduce){ a.app{transition:none} a.app:hover{transform:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">IE4756 / IE6156 / EE6156 · Computer Architecture Part 1</p>
+  <h1>计算机体系结构 · 复习站</h1>
+  <p class="lede">五个可以直接在浏览器里打开的学习页。从系统学习到逐题精讲，再到考前速查和自测练习，按下面的顺序用效果最好。</p>
+
+  <div class="order">推荐顺序 · 学 → 练 → 查</div>
+  <nav class="list" aria-label="学习页目录">
+    <a class="app" href="chip-blueprint.html">
+      <span class="n">01</span><span class="t">芯片蓝图</span><span class="tag">系统学习</span>
+      <span class="d">12 个模块覆盖讲义 1–6：世代史、抽象机、加法器与触发器、MIPS 编码、性能、总线与存储。含交互式指令编码器和总线时序动画，进度自动记录。</span>
+    </a>
+    <a class="app" href="tutorials.html">
+      <span class="n">02</span><span class="t">习题册</span><span class="tag">逐题精讲</span>
+      <span class="d">Tutorial 1–5 全部题目的完整推导：图灵机转移表、RAM 程序、TM 编码、分离缓存、中断、加法器延迟、MIPS 编解码、磁盘延迟。</span>
+    </a>
+    <a class="app" href="mock-paper.html">
+      <span class="n">03</span><span class="t">模拟卷</span><span class="tag">整卷练习</span>
+      <span class="d">按近年真题四大题结构出的原创试题：晶体管电路与状态机、MIPS、缓存、流水线。答案折叠，先做再看。</span>
+    </a>
+    <a class="app" href="practice.html">
+      <span class="n">04</span><span class="t">性能与 I/O 练习</span><span class="tag">专项练习</span>
+      <span class="d">9 道 CPI、Amdahl、流水线 CPI 上界、磁盘延迟、DMA 占用、总线带宽题，每题标出真题里的扣分陷阱。</span>
+    </a>
+    <a class="app" href="cheatsheet.html">
+      <span class="n">05</span><span class="t">考前速查</span><span class="tag">可打印</span>
+      <span class="d">一页纸：必背公式、21 道 tutorial 题的一句话结论、12 条易错点、三套考场解题流程。</span>
+    </a>
+  </nav>
+
+  <div class="note">
+    <b>说明</b>　这些是个人复习笔记，不是 NTU 官方材料。页面里引用的题目和讲义要点仅用于学习；课程原始讲义与试卷的版权归南洋理工大学所有，本仓库不包含原文件。考试范围请以 NTULearn 公告为准。
+  </div>
+  <footer>纯静态 HTML · 无需安装 · 手机也能看</footer>
+</div>
+</body>
+</html>

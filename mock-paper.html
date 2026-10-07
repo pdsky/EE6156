@@ -1,0 +1,843 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IE4756 模拟卷</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#eaeff4; --bg-grid:#dde6ee; --surface:#ffffff; --surface-2:#e4ebf2; --surface-3:#d2dfea;
+  --ink:#11212e; --ink-soft:#32485a; --muted:#5b7081;
+  --accent:#b85c17; --accent-strong:#8f4610; --accent-soft:#f5e4d1; --accent-ink:#fff8f0;
+  --line:#c5d3df; --line-strong:#a7bbca;
+  --teal:#0e6d61; --teal-soft:#dbefec; --warn:#a5301d; --warn-soft:#f7e1dc;
+  --shadow:0 1px 2px rgba(20,35,50,.06), 0 10px 26px -14px rgba(20,35,50,.22);
+  --radius:3px;
+  --fd:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif;
+  --fb:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'IBM Plex Mono',ui-monospace,'SF Mono',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#091624; --bg-grid:#0e1f31; --surface:#0e2035; --surface-2:#142e46; --surface-3:#1b3a57;
+    --ink:#e9f1f7; --ink-soft:#c0d1df; --muted:#88a2b7;
+    --accent:#ef9f4f; --accent-strong:#ffc083; --accent-soft:#2b2011; --accent-ink:#1b1102;
+    --line:#22415e; --line-strong:#2e577a; --teal:#5fd9c8; --teal-soft:#0d2e2a;
+    --warn:#ff8b71; --warn-soft:#391a14;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#091624; --bg-grid:#0e1f31; --surface:#0e2035; --surface-2:#142e46; --surface-3:#1b3a57;
+  --ink:#e9f1f7; --ink-soft:#c0d1df; --muted:#88a2b7;
+  --accent:#ef9f4f; --accent-strong:#ffc083; --accent-soft:#2b2011; --accent-ink:#1b1102;
+  --line:#22415e; --line-strong:#2e577a; --teal:#5fd9c8; --teal-soft:#0d2e2a;
+  --warn:#ff8b71; --warn-soft:#391a14;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+body{
+  margin:0;
+  background:
+    repeating-linear-gradient(0deg, var(--bg-grid) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 30px),
+    var(--bg);
+  color:var(--ink); font-family:var(--fb); font-size:16px; line-height:1.66; -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+::selection{background:var(--accent-soft); color:var(--ink)}
+
+.bar{
+  position:sticky; top:env(safe-area-inset-top, 0px); z-index:30;
+  display:flex; align-items:center; gap:10px; flex-wrap:nowrap; overflow-x:auto;
+  padding:9px 16px; background:color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+}
+.bar .who{font-family:var(--fm);font-size:12px;letter-spacing:.06em;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.bar .who b{color:var(--ink);font-weight:700}
+.bar nav{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
+.bar nav a{font-family:var(--fm);font-size:12px;text-decoration:none;white-space:nowrap;color:var(--ink-soft);
+  border:1px solid var(--line-strong);background:var(--surface-2);padding:5px 10px;border-radius:20px}
+.bar nav a:hover{background:var(--surface-3);color:var(--ink)}
+
+.wrap{max-width:880px;margin:0 auto;padding-inline:20px;padding-block:0 100px}
+
+.hero{padding-block:46px 28px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--fm);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-strong);
+  margin:0 0 14px 0;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:24px;height:1px;background:var(--accent-strong)}
+h1{font-family:var(--fd);font-weight:700;font-size:clamp(30px,5.6vw,46px);line-height:1.08;margin:0 0 14px 0;text-wrap:balance;letter-spacing:-.01em}
+.lede{max-width:64ch;color:var(--ink-soft);font-size:16.5px;margin:0 0 22px 0}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:6px}
+.rule{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);padding:11px 14px;box-shadow:var(--shadow)}
+.rule .k{font-family:var(--fm);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.rule .v{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--ink)}
+
+.intel{padding-block:34px 0}
+h2.sec{font-family:var(--fd);font-size:clamp(21px,3.4vw,27px);margin:0 0 10px 0;font-weight:700}
+p.secnote{color:var(--muted);font-size:14.5px;max-width:66ch;margin:0 0 4px 0}
+
+.paper{padding-top:44px;scroll-margin-top:66px}
+.paperhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+.paperhead .no{font-family:var(--fm);font-size:12.5px;font-weight:700;color:var(--accent-strong);
+  border:1px solid var(--accent-strong);padding:2px 8px;border-radius:3px;letter-spacing:.05em}
+.paperhead h2{font-family:var(--fd);font-size:clamp(22px,3.5vw,29px);margin:0;font-weight:700}
+.partflag{font-family:var(--fm);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 9px;border-radius:20px;border:1px solid var(--teal);color:var(--teal);background:var(--teal-soft)}
+.partflag.p2{border-color:var(--line-strong);color:var(--muted);background:var(--surface-2)}
+
+.q{margin-top:26px;border-top:1px solid var(--line);padding-top:20px}
+.q:first-of-type{border-top:none}
+.qtop{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.qno{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--accent-strong);letter-spacing:.04em;white-space:nowrap}
+.marks{font-family:var(--fm);font-size:11.5px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.q p{max-width:70ch;margin:0 0 12px 0}
+.q h4{font-family:var(--fd);font-size:15.5px;margin:18px 0 7px 0;color:var(--ink)}
+ol.parts{margin:0 0 12px 0;padding-left:0;list-style:none;max-width:70ch;counter-reset:pt}
+ol.parts>li{position:relative;padding-left:32px;margin-bottom:10px}
+ol.parts>li::before{counter-increment:pt;content:"(" counter(pt,lower-alpha) ")";position:absolute;left:0;top:0;
+  font-family:var(--fm);font-size:13px;color:var(--accent-strong);font-weight:600}
+ol.roman{counter-reset:rn;margin:8px 0 0 0;padding-left:0;list-style:none}
+ol.roman>li{position:relative;padding-left:30px;margin-bottom:6px}
+ol.roman>li::before{counter-increment:rn;content:"(" counter(rn,lower-roman) ")";position:absolute;left:0;top:0;
+  font-family:var(--fm);font-size:12.5px;color:var(--muted)}
+ul.list{margin:0 0 13px 0;padding-left:0;list-style:none;max-width:70ch}
+ul.list li{position:relative;padding-left:19px;margin-bottom:7px}
+ul.list li::before{content:"▸";position:absolute;left:0;top:1px;color:var(--accent-strong);font-size:12.5px}
+
+code{font-family:var(--fm);font-size:.9em;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:2px;padding:1px 5px;overflow-wrap:break-word}
+pre.code,pre.dia{font-family:var(--fm);font-size:13px;line-height:1.7;margin:14px 0;padding:14px 16px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto;
+  box-shadow:var(--shadow);color:var(--ink)}
+pre.dia{font-size:14.5px;line-height:1.5;letter-spacing:.05em;text-align:left}
+pre.code b{color:var(--accent-strong);font-weight:600}
+pre.code i{color:var(--muted);font-style:normal}
+
+details.sol{border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:0 var(--radius) var(--radius) 0;
+  background:var(--surface);margin:14px 0 4px 0;max-width:70ch;box-shadow:var(--shadow)}
+details.sol>summary{cursor:pointer;list-style:none;padding:11px 15px;font-family:var(--fm);font-size:12.5px;
+  font-weight:700;color:var(--teal);letter-spacing:.04em;display:flex;align-items:center;gap:9px}
+details.sol>summary::-webkit-details-marker{display:none}
+details.sol>summary::before{content:"▸";font-size:12px;transition:transform .18s}
+details.sol[open]>summary::before{transform:rotate(90deg)}
+details.sol[open]>summary{border-bottom:1px solid var(--line)}
+.solbody{padding:14px 16px 16px 16px}
+.solbody>*:first-child{margin-top:0}
+.solbody>*:last-child{margin-bottom:0}
+.solbody p{margin:0 0 11px 0}
+
+.key{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-family:var(--fm);font-size:14.5px;font-weight:600;
+  color:var(--teal);background:var(--teal-soft);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:10px 13px;margin:0 0 13px 0}
+.key .lb{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:700}
+
+.note{border:1px solid var(--line);border-left:3px solid var(--accent-strong);background:var(--surface-2);
+  border-radius:0 var(--radius) var(--radius) 0;padding:12px 15px;margin:14px 0;max-width:70ch}
+.note .lb{font-family:var(--fm);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--accent-strong);font-weight:700;margin-bottom:4px}
+.note p:last-child{margin-bottom:0}
+.note.warn{border-left-color:var(--warn)} .note.warn .lb{color:var(--warn)}
+
+.tw{overflow-x:auto;margin:14px 0 18px 0;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:460px;background:var(--surface)}
+caption{text-align:left;font-family:var(--fm);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line)}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{font-family:var(--fm);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+  background:var(--surface-2);font-weight:600;white-space:nowrap}
+td.m,th.m{font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-2)}
+td small{display:block;color:var(--muted);font-size:12px}
+
+.fig{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:17px;margin:15px 0 18px 0}
+.fig .cap{font-family:var(--fm);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.fig .scroll{overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig .foot{font-size:13px;color:var(--muted);margin:9px 0 0 0;max-width:66ch}
+
+footer{border-top:1px solid var(--line);margin-top:60px;padding-block:22px 10px;color:var(--muted);font-size:12.5px;font-family:var(--fm)}
+</style>
+
+<div class="bar">
+  <span class="who"><b>IE4756</b> · 模拟卷 · Practice Paper</span>
+  <nav><a href="#intel">考点</a><a href="#p1">卷一</a><a href="#p2">卷二</a><a href="#p3">卷三</a><a href="#p4">卷四</a></nav>
+</div>
+
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">按 2024S2 / 2025-26 真题结构出题 · 附完整解答</p>
+  <h1>照着真题的骨架，<br>把每个考点再打一遍</h1>
+  <p class="lede">题目是新出的，但结构、问法和分值分布严格对照近两年真题与 Quiz 1。答案默认折叠——先自己动笔，写完再展开对。数值结果全部经程序验算。</p>
+  <div class="rules">
+    <div class="rule"><div class="k">题量</div><div class="v">4 大题</div></div>
+    <div class="rule"><div class="k">分值</div><div class="v">每题等分</div></div>
+    <div class="rule"><div class="k">建议用时</div><div class="v">2 小时</div></div>
+    <div class="rule"><div class="k">形式</div><div class="v">闭卷</div></div>
+  </div>
+</header>
+
+<section class="intel" id="intel">
+  <h2 class="sec">先看清楚考点分布</h2>
+  <p class="secnote">这是从 2024S2、2025-26 两份真题和 Quiz 1 里归纳出来的规律。四道大题的主题这两年<strong>完全固定</strong>，只是具体数字和电路在换。</p>
+  <div class="tw">
+    <table>
+      <caption>四道大题各考什么（2024S2 / 2025-26 对照）</caption>
+      <thead><tr><th class="m">题号</th><th>主题</th><th>反复出现的题型</th><th class="m">对应模块</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="m"><strong>Q1</strong></td><td><strong>晶体管级数字电路</strong></td>
+          <td>① 用 CMOS / 传输门 + NOT 构造某个门或 MUX，并论证为什么这样更好<br>② 扇入扇出与门延迟的定量分析<br>③ <strong>给状态图，用 D 触发器搭时序电路</strong>（2024S2、2025-26、Quiz 1 <u>三次全考</u>）</td>
+          <td class="m">06 · 07</td>
+        </tr>
+        <tr>
+          <td class="m"><strong>Q2</strong></td><td><strong>MIPS 指令集</strong></td>
+          <td>① 汇编 → 十六进制（2 条）<br>② 十六进制 → 汇编（2 条）<br>③ 跳转指令族的必要性推理（J / JAL / JR / JALR 两年都考）<br>④ 给流水线时序规则，求 CPI 界限（2025-26 新增）</td>
+          <td class="m">10 · 11</td>
+        </tr>
+        <tr>
+          <td class="m"><strong>Q3</strong></td><td><strong>缓存</strong><br><small>Part 2 内容</small></td>
+          <td>① 命中率 + 速度倍数 → 加速比<br>② 地址位划分（offset / index / tag）、额外存储、XOR 门数<br>③ 给访问序列，判断时间/空间局部性或模拟缓存填充</td>
+          <td class="m">Part 2</td>
+        </tr>
+        <tr>
+          <td class="m"><strong>Q4</strong></td><td><strong>流水线</strong><br><small>Part 2 内容</small></td>
+          <td>① 各级耗时 → 加速比与延迟<br>② 给指令序列，识别冒险类型及解决办法<br>③ 停顿比例 / 延迟槽 → 实际加速比</td>
+          <td class="m">Part 2</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">
+    <div class="lb">两个必须知道的结论</div>
+    <p><strong>一、状态图那道题是送分题，也是必考题。</strong>三份卷子连考三次，题型一模一样，只是位数和状态不同。解法是完全机械的五步流程（见卷一第 4 题的解答），练熟了十分钟内能拿满分。</p>
+    <p><strong>二、Q1 和 Q2 是 Part 1 的内容，占整卷一半分数。</strong>Q3 缓存和 Q4 流水线属于 Part 2。下面卷三、卷四也照样出了题并给了完整解答，可以当预习用。</p>
+  </div>
+</section>
+
+<!-- ======================= 卷一 ======================= -->
+<section class="paper" id="p1">
+  <div class="paperhead">
+    <span class="no">Q1</span><h2>晶体管级数字电路</h2><span class="partflag">Part 1 · 模块 06–07</span>
+  </div>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">1 (a)</span><span class="marks">(10 Marks)</span></div>
+    <ol class="roman">
+      <li>为 <strong>3 输入 OR 门</strong>构造一个高效的 CMOS 电路。（用 PMOS / NMOS 晶体管符号表示。）</li>
+      <li>解释为什么你的电路比"把两个 2 输入 OR 门级联起来"更好。</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>(i)</strong> CMOS 天生只能直接做<em>反相</em>逻辑，所以正确做法是先做 NOR3，再串一级反相器：</p>
+      <ul class="list">
+        <li><strong>NOR3 的下拉网络</strong>：3 个 NMOS <strong>并联</strong>接到 GND——任何一个输入为 1，输出就被拉低到 0。</li>
+        <li><strong>NOR3 的上拉网络</strong>：3 个 PMOS <strong>串联</strong>接到 VDD——只有三个输入全为 0 时才导通，输出被拉高到 1。</li>
+        <li>这 6 个管子构成 NOR3，输出接一个<strong>反相器</strong>（1 PMOS + 1 NMOS）得到 OR3。</li>
+      </ul>
+      <div class="key"><span class="lb">总计</span> 6 + 2 = <strong>8 个晶体管</strong>，延迟 <strong>2 级门</strong></div>
+      <p><strong>(ii)</strong> 两个 2 输入 OR 级联的代价：每个 OR2 = NOR2(4 管) + NOT(2 管) = 6 管，两个就是 <strong>12 管</strong>；信号要依次穿过 NOR→NOT→NOR→NOT，共 <strong>4 级门延迟</strong>。</p>
+      <div class="tw"><table>
+        <caption>两种做法对比</caption>
+        <thead><tr><th></th><th class="m">单个 OR3</th><th class="m">两个 OR2 级联</th></tr></thead>
+        <tbody>
+          <tr><td>晶体管数</td><td class="m"><strong>8</strong></td><td class="m">12</td></tr>
+          <tr><td>门延迟</td><td class="m"><strong>2 级</strong></td><td class="m">4 级</td></tr>
+          <tr><td>面积 / 功耗</td><td class="m">更小</td><td class="m">更大</td></tr>
+        </tbody>
+      </table></div>
+      <p>所以更省面积、更省功耗，而且<strong>快一倍</strong>。</p>
+      <div class="note warn"><div class="lb">但要补一句才拿满分</div><p>必须指出这个优势<strong>不能无限外推</strong>：3 个 PMOS 串联的导通电阻是单管的 3 倍，而 PMOS 的空穴迁移率本来就只有 NMOS 的一半左右，所以上拉本来就慢。为了补偿必须把每个 PMOS 做得更宽，面积和输入电容都会上升。扇入再大下去，这笔账就会反过来——这正好是下一小题要问的。</p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">1 (b)</span><span class="marks">(5 Marks)</span></div>
+    <p>说明如果直接用上拉/下拉网络的技术去构造一个 <strong>32 输入 OR 门</strong>，会遇到哪些问题。应该怎么改进？</p>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>直接做意味着 NOR32：下拉是 32 个 NMOS 并联，<strong>上拉是 32 个 PMOS 串联</strong>。问题集中在串联这一侧：</p>
+      <ul class="list">
+        <li><strong>上拉电阻是单管的 32 倍</strong>，输出从 0 翻到 1 的时间被拉长几十倍——整个门的延迟完全由这条路径决定，慢到不可用。</li>
+        <li><strong>面积暴涨</strong>：为了把上拉速度补回来，每个串联 PMOS 都得做得很宽，而 PMOS 本来就需要比 NMOS 更大的宽度才能达到同样驱动力。</li>
+        <li><strong>输入电容变大</strong>：每个输入要驱动一个 NMOS 加一个（被加宽的）PMOS 的栅极，前一级的负载因此变重——大扇入直接转化成上一级的大扇出负担。</li>
+        <li><strong>体效应（body effect）</strong>：串联链中间的管子源极电位被抬高，阈值电压上升，导通能力进一步变差，越靠上越慢。</li>
+        <li><strong>并联侧的漏电流叠加</strong>：32 个 NMOS 的亚阈值漏电加在一起，静态功耗上升、噪声容限下降。</li>
+      </ul>
+      <div class="key"><span class="lb">改进办法</span> 做成<strong>树</strong>，不要做成一级</div>
+      <p>用多级<strong>小扇入</strong>的门拼出来。例如四输入一组：8 个 NOR4 → 结果再送进 2 个 NAND4 → 再一个 NOR2 …… 每个门的扇入都只有 4，各自都很快；而总延迟从"一级但极慢"变成 <strong>log₄32 ≈ 2–3 级正常速度的门</strong>。</p>
+      <p>这就是模块 05 讲快加法器时同一条原则的另一次应用：<strong>把 Θ(n) 的串联结构换成 Θ(log n) 的树形结构。</strong></p>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">1 (c)</span><span class="marks">(8 Marks)</span><span style="font-family:var(--fm);font-size:11px;color:var(--warn);font-weight:700">★ 2024S2 原题考法</span></div>
+    <p>只用<strong>传输门和 NOT 门</strong>，画出一个 2 选 1 多路选择器；然后说明如何用它搭出 <strong>8 选 1</strong> 多路选择器，并给出所用的传输门数量与传播延迟（每个 NOT 门 / 传输门各算 1 级门延迟）。</p>
+    <p>如果这个 8 选 1 选择器要处理 <strong>64 位宽</strong>的数据（即 8 路各 64 位输入、64 位输出），且要求<strong>最大扇入与最大扇出都不超过 8</strong>，应该怎么处理？给出总传播延迟（每个 NOT 门 / 传输门各算 1 级门延迟）。</p>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>2 选 1：</strong>输入 W、X，控制位 S。</p>
+      <ul class="list">
+        <li><strong>TG₁</strong> 接在 W 与输出之间，NMOS 栅极接 <code>S′</code>、PMOS 栅极接 <code>S</code> ⇒ S=0 时导通；</li>
+        <li><strong>TG₂</strong> 接在 X 与输出之间，栅极接法相反 ⇒ S=1 时导通；</li>
+        <li>一个 NOT 门产生 <code>S′</code>。两个 TG 的输出直接短接——控制互补，<strong>任意时刻恰好一条通路导通</strong>，不会冲突。</li>
+      </ul>
+      <p><strong>8 选 1：</strong>控制位 A、B、C（A 为最高位）。摆成<strong>三层二叉树</strong>：</p>
+      <pre class="code">第 1 层：4 个 2:1 MUX，全部由 <b>C</b> 控制 → 把 8 路收成 4 路
+第 2 层：2 个 2:1 MUX，全部由 <b>B</b> 控制 → 收成 2 路
+第 3 层：1 个 2:1 MUX，由 <b>A</b> 控制       → 收成 1 路</pre>
+      <div class="key"><span class="lb">规模</span> 7 个 2:1 MUX = <strong>14 个传输门</strong> + 3 个 NOT（每个控制位共享一个）</div>
+      <p><strong>传播延迟：</strong>信号要穿过 3 层传输门 = <strong>3 级门延迟</strong>。生成 A′/B′/C′ 的 NOT 门与数据路径<em>并行</em>，只在最开始加 1 级，所以从控制信号稳定算起总延迟约 <strong>4 级门</strong>。</p>
+      <h4>64 位宽：唯一的瓶颈是控制信号的扇出</h4>
+      <p>64 位就是把上面这个 1 位选择器<strong>原样复制 64 份</strong>并排放，第 i 份负责第 i 位。<strong>数据线完全各走各的</strong>——某一路输入的第 i 位只进第 i 份切片，扇出 = 1，毫无问题。</p>
+      <p>麻烦只出在 A、B、C 三根<strong>控制线</strong>上：64 份切片共用同一组控制信号，直接连的话一根线要带 64 个负载，<strong>扇出 = 64 ≫ 8</strong>。</p>
+
+      <div class="key"><span class="lb">解法</span> 给每根控制线建一棵 <strong>NOT 门缓冲树</strong>；因为 <strong>64 = 8²</strong>，恰好<strong>两层</strong></div>
+      <pre class="code">第 1 层： A 驱动 <b>8</b> 个 NOT 门        → 得到 8 份 A′   （A 的扇出 = 8 ✓）
+第 2 层： 每份 A′ 各驱动 <b>8</b> 个 NOT → 得到 <b>64</b> 份 A（每个门扇出 = 8 ✓）
+叶　子： 每份 A 各带 1 个切片            （扇出 = 1 ✓）
+
+8 × 8 = 64 —— 一层不够、三层多余，<b>正好两层</b>。</pre>
+      <p>还有个漂亮的副产品：<strong>两层 = 偶数次取反，极性自动还原</strong>，叶子拿到的正好还是 A 本身，不需要再额外配缓冲器。A′ 则在每个切片内部用一个本地 NOT 门生成（它的扇出只有切片里那几个传输门，完全合规）。</p>
+
+      <h4>为什么每一层必须是 NOT 门——"隔离"到底在隔离什么</h4>
+      <p>这是这道题真正的考点，必须答出来：</p>
+      <ul class="list">
+        <li><strong>传输门是无源开关，自己不产生任何驱动力。</strong>它导通时只是把输入端和输出端连通，输出的驱动能力完全来自上游那个源。</li>
+        <li>所以让一根线直接挂 64 个传输门的栅极，就是把 64 个栅电容<strong>全部叠加</strong>在同一个节点上——上升/下降沿会被拖得又平又慢，严重时下游根本判不出高低电平。</li>
+        <li><strong>NOT 门是有源 CMOS 门</strong>：它不转发输入的电流，而是<strong>从 VDD / GND 重新取电流</strong>去驱动下一级，顺手把被拖平的边沿<strong>恢复</strong>成满幅度、陡边沿。</li>
+        <li>这就是"隔离"的含义——把"1 个源带 64 个负载"这件做不到的事，拆成三级"1 个源带 8 个负载"，<strong>每一级都由一个全新的驱动器重新发力</strong>。</li>
+      </ul>
+
+      <h4>传播延迟</h4>
+      <pre class="code">控制路径 = 2（缓冲树两层）+ 1（切片内本地生成 A′/B′/C′） = <b>3</b> 门延迟
+数据路径 = 3 层传输门                                        = <b>3</b> 门延迟
+                                              总计 = <b>6 个门延迟</b></pre>
+      <p><em>（若是 4 选 1，数据路径只有 2 层传输门，总计就是 5 个门延迟。）</em></p>
+      <p><strong>扇入检查：</strong>NOT 门扇入 1；传输门只有 1 个数据输入；2 选 1 MUX 的输出节点上并接 2 个传输门——全部 ≤ 8 ✓</p>
+      <div class="note"><div class="lb">出题人为什么挑 64 和 8 这两个数</div><p>因为 <code>log₈64 = 2</code> 正好是整数。题目里的每个数字都不是随便给的：<strong>位宽 64、扇出上限 8 ⇒ 缓冲树必然是两层</strong>，答案唯一、好判分。看到这类题先做这个除法，层数立刻就出来了。</p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">1 (d)</span><span class="marks">(12 Marks)</span><span style="font-family:var(--fm);font-size:11px;color:var(--warn);font-weight:700">★ 必考题型</span></div>
+    <p>只用逻辑门、一个时钟和 <strong>3 个上升沿触发的 D 触发器</strong>（每个初始值为 0），构造一个电路，使输出位组合 (X, Y, Z) 在每个时钟上升沿按下面的状态图变化。请清楚标注 X、Y、Z 三个输出位。</p>
+    <pre class="dia">000
+ ↓
+101 ← 011
+ ↓     ↑
+110 → 111</pre>
+    <p style="font-size:13.5px;color:var(--muted)">（即：000 → 101 → 110 → 111 → 011 → 101 → … 之后在后四个状态间循环。）</p>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>这类题有一套<strong>完全机械的五步流程</strong>，照做即可，不需要任何灵感。</p>
+
+      <h4>第 1 步 · 把状态图抄成次态真值表</h4>
+      <p>三个触发器的输出就是 X、Y、Z（当前态）；要求的是它们的<strong>次态</strong> X′、Y′、Z′。状态图里没出现的状态（001、010、100）标成<strong>无关项 d</strong>——这是关键，它给了化简的自由度。</p>
+      <div class="tw"><table>
+        <caption>次态真值表</caption>
+        <thead><tr><th class="m">X</th><th class="m">Y</th><th class="m">Z</th><th class="m">X′</th><th class="m">Y′</th><th class="m">Z′</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td class="m">0</td><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="m">0</td><td class="m">1</td><td>000 → 101（初始态，只经过一次）</td></tr>
+          <tr><td class="m">0</td><td class="m">0</td><td class="m">1</td><td class="m">d</td><td class="m">d</td><td class="m">d</td><td>未使用</td></tr>
+          <tr><td class="m">0</td><td class="m">1</td><td class="m">0</td><td class="m">d</td><td class="m">d</td><td class="m">d</td><td>未使用</td></tr>
+          <tr><td class="m">0</td><td class="m">1</td><td class="m">1</td><td class="m">1</td><td class="m">0</td><td class="m">1</td><td>011 → 101</td></tr>
+          <tr><td class="m">1</td><td class="m">0</td><td class="m">0</td><td class="m">d</td><td class="m">d</td><td class="m">d</td><td>未使用</td></tr>
+          <tr><td class="m">1</td><td class="m">0</td><td class="m">1</td><td class="m">1</td><td class="m">1</td><td class="m">0</td><td>101 → 110</td></tr>
+          <tr><td class="m">1</td><td class="m">1</td><td class="m">0</td><td class="m">1</td><td class="m">1</td><td class="m">1</td><td>110 → 111</td></tr>
+          <tr><td class="m">1</td><td class="m">1</td><td class="m">1</td><td class="m">0</td><td class="m">1</td><td class="m">1</td><td>111 → 011</td></tr>
+        </tbody>
+      </table></div>
+
+      <h4>第 2 步 · 对每一位次态单独化简</h4>
+      <p><strong>X′</strong>：只有在 111 时为 0，其余有定义的行全是 1。把三个无关项都取 1，得到最简形式：</p>
+      <pre class="code">X′ = ¬( X · Y · Z )        <i>// 一个 3 输入 NAND 门</i></pre>
+      <p><strong>Y′</strong>：看有定义的五行——000→0、011→0、101→1、110→1、111→1。观察到<em>它每次都等于当前的 X</em>：</p>
+      <pre class="code">Y′ = X                     <i>// 根本不需要门，一根导线</i></pre>
+      <p><strong>Z′</strong>：只有 101 这一行为 0。若把无关项 001 也取 0，两者可以合并成同一项 <code>¬Y·Z</code>：</p>
+      <pre class="code">Z′ = ¬( ¬Y · Z ) = Y + ¬Z  <i>// 一个 NOT 门 + 一个 OR 门</i></pre>
+
+      <h4>第 3 步 · 接线</h4>
+      <p>三个 D 触发器共享同一个时钟。把上面三个表达式的输出分别接到对应触发器的 <strong>D 端</strong>，触发器的 <strong>Q 端</strong>就是 X、Y、Z，同时反馈回组合逻辑。</p>
+
+      <div class="fig">
+        <div class="cap">参考电路</div>
+        <div class="scroll">
+        <svg viewBox="0 0 740 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="电路图：三个共享时钟的D触发器分别输出X、Y、Z；X的D端接一个三输入NAND门（输入为X、Y、Z）；Y的D端直接连到X；Z的D端接一个OR门，输入为Y和Z经过NOT门的结果">
+          <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+            <!-- NAND3 -->
+            <path d="M 120 24 L 156 24 A 22 22 0 0 1 156 68 L 120 68 Z" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.5"/>
+            <circle cx="184" cy="46" r="5" fill="var(--surface)" stroke="var(--accent-strong)" stroke-width="1.5"/>
+            <text x="144" y="50" text-anchor="middle" fill="var(--accent-strong)" font-size="10">NAND</text>
+            <text x="74" y="18" fill="var(--muted)" font-size="10">X,Y,Z</text>
+            <path d="M 84 32 L 120 32 M 84 46 L 120 46 M 84 60 L 120 60" stroke="var(--line-strong)" stroke-width="1.3" fill="none"/>
+            <path d="M 190 46 L 250 46" stroke="var(--accent-strong)" stroke-width="1.7" fill="none"/>
+            <text x="196" y="38" fill="var(--accent-strong)" font-size="10">X′</text>
+
+            <!-- FF X -->
+            <rect x="250" y="20" width="96" height="54" rx="3" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
+            <text x="260" y="40" fill="var(--ink-soft)" font-size="10">D</text>
+            <text x="336" y="40" text-anchor="end" fill="var(--ink-soft)" font-size="10">Q</text>
+            <text x="300" y="62" text-anchor="middle" fill="var(--muted)" font-size="9.5">D-FF · init 0</text>
+            <path d="M 346 40 L 420 40" stroke="var(--teal)" stroke-width="2" fill="none"/>
+            <text x="432" y="45" fill="var(--teal)" font-size="15" font-weight="700">X</text>
+
+            <!-- Y: wire from X -->
+            <path d="M 396 40 L 396 100 L 250 100 L 250 140" stroke="var(--line-strong)" stroke-width="1.5" fill="none"/>
+            <circle cx="396" cy="40" r="3.5" fill="var(--teal)"/>
+            <text x="270" y="94" fill="var(--muted)" font-size="10">Y′ = X（直接连线，无需任何门）</text>
+            <rect x="250" y="140" width="96" height="54" rx="3" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
+            <text x="260" y="160" fill="var(--ink-soft)" font-size="10">D</text>
+            <text x="336" y="160" text-anchor="end" fill="var(--ink-soft)" font-size="10">Q</text>
+            <text x="300" y="182" text-anchor="middle" fill="var(--muted)" font-size="9.5">D-FF · init 0</text>
+            <path d="M 346 160 L 420 160" stroke="var(--teal)" stroke-width="2" fill="none"/>
+            <text x="432" y="165" fill="var(--teal)" font-size="15" font-weight="700">Y</text>
+
+            <!-- Z logic: NOT on Z, OR with Y -->
+            <path d="M 72 262 L 100 262" stroke="var(--line-strong)" stroke-width="1.3" fill="none"/>
+            <text x="40" y="266" fill="var(--muted)" font-size="10">Z</text>
+            <path d="M 100 250 L 100 274 L 124 262 Z" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <circle cx="129" cy="262" r="4.5" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <text x="112" y="244" text-anchor="middle" fill="var(--muted)" font-size="9.5">NOT</text>
+            <path d="M 134 262 L 160 262" stroke="var(--line-strong)" stroke-width="1.3" fill="none"/>
+            <text x="40" y="238" fill="var(--muted)" font-size="10">Y</text>
+            <path d="M 72 234 L 160 234" stroke="var(--line-strong)" stroke-width="1.3" fill="none"/>
+            <path d="M 160 218 Q 180 248 160 278 Q 206 278 226 248 Q 206 218 160 218 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/>
+            <text x="184" y="252" text-anchor="middle" fill="var(--teal)" font-size="10">OR</text>
+            <path d="M 226 248 L 250 248" stroke="var(--teal)" stroke-width="1.7" fill="none"/>
+            <text x="196" y="212" fill="var(--teal)" font-size="10">Z′ = Y + ¬Z</text>
+
+            <rect x="250" y="222" width="96" height="54" rx="3" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
+            <text x="260" y="242" fill="var(--ink-soft)" font-size="10">D</text>
+            <text x="336" y="242" text-anchor="end" fill="var(--ink-soft)" font-size="10">Q</text>
+            <text x="300" y="264" text-anchor="middle" fill="var(--muted)" font-size="9.5">D-FF · init 0</text>
+            <path d="M 346 242 L 420 242" stroke="var(--teal)" stroke-width="2" fill="none"/>
+            <text x="432" y="247" fill="var(--teal)" font-size="15" font-weight="700">Z</text>
+
+            <!-- clock: 竖直总线走在触发器左侧，不穿过任何方框 -->
+            <path d="M 232 300 L 232 58" stroke="var(--warn)" stroke-width="1.4" fill="none" stroke-dasharray="4 3"/>
+            <path d="M 232 58 L 250 58 M 232 178 L 250 178 M 232 260 L 250 260" stroke="var(--warn)" stroke-width="1.4" fill="none" stroke-dasharray="4 3"/>
+            <g stroke="var(--ink-soft)" stroke-width="1.4" fill="none">
+              <path d="M 250 52 L 258 58 L 250 64"/><path d="M 250 172 L 258 178 L 250 184"/><path d="M 250 254 L 258 260 L 250 266"/>
+            </g>
+            <path d="M 160 300 L 172 300 L 172 288 L 186 288 L 186 300 L 200 300 L 200 288 L 214 288 L 214 300 L 232 300" stroke="var(--warn)" stroke-width="1.6" fill="none"/>
+            <text x="120" y="304" fill="var(--warn)" font-size="10.5">Clock</text>
+            <text x="120" y="318" fill="var(--muted)" font-size="9.5">三个触发器共用</text>
+
+            <!-- feedback note -->
+            <path d="M 460 40 L 570 40 L 570 326 L 44 326 L 44 32" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4" fill="none"/>
+            <text x="588" y="170" fill="var(--muted)" font-size="10">X、Y、Z</text>
+            <text x="588" y="186" fill="var(--muted)" font-size="10">全部反馈</text>
+            <text x="588" y="202" fill="var(--muted)" font-size="10">回组合逻辑</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">整个电路只用了 1 个 NAND3 + 1 个 NOT + 1 个 OR——Y′ 那一路连门都不需要。</p>
+      </div>
+
+      <h4>第 4 步 · 验证（一定要写在卷子上）</h4>
+      <div class="tw"><table>
+        <caption>从初始态 000 开始逐拍推演</caption>
+        <thead><tr><th class="m">当前 XYZ</th><th class="m">X′ = ¬(XYZ)</th><th class="m">Y′ = X</th><th class="m">Z′ = Y+¬Z</th><th class="m">次态</th></tr></thead>
+        <tbody>
+          <tr><td class="m">000</td><td class="m">¬0 = 1</td><td class="m">0</td><td class="m">0+1 = 1</td><td class="m"><strong>101</strong> ✓</td></tr>
+          <tr><td class="m">101</td><td class="m">¬0 = 1</td><td class="m">1</td><td class="m">0+0 = 0</td><td class="m"><strong>110</strong> ✓</td></tr>
+          <tr><td class="m">110</td><td class="m">¬0 = 1</td><td class="m">1</td><td class="m">1+1 = 1</td><td class="m"><strong>111</strong> ✓</td></tr>
+          <tr><td class="m">111</td><td class="m">¬1 = 0</td><td class="m">1</td><td class="m">1+0 = 1</td><td class="m"><strong>011</strong> ✓</td></tr>
+          <tr><td class="m">011</td><td class="m">¬0 = 1</td><td class="m">0</td><td class="m">1+0 = 1</td><td class="m"><strong>101</strong> ✓ 进入循环</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="note"><div class="lb">这类题的三个得分要点</div>
+      <p><strong>① 无关项一定要用。</strong>没出现的状态标 d 而不是 0，化简结果能简一大截（本题 Z′ 正是靠这一点从 3 个门减到 2 个）。<br>
+      <strong>② 别忘了初始态。</strong>题目说触发器初始值为 0，即从 000 出发。要检查 000 确实能走进循环——如果化简后 000 走不到 101，就得回头把某个无关项换个取值。<br>
+      <strong>③ 组合逻辑接 D 端，不是接 Q 端。</strong>D 触发器的作用只是"把这一拍算出来的次态,在时钟沿变成下一拍的现态"。所有计算都发生在组合逻辑里，触发器本身不做任何运算。</p></div>
+    </div></details>
+  </article>
+</section>
+
+<!-- ======================= 卷二 ======================= -->
+<section class="paper" id="p2">
+  <div class="paperhead">
+    <span class="no">Q2</span><h2>MIPS 指令集</h2><span class="partflag">Part 1 · 模块 10–11</span>
+  </div>
+  <p class="secnote">（真题会在后面附上指令编码与语义表，所以不必背 opcode/funct，但必须熟练掌握字段划分和补码。）</p>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">2 (a)</span><span class="marks">(4 Marks)</span></div>
+    <p>把下列 MIPS 指令编码为十六进制：</p>
+    <ol class="roman">
+      <li><code>sltiu $9, $5, -1</code></li>
+      <li><code>srav $7, $8, $3</code></li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>(i) sltiu $9, $5, −1</strong>　I 型，opcode = <code>001011</code>。格式是 <code>sltiu $rt, $rs, imm</code>，所以 rt = $9、rs = $5。</p>
+      <pre class="code">opcode  rs      rt      immediate
+001011  00101   01001   1111111111111111    <i>// −1 的 16 位补码 = 0xFFFF</i>
+
+→ 0010 1100 1010 1001 1111 1111 1111 1111</pre>
+      <div class="key"><span class="lb">答案 i</span> <code>0x2ca9ffff</code></div>
+      <div class="note warn"><div class="lb">这条指令本身就是个陷阱</div><p>注意 <code>sltiu</code> 的语义：立即数先做<strong>符号扩展</strong>（extsign），然后按<strong>无符号</strong>比较。所以 −1 被扩展成 0xFFFFFFFF，再当成无符号数看就是 4294967295——32 位无符号能表示的最大值。于是 <code>sltiu $9,$5,-1</code> 的效果是"只要 $5 不等于 0xFFFFFFFF 就置 1"。<strong>"u" 指的是比较方式，不是扩展方式</strong>，这一点年年有人答错。</p></div>
+
+      <p><strong>(ii) srav $7, $8, $3</strong>　R 型，opcode = <code>000000</code>，funct = <code>000111</code>。格式是 <code>srav $rd, $rt, $rs</code>，所以 rd = $7、rt = $8、rs = $3（rs 提供移位量）。</p>
+      <pre class="code">opcode  rs      rt      rd      shamt   funct
+000000  00011   01000   00111   00000   000111
+
+→ 0000 0000 0110 1000 0011 1000 0000 0111</pre>
+      <div class="key"><span class="lb">答案 ii</span> <code>0x00683807</code></div>
+      <p>注意两点：<strong>shamt 必须填 0</strong>（移位量来自寄存器，不用这个字段）；而且 <code>srav</code> 的汇编书写顺序是 rd, rt, rs，和编码顺序 rs, rt, rd <strong>正好是反的</strong>——这是最高频的失分点。</p>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">2 (b)</span><span class="marks">(6 Marks)</span></div>
+    <p>把下列十六进制解码为 MIPS 指令：</p>
+    <ol class="roman">
+      <li><code>0x01095022</code></li>
+      <li><code>0xae2b0010</code></li>
+      <li><code>0x0c100004</code></li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>解码的固定第一步：<strong>展开成二进制，取最前面 6 位看 opcode</strong>，由它决定后面 26 位怎么切。</p>
+
+      <p><strong>(i) 0x01095022</strong></p>
+      <pre class="code">0000 0001 0000 1001 0101 0000 0010 0010
+
+opcode = 000000  → R 型，看最后 6 位
+rs     = 01000   = 8   → $8
+rt     = 01001   = 9   → $9
+rd     = 01010   = 10  → $10
+shamt  = 00000
+funct  = 100010  → sub</pre>
+      <div class="key"><span class="lb">答案 i</span> <code>sub $10, $8, $9</code>　⇒　R[10] := R[8] − R[9]</div>
+
+      <p><strong>(ii) 0xae2b0010</strong></p>
+      <pre class="code">1010 1110 0010 1011 0000 0000 0001 0000
+
+opcode = 101011  → sw，I 型
+rs     = 10001   = 17  → $17（基址）
+rt     = 01011   = 11  → $11（要存的数据）
+imm    = 0000000000010000 = 16（最高位是 0，正数）</pre>
+      <div class="key"><span class="lb">答案 ii</span> <code>sw $11, 16($17)</code>　⇒　mem[(R[17]+16)/4] := R[11]</div>
+
+      <p><strong>(iii) 0x0c100004</strong></p>
+      <pre class="code">0000 1100 0001 0000 0000 0000 0000 0100
+
+opcode = 000011  → jal，J 型
+address 字段（剩余 26 位）= 00 0001 0000 0000 0000 0000 0100 = 1048580</pre>
+      <p>J 型存的是<strong>目标地址右移 2 位</strong>之后的值，所以实际跳转目标 = 1048580 × 4 = 4194320 = <code>0x00400010</code>。</p>
+      <div class="key"><span class="lb">答案 iii</span> <code>jal 0x00400010</code>　⇒　R[31] := PC+4；PC := 0x00400010</div>
+      <div class="note"><div class="lb">为什么可以省掉最低两位</div><p>MIPS 指令一律 4 字节对齐，任何合法指令地址的最低 2 位<strong>必然是 00</strong>，存进去纯属浪费。省下这 2 位，26 位字段就能覆盖 2²⁸ = 256 MB 的跳转范围而不是 64 MB。高 4 位则直接沿用当前 PC 的高 4 位——这就是"伪直接寻址"，代价是无法跨越 256 MB 的段边界跳转，那时必须改用 <code>jr</code>。</p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">2 (c)</span><span class="marks">(10 Marks)</span></div>
+    <p>解释为什么 MIPS 必须提供 <code>lui</code> 指令。具体说明：</p>
+    <ol class="roman">
+      <li>若 ISA 中没有 <code>lui</code>，要把一个任意的 32 位常数装入寄存器会遇到什么困难？</li>
+      <li>有了 <code>lui</code> 之后应该怎么做？为什么第二条指令必须用 <code>ori</code> 而不能用 <code>addi</code>？</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>(i) 根本矛盾：立即数字段只有 16 位，寄存器却是 32 位。</strong></p>
+      <p>I 型指令的 immediate 字段固定 16 位，所以<strong>任何单条指令最多只能携带 16 位的常数信息</strong>。逐个看现有手段：</p>
+      <ul class="list">
+        <li><code>addi $t, $0, imm</code>：符号扩展，只能得到 [−32768, 32767] 范围内的值；</li>
+        <li><code>ori $t, $0, imm</code>：零扩展，只能得到 [0, 65535] 范围内的值。</li>
+      </ul>
+      <p>两者都覆盖不到需要高 16 位的常数。没有 <code>lui</code> 时并非完全做不到——可以借助移位拼三条：</p>
+      <pre class="code">ori $t, $0, 0x1234     <i>// $t = 0x00001234</i>
+sll $t, $t, 16         <i>// $t = 0x12340000</i>
+ori $t, $t, 0x5678     <i>// $t = 0x12345678</i></pre>
+      <p>所以准确的说法是：<strong>没有 lui 要花三条指令，有了 lui 只要两条</strong>。装载 32 位常数在真实代码里极其频繁（每个全局变量地址、每个大立即数都要），省下的这一条指令是实打实的。</p>
+
+      <p><strong>(ii) 标准两条指令写法：</strong></p>
+      <pre class="code">lui $t, 0x1234         <i>// $t = 0x12340000，低 16 位自动补 0</i>
+ori $t, $t, 0x5678     <i>// $t = 0x12345678</i></pre>
+      <div class="key"><span class="lb">关键</span> 第二条必须用 <code>ori</code>，因为 <code>addi</code> 会<strong>符号扩展</strong></div>
+      <p>如果低 16 位的最高位是 1，<code>addi</code> 会把它当成负数，向高位<strong>借位</strong>，把 <code>lui</code> 刚放好的高 16 位改掉。举个会出错的例子——要装载 <code>0x1234FFFF</code>：</p>
+      <div class="tw"><table>
+        <caption>同一个目标，两种第二条指令</caption>
+        <thead><tr><th>指令序列</th><th class="m">结果</th><th class="m">对不对</th></tr></thead>
+        <tbody>
+          <tr><td><code>lui $t,0x1234</code><br><code>addi $t,$t,0xFFFF</code><br><small>0xFFFF 符号扩展成 −1，于是 0x12340000 + (−1)</small></td><td class="m">0x1233FFFF</td><td class="m" style="color:var(--warn)"><strong>错</strong></td></tr>
+          <tr><td><code>lui $t,0x1234</code><br><code>ori $t,$t,0xFFFF</code><br><small>0xFFFF 零扩展，再按位或，高低位互不干扰</small></td><td class="m">0x1234FFFF</td><td class="m" style="color:var(--teal)"><strong>对</strong></td></tr>
+        </tbody>
+      </table></div>
+      <p>两个原因叠加：<code>ori</code> 用<strong>零扩展</strong>（不会把高位污染成全 1），而且是<strong>按位或</strong>（不会产生进位）。高低两半因此完全独立。</p>
+      <div class="note"><div class="lb">延伸一句</div><p>这也解释了为什么汇编器的伪指令 <code>li $t, imm</code> 在立即数较小时只展开成一条 <code>addiu</code>，一旦超过 16 位才展开成 <code>lui</code> + <code>ori</code> 两条——汇编器替你做了这个判断。</p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">2 (d)</span><span class="marks">(10 Marks)</span></div>
+    <p>某流水线 MIPS CPU 具有以下特性（忽略 cache miss 及其他冒险）：</p>
+    <ul class="list">
+      <li>每条 M/D（乘除）指令从开始执行到结果可用，需要 <strong>30 个周期</strong>。</li>
+      <li>指令按程序顺序发射，<strong>一般情况下每条指令在前一条指令开始后 1 个周期开始</strong>。</li>
+      <li><strong>例外</strong>：<code>MFHI</code>/<code>MFLO</code> 必须等到它前面最近的那条 M/D 指令<strong>结果可用之后</strong>才能开始。</li>
+    </ul>
+    <p>程序 P 的指令模式为：每条 M/D 之后紧跟 1 条 <code>MFHI</code>，再跟 3 条普通（非 M/D、非 MFHI/MFLO）指令，然后进入下一条 M/D，如此循环。</p>
+    <ol class="roman">
+      <li>求该 CPU 运行 P 时的 CPI。</li>
+      <li>若编译器可以重排指令，把那 3 条普通指令（它们与 M/D 的结果无关）挪到 <code>MFHI</code> 之前，CPI 变成多少？</li>
+      <li>要让 M/D 的等待被<strong>完全隐藏</strong>（即 CPI 达到 1），每条 M/D 之后至少需要多少条与其结果无关的普通指令？</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>解这类题的唯一方法是<strong>画出每条指令的开始周期</strong>。设第一条 M/D 在周期 0 开始，则它的结果在周期 30 可用。每条指令的开始时刻 = <code>max(前一条指令开始 + 1, 该指令自身的依赖就绪时刻)</code>。</p>
+
+      <p><strong>(i) 原始顺序</strong></p>
+      <div class="tw"><table>
+        <caption>一个循环内各指令的开始周期</caption>
+        <thead><tr><th>指令</th><th class="m">开始周期</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>M/D</td><td class="m">0</td><td>循环起点</td></tr>
+          <tr><td>MFHI</td><td class="m"><strong>30</strong></td><td>max(0+1, 30) = 30　← <strong>停等了 29 个周期</strong></td></tr>
+          <tr><td>普通 #1</td><td class="m">31</td><td>前一条开始后 1 周期</td></tr>
+          <tr><td>普通 #2</td><td class="m">32</td><td></td></tr>
+          <tr><td>普通 #3</td><td class="m">33</td><td></td></tr>
+          <tr><td>下一条 M/D</td><td class="m">34</td><td>下一个循环的起点</td></tr>
+        </tbody>
+      </table></div>
+      <pre class="code">一个循环 = 5 条指令，占 34 个周期
+CPI = 34 / 5 = <b>6.8</b></pre>
+
+      <p><strong>(ii) 把 3 条普通指令提到 MFHI 之前</strong></p>
+      <pre class="code">M/D      : 周期 0
+普通 #1   : 周期 1     <i>// 利用 M/D 的等待期干活</i>
+普通 #2   : 周期 2
+普通 #3   : 周期 3
+MFHI     : max(4, 30) = 30
+下一 M/D  : 周期 31
+
+CPI = 31 / 5 = <b>6.2</b></pre>
+      <p>只改善了 0.6。原因很直白：<strong>只有 3 条独立指令可填，而空窗有 29 个周期</strong>——填不满。</p>
+
+      <p><strong>(iii) 要完全隐藏需要多少条</strong></p>
+      <p>M/D 在周期 0 开始，结果在周期 30 可用。要让 MFHI 在周期 30 开始时<em>恰好不必等待</em>，它前面必须已经连续发射满周期 1 到 29，也就是需要 <strong>29 条</strong>独立普通指令。此时：</p>
+      <pre class="code">M/D          : 周期 0
+普通 #1..#29 : 周期 1..29      <i>// 把 29 个空窗周期全部填满</i>
+MFHI         : max(30, 30) = 30 <i>// 不再需要等待</i>
+下一 M/D      : 周期 31
+
+指令数 = 1 + 29 + 1 = 31 条，占用 31 个周期
+CPI = 31 / 31 = <b>1.0</b></pre>
+      <div class="key"><span class="lb">答案</span> (i) 6.8　　(ii) 6.2　　(iii) 至少 <strong>29 条</strong></div>
+      <div class="note"><div class="lb">这道题真正想让你看见的东西</div><p>三小问其实是同一个故事的三帧：<strong>长延迟指令本身不可怕，可怕的是它后面紧跟着一条依赖它的指令。</strong>硬件已经把乘除做到 30 周期了，再快很难；但只要编译器能在这 30 个周期里塞进足够多的独立工作，这 30 周期就<em>一个都不浪费</em>——CPI 从 6.8 直接掉到 1.0，快了将近 7 倍，而硬件一点没动。<br><br>这就是<strong>指令调度（instruction scheduling）</strong>的全部意义，也是为什么现代编译器的优化 pass 里，调度和寄存器分配同样重要。反过来也说明：如果程序里根本找不出 29 条独立指令（比如一条依赖一条的串行计算链），再聪明的编译器也无能为力——这时就只能靠硬件的乱序执行去别处找活干。</p></div>
+    </div></details>
+  </article>
+</section>
+
+<!-- ======================= 卷三 ======================= -->
+<section class="paper" id="p3">
+  <div class="paperhead">
+    <span class="no">Q3</span><h2>缓存</h2><span class="partflag p2">Part 2 · 可当预习</span>
+  </div>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">3 (a)</span><span class="marks">(10 Marks)</span></div>
+    <p>设缓存的命中率为 0.9，且缓存的速度是主存的 20 倍。</p>
+    <ol class="roman">
+      <li>求可达到的加速比。</li>
+      <li>若要把加速比提高到 8，命中率需要达到多少？</li>
+      <li>在这个配置下，加速比的理论上限是多少？为什么？</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>设<strong>主存</strong>访问时间为 1，则缓存访问时间为 1/k（k = 速度倍数 = 20）。命中走缓存，未命中走主存：</p>
+      <pre class="code">平均访问时间  T = h·(1/k) + (1−h)·1
+加速比        S = 1 / T = 1 / ( h/k + 1 − h )</pre>
+      <p><strong>(i)</strong> 代入 h = 0.9、k = 20：</p>
+      <pre class="code">T = 0.9/20 + 0.1 = 0.045 + 0.1 = 0.145
+S = 1 / 0.145 = <b>6.90</b></pre>
+      <div class="key"><span class="lb">答案 i</span> 加速比 ≈ <strong>6.90</strong></div>
+
+      <p><strong>(ii)</strong> 令 S = 8，反解 h：</p>
+      <pre class="code">h/20 + 1 − h = 1/8 = 0.125
+1 − 0.95h = 0.125
+0.95h = 0.875
+h = <b>0.921</b></pre>
+      <div class="key"><span class="lb">答案 ii</span> 命中率需达到 <strong>92.1%</strong></div>
+      <p>注意这个数字的含义：命中率只提高 2.1 个百分点（90% → 92.1%），加速比却从 6.90 涨到 8.00——<strong>在高命中率区间，每一个百分点都极其值钱</strong>，因为决定性能的是"未命中的那一小撮"，而它的绝对数量在快速缩小。</p>
+
+      <p><strong>(iii)</strong> 令 h → 1：</p>
+      <pre class="code">T → 1/k = 1/20 = 0.05
+S → <b>20</b></pre>
+      <div class="key"><span class="lb">答案 iii</span> 上限 = <strong>k = 20 倍</strong>，即缓存自身的速度倍数</div>
+      <p>原因很直观：即使每次都命中，访问也仍然要花掉缓存自己的时间。<strong>缓存再怎么用，也不可能比缓存本身更快。</strong>这正是阿姆达尔定律的又一次体现——被优化部分的极限速度，就是整体加速比的天花板。</p>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">3 (b)</span><span class="marks">(10 Marks)</span></div>
+    <p>某计算机拥有 4 GB 字节寻址的主存，地址总线为 32 位。缓存总容量 128 KB，块大小 64 字节。对下面两种缓存组织方式，分别求出地址中用于<strong>块内偏移、索引、标记</strong>的位数，以及存储全部标记所需的<strong>额外存储量</strong>和比较标记所需的 <strong>XOR 门数量</strong>。</p>
+    <ol class="roman">
+      <li>直接映射缓存</li>
+      <li>8 路组相联缓存</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>先算两个与组织方式无关的量：</p>
+      <pre class="code">块内偏移位数 = log₂(块大小) = log₂64 = <b>6 位</b>
+总块数       = 128 KB / 64 B = <b>2048 块</b></pre>
+
+      <p><strong>(i) 直接映射</strong>——每块只能放在唯一确定的位置，所以"组数 = 块数"。</p>
+      <pre class="code">索引位数 = log₂2048 = <b>11 位</b>
+标记位数 = 32 − 6 − 11 = <b>15 位</b>
+额外存储 = 2048 × 15 = 30720 位 = 3840 字节 = <b>3.75 KB</b>
+XOR 门数 = 每次只需比较 1 个标记 = <b>15 个</b></pre>
+
+      <p><strong>(ii) 8 路组相联</strong>——每组 8 块，所以组数变成块数的 1/8。</p>
+      <pre class="code">组数     = 2048 / 8 = 256
+索引位数 = log₂256 = <b>8 位</b>
+标记位数 = 32 − 6 − 8 = <b>18 位</b>
+额外存储 = 2048 × 18 = 36864 位 = 4608 字节 = <b>4.5 KB</b>
+XOR 门数 = 同一组的 8 个标记必须<b>并行</b>比较 = 8 × 18 = <b>144 个</b></pre>
+
+      <div class="tw"><table>
+        <caption>相联度提高的代价与收益</caption>
+        <thead><tr><th></th><th class="m">直接映射</th><th class="m">8 路组相联</th></tr></thead>
+        <tbody>
+          <tr><td class="m">块内偏移</td><td class="m">6 位</td><td class="m">6 位</td></tr>
+          <tr><td class="m">索引</td><td class="m">11 位</td><td class="m">8 位</td></tr>
+          <tr><td class="m">标记</td><td class="m">15 位</td><td class="m">18 位</td></tr>
+          <tr><td class="m">标记额外存储</td><td class="m">3.75 KB</td><td class="m">4.5 KB</td></tr>
+          <tr><td class="m">XOR 门</td><td class="m">15</td><td class="m"><strong>144</strong></td></tr>
+          <tr><td>冲突失效</td><td>多</td><td><strong>少得多</strong></td></tr>
+        </tbody>
+      </table></div>
+      <div class="note"><div class="lb">要能一句话说清这笔账</div><p>提高相联度，<strong>索引变短 ⇒ 标记必然变长</strong>（三段位数加起来永远是 32），于是标记存储变多；更要命的是比较器数量随路数<strong>线性增长</strong>——8 路要同时比 8 个标记，硬件成本涨了近 10 倍。换回来的是冲突失效大幅减少。这就是为什么现代 L1 一般只做 4～8 路，而不会做全相联：<strong>全相联要把所有块的标记同时比一遍，比较器成本会彻底失控。</strong></p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">3 (c)</span><span class="marks">(5 Marks)</span></div>
+    <p>某程序依次访问了以下地址（十六进制）：</p>
+    <pre class="code">2C10,  2C14,  9F00,  2C18,  9F00,  2C1C,  4B80,  2C10,  4B84</pre>
+    <p>指出其中体现<strong>空间局部性</strong>和<strong>时间局部性</strong>的访问。</p>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>空间局部性</strong>——访问了彼此<em>相邻</em>的地址：</p>
+      <ul class="list">
+        <li><code>2C10 → 2C14 → 2C18 → 2C1C</code>：第 1、2、4、6 次访问，每次地址 <strong>+4</strong>。这是典型的<strong>顺序遍历一个 32 位整数数组</strong>的足迹。</li>
+        <li><code>4B80 → 4B84</code>：第 7 和第 9 次访问，同样相差 4，是另一个数组（或结构体的相邻字段）。</li>
+      </ul>
+      <p><strong>时间局部性</strong>——同一个地址在<em>不久之后</em>被再次访问：</p>
+      <ul class="list">
+        <li><code>9F00</code>：第 3 次和第 5 次访问，中间只隔了一次访问。典型的<strong>循环里反复读同一个变量</strong>（比如累加器、循环上界、或一个基址指针）。</li>
+        <li><code>2C10</code>：第 1 次和第 8 次访问，间隔较远，属于较弱的时间局部性——可能是第二轮遍历从数组头开始。</li>
+      </ul>
+      <div class="note"><div class="lb">为什么这两条性质值这么多钱</div><p>整个缓存的设计就建立在它们之上，而且各自对应一个具体机制：<strong>空间局部性 ⇒ 按"块"而不是按字节搬运</strong>（取 2C10 时把整个 64 字节块一起拉进来，于是 2C14/2C18/2C1C 全部免费命中）；<strong>时间局部性 ⇒ 把数据留在缓存里别急着换出</strong>（LRU 替换策略的全部依据）。答这类题时，把"看到的现象"和"它支撑哪个设计决策"一起写出来，才是完整答案。</p></div>
+    </div></details>
+  </article>
+</section>
+
+<!-- ======================= 卷四 ======================= -->
+<section class="paper" id="p4">
+  <div class="paperhead">
+    <span class="no">Q4</span><h2>流水线</h2><span class="partflag p2">Part 2 · 可当预习</span>
+  </div>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">4 (a)</span><span class="marks">(10 Marks)</span></div>
+    <p>某机器的一条指令可分为 5 个阶段，各阶段耗时如下：</p>
+    <div class="tw"><table>
+      <caption>各流水级耗时</caption>
+      <thead><tr><th class="m">IF 取指</th><th class="m">ID 译码</th><th class="m">EX 执行</th><th class="m">MEM 访存</th><th class="m">WB 写回</th></tr></thead>
+      <tbody><tr><td class="m">25 ns</td><td class="m">15 ns</td><td class="m">30 ns</td><td class="m">28 ns</td><td class="m">20 ns</td></tr></tbody>
+    </table></div>
+    <ol class="roman">
+      <li>求运行 1000 条指令时，流水线相对非流水线的加速比。</li>
+      <li>求流水线下单条指令的延迟（latency），并与非流水线比较。</li>
+      <li>指令数趋于无穷时，理想加速比是多少？为什么达不到 5？</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p>两个基本量先算出来：</p>
+      <pre class="code">非流水：一条指令走完全部 5 级 = 25+15+30+28+20 = <b>118 ns</b>
+流水：  时钟周期 = <b>最慢的那一级</b> = max(25,15,30,28,20) = <b>30 ns</b></pre>
+      <p>关键概念：流水线的时钟周期由<strong>最慢的一级</strong>决定，其余各级只能"等着"——15 ns 的 ID 级每拍要白白空转 15 ns。</p>
+
+      <p><strong>(i)</strong> n 条指令的流水耗时 = (n + 级数 − 1) × 周期，其中"−1"之外的额外级数是<strong>填满流水线</strong>所需的启动开销：</p>
+      <pre class="code">流水   = (1000 + 5 − 1) × 30 = 1004 × 30 = 30120 ns
+非流水 = 1000 × 118 = 118000 ns
+加速比 = 118000 / 30120 = <b>3.92</b></pre>
+
+      <p><strong>(ii)</strong> 单条指令的延迟：</p>
+      <pre class="code">流水线下   = 5 × 30 = <b>150 ns</b>
+非流水线下 = <b>118 ns</b></pre>
+      <div class="key"><span class="lb">反直觉但必须记住</span> 流水线让单条指令<strong>更慢</strong>了（150 &gt; 118）</div>
+      <p>因为每一级都被拉长到最慢那级的 30 ns，快的级只能干等。<strong>流水线提升的是吞吐量（throughput），不是单条指令的延迟（latency）</strong>——它让指令一条接一条地流出来，而不是让每一条跑得更快。这是流水线最核心的概念，几乎每年都有一小问在考它。</p>
+
+      <p><strong>(iii)</strong> n → ∞ 时，启动开销可以忽略：</p>
+      <pre class="code">理想加速比 = 118 / 30 = <b>3.93</b>  （而不是 5）</pre>
+      <p>达不到 5 的原因是<strong>各级不均衡</strong>。理想情况下 5 级流水的加速比应为级数 5，前提是每级耗时完全相等（各 118/5 = 23.6 ns）。而现在 EX 级要 30 ns，成为瓶颈；每拍都有 <code>5×30 − 118 = 32 ns</code> 被浪费在各级的等待上，占 21%。</p>
+      <p>改进方向：<strong>把最慢的 EX 级再拆开</strong>（比如拆成两个 15 ns 的子级，变成 6 级流水），新周期就降到 28 ns（此时瓶颈变成 MEM）。这正是 1990 年代 CPU 流水线越做越深的动机——不过级数太深又会放大分支预测失败的代价，所以有个最优点。</p>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">4 (b)</span><span class="marks">(9 Marks)</span></div>
+    <p>指出下列各指令序列会遇到什么类型的冒险，并说明一个基本的 5 级流水线如何处理：</p>
+    <ol class="roman">
+      <li><code>add $3, $1, $2</code>　→　<code>sub $5, $3, $4</code>　→　<code>or $6, $3, $5</code></li>
+      <li><code>lw $2, 0($1)</code>　→　<code>add $4, $2, $3</code></li>
+      <li><code>sub $1, $2, $3</code>　→　<code>add $2, $4, $5</code></li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>(i) RAW（写后读）数据冒险 —— 转发即可解决，无需停顿</strong></p>
+      <p><code>sub</code> 要读 <code>$3</code>，而 <code>$3</code> 是前一条 <code>add</code> 的结果；<code>or</code> 同时依赖 <code>add</code> 的 <code>$3</code> 和 <code>sub</code> 的 <code>$5</code>。按正常流程，<code>add</code> 要到 WB 级才把结果写回寄存器堆，那时 <code>sub</code> 早就过了读寄存器的时刻。</p>
+      <p><strong>解决：转发 / 旁路（forwarding / bypassing）</strong>。<code>add</code> 的结果其实在 <strong>EX 级末尾就已经算出来了</strong>，不必等写回——直接从 EX/MEM 流水寄存器拉一条线，送回 EX 级的输入端。这样 <code>sub</code> 和 <code>or</code> 都能及时拿到值，<strong>一拍都不用停</strong>。</p>
+
+      <p><strong>(ii) load-use 冒险 —— 转发也救不了，必须停顿 1 拍</strong></p>
+      <p>这是 (i) 的关键反例，也是最常考的一问。<code>lw</code> 的数据要到 <strong>MEM 级结束</strong>才从内存取回来，而下一条 <code>add</code> 在 <strong>它自己的 EX 级</strong>就需要这个值——而这两个时刻<strong>恰好是同一拍</strong>，数据还没到，转发无从转起（不可能把数据送回过去）。</p>
+      <div class="key"><span class="lb">处理</span> 硬件插入 1 个气泡（stall / bubble），把 add 推迟一拍，然后再转发</div>
+      <p>更好的办法是让<strong>编译器</strong>在 <code>lw</code> 和 <code>add</code> 之间调度一条无关指令填进去，这样停顿周期被有用工作占满，代价归零——和卷二第 (d) 题的思路完全一样。</p>
+
+      <p><strong>(iii) WAR（读后写）—— 在这条流水线上<u>不构成</u>冒险</strong></p>
+      <p>表面上看 <code>sub</code> 要读 <code>$2</code>，而后面的 <code>add</code> 要写 <code>$2</code>，像是有冲突。但在<strong>顺序发射、顺序完成</strong>的 5 级流水线里：<code>sub</code> 在第 2 拍的 ID 级读 <code>$2</code>，<code>add</code> 最早也要到第 6 拍的 WB 级才写 <code>$2</code>——<strong>读永远发生在写之前，顺序天然不会被破坏</strong>。</p>
+      <p>所以正确答案是：<strong>这是一个"名字依赖"（name dependence），不是真依赖，基本流水线无需任何处理。</strong>只有在<strong>乱序执行</strong>的处理器里，后面的指令可能提前执行，这时才需要<strong>寄存器重命名</strong>来消除它。同理 WAW（写后写）也是名字依赖。</p>
+      <div class="note"><div class="lb">答这一问的判分点</div><p>很多人会条件反射地答"WAR 冒险，需要停顿"——这是错的，而且正是出题人设的坑。要拿分必须说出两件事：<strong>① 在顺序流水线里读写的相对顺序天然正确，所以不是冒险；② 它只在乱序执行下才成为问题，解决办法是寄存器重命名而不是停顿。</strong></p></div>
+    </div></details>
+  </article>
+
+  <article class="q">
+    <div class="qtop"><span class="qno">4 (c)</span><span class="marks">(6 Marks)</span></div>
+    <p>某 5 级流水线机器的理想 CPI 为 1。实测发现有 15% 的指令因冒险停顿 1 个周期，另有 5% 的指令停顿 2 个周期。</p>
+    <ol class="roman">
+      <li>求实际的平均 CPI，以及相对于非流水线实现（CPI = 5）的加速比。</li>
+      <li>若引入流水线寄存器会使时钟周期比非流水线时延长 10%，实际加速比变成多少？</li>
+    </ol>
+
+    <details class="sol"><summary>点击查看参考答案</summary><div class="solbody">
+      <p><strong>(i)</strong> 平均 CPI = 理想 CPI + 各类停顿的期望值：</p>
+      <pre class="code">CPI = 1 + 0.15×1 + 0.05×2
+    = 1 + 0.15 + 0.10
+    = <b>1.25</b>
+
+加速比 = 非流水 CPI / 流水 CPI = 5 / 1.25 = <b>4.0</b></pre>
+
+      <p><strong>(ii)</strong> 加速比要同时考虑 CPI 和时钟周期两个因子：</p>
+      <pre class="code">加速比 = (CPI_非流水 / CPI_流水) × (周期_非流水 / 周期_流水)
+       = (5 / 1.25) × (1 / 1.1)
+       = 4.0 / 1.1 = <b>3.64</b></pre>
+      <div class="key"><span class="lb">答案</span> (i) CPI = 1.25，加速比 4.0　　(ii) 加速比 <strong>3.64</strong></div>
+      <div class="note"><div class="lb">别漏掉时钟周期这个因子</div><p>性能公式永远是三项相乘：<code>时间 = 指令数 × CPI × 时钟周期</code>。流水线改善的是 CPI，但它<strong>同时会让时钟周期变差一点</strong>——因为每两级之间要插一个流水寄存器，它的建立时间和传播延迟都要算进关键路径。<br><br>这也解释了为什么流水线不能无限加深：级数越多，CPI 越接近 1（收益递减），但寄存器开销占每个周期的比例越来越大（代价递增），而且分支预测失败要清空的级数也越多。两条曲线一交叉，就是最优深度。</p></div>
+    </div></details>
+  </article>
+</section>
+
+<footer>IE4756 模拟卷 · 题目为原创，结构对照 2024S2 / 2025-26 真题与 Quiz 1 · 数值答案均经程序验算 · 仅供个人复习使用</footer>
+
+</div>
+
+</body></html>

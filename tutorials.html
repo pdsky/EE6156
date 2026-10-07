@@ -1,0 +1,1427 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>IE4756 习题册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#eaeff4;
+  --bg-grid:#dde6ee;
+  --surface:#ffffff;
+  --surface-2:#e4ebf2;
+  --surface-3:#d2dfea;
+  --ink:#11212e;
+  --ink-soft:#32485a;
+  --muted:#5b7081;
+  --accent:#b85c17;
+  --accent-strong:#8f4610;
+  --accent-soft:#f5e4d1;
+  --accent-ink:#fff8f0;
+  --line:#c5d3df;
+  --line-strong:#a7bbca;
+  --teal:#0e6d61;
+  --teal-soft:#dbefec;
+  --warn:#a5301d;
+  --warn-soft:#f7e1dc;
+  --shadow:0 1px 2px rgba(20,35,50,.06), 0 10px 26px -14px rgba(20,35,50,.22);
+  --radius:3px;
+  --fd:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif;
+  --fb:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'IBM Plex Mono',ui-monospace,'SF Mono',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#091624;
+    --bg-grid:#0e1f31;
+    --surface:#0e2035;
+    --surface-2:#142e46;
+    --surface-3:#1b3a57;
+    --ink:#e9f1f7;
+    --ink-soft:#c0d1df;
+    --muted:#88a2b7;
+    --accent:#ef9f4f;
+    --accent-strong:#ffc083;
+    --accent-soft:#2b2011;
+    --accent-ink:#1b1102;
+    --line:#22415e;
+    --line-strong:#2e577a;
+    --teal:#5fd9c8;
+    --teal-soft:#0d2e2a;
+    --warn:#ff8b71;
+    --warn-soft:#391a14;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#091624; --bg-grid:#0e1f31; --surface:#0e2035; --surface-2:#142e46; --surface-3:#1b3a57;
+  --ink:#e9f1f7; --ink-soft:#c0d1df; --muted:#88a2b7;
+  --accent:#ef9f4f; --accent-strong:#ffc083; --accent-soft:#2b2011; --accent-ink:#1b1102;
+  --line:#22415e; --line-strong:#2e577a; --teal:#5fd9c8; --teal-soft:#0d2e2a;
+  --warn:#ff8b71; --warn-soft:#391a14;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+
+body{
+  margin:0;
+  background:
+    repeating-linear-gradient(0deg, var(--bg-grid) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 30px),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--fb);
+  font-size:16px;
+  line-height:1.66;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:var(--accent-soft);color:var(--ink)}
+
+/* ---- top bar ---- */
+.bar{
+  position:sticky; top:env(safe-area-inset-top, 0px); z-index:30;
+  display:flex; align-items:center; gap:10px; flex-wrap:nowrap; overflow-x:auto;
+  padding:9px 16px;
+  background:color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.bar .who{font-family:var(--fm);font-size:12px;letter-spacing:.06em;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.bar .who b{color:var(--ink);font-weight:700}
+.bar nav{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
+.bar nav a{
+  font-family:var(--fm);font-size:12px;text-decoration:none;white-space:nowrap;
+  color:var(--ink-soft);border:1px solid var(--line-strong);background:var(--surface-2);
+  padding:5px 10px;border-radius:20px;
+}
+.bar nav a:hover{background:var(--surface-3);color:var(--ink)}
+
+.wrap{max-width:860px;margin:0 auto;padding-inline:20px;padding-block:0 100px}
+
+/* ---- hero ---- */
+.hero{padding-block:46px 30px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.eyebrow{font-family:var(--fm);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-strong);margin:0 0 14px 0;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:24px;height:1px;background:var(--accent-strong)}
+h1{font-family:var(--fd);font-weight:700;font-size:clamp(30px,5.6vw,46px);line-height:1.08;margin:0 0 14px 0;text-wrap:balance;letter-spacing:-.01em}
+.lede{max-width:62ch;color:var(--ink-soft);font-size:16.5px;margin:0 0 20px 0}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-family:var(--fm);font-size:11.5px;color:var(--muted);border:1px solid var(--line);padding:5px 11px;border-radius:20px}
+
+/* ---- tutorial section ---- */
+.tut{padding-top:44px;scroll-margin-top:66px}
+.tuthead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.tuthead .no{font-family:var(--fm);font-size:12.5px;font-weight:700;color:var(--accent-strong);border:1px solid var(--accent-strong);padding:2px 8px;border-radius:3px;letter-spacing:.05em}
+.tuthead h2{font-family:var(--fd);font-size:clamp(23px,3.6vw,30px);margin:0;font-weight:700}
+.tutnote{color:var(--muted);font-size:14.5px;margin:0 0 6px 0;max-width:66ch}
+
+/* ---- question card ---- */
+.q{margin-top:26px}
+.qhead{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;background:var(--surface-2);border-left:3px solid var(--accent-strong);border-radius:0 var(--radius) var(--radius) 0}
+.qid{font-family:var(--fm);font-size:11.5px;font-weight:700;color:var(--accent-strong);letter-spacing:.04em;white-space:nowrap;padding-top:2px}
+.qtext{margin:0;font-size:15px;color:var(--ink);font-style:italic}
+.qtext .sub{display:block;font-style:normal;color:var(--muted);font-size:13.5px;margin-top:4px}
+.qbody{padding-top:14px}
+.qbody p{max-width:70ch;margin:0 0 13px 0}
+.qbody h4{font-family:var(--fd);font-size:16px;margin:22px 0 8px 0;color:var(--ink)}
+
+/* answer chip */
+.ans{
+  display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;
+  font-family:var(--fm);font-size:15px;font-weight:600;color:var(--teal);
+  background:var(--teal-soft);border:1px solid var(--teal);border-radius:var(--radius);
+  padding:11px 14px;margin:0 0 15px 0;
+}
+.ans .lb{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;font-weight:700}
+
+ul.list{margin:0 0 15px 0;padding-left:0;list-style:none;max-width:70ch}
+ul.list li{position:relative;padding-left:19px;margin-bottom:8px}
+ul.list li::before{content:"▸";position:absolute;left:0;top:1px;color:var(--accent-strong);font-size:12.5px}
+
+.note{border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--surface);border-radius:0 var(--radius) var(--radius) 0;padding:14px 16px;margin:18px 0;max-width:70ch;box-shadow:var(--shadow)}
+.note .lb{font-family:var(--fm);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:5px}
+.note p:last-child{margin-bottom:0}
+.note.warn{border-left-color:var(--warn)}
+.note.warn .lb{color:var(--warn)}
+.note.rust{border-left-color:var(--accent-strong)}
+.note.rust .lb{color:var(--accent-strong)}
+
+code{font-family:var(--fm);font-size:.9em;background:var(--surface-2);border:1px solid var(--line);border-radius:2px;padding:1px 5px;overflow-wrap:break-word}
+pre.code{
+  font-family:var(--fm);font-size:13px;line-height:1.7;margin:16px 0;padding:15px 17px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  overflow-x:auto;box-shadow:var(--shadow);color:var(--ink);
+}
+pre.code b{color:var(--accent-strong);font-weight:600}
+pre.code i{color:var(--muted);font-style:normal}
+
+.tw{overflow-x:auto;margin:16px 0 22px 0;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:480px;background:var(--surface)}
+caption{text-align:left;font-family:var(--fm);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--line)}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{font-family:var(--fm);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:600;white-space:nowrap}
+td.m,th.m{font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-2)}
+td small{display:block;color:var(--muted);font-size:12px}
+
+.fig{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:18px 0 22px 0;position:relative}
+.fig .cap{font-family:var(--fm);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.fig .scroll{overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig .foot{font-size:13px;color:var(--muted);margin:10px 0 0 0;max-width:68ch}
+
+/* bit-field strip */
+.bits{display:flex;gap:3px;min-width:560px;margin:14px 0 6px 0}
+.bf{border:1px solid var(--line-strong);border-radius:2px;padding:7px 4px;text-align:center;background:var(--surface);flex-shrink:0}
+.bf .n{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.bf .v{font-family:var(--fm);font-size:12.5px;font-weight:700;color:var(--accent-strong);word-break:break-all}
+.bf .d{font-family:var(--fm);font-size:11px;color:var(--ink-soft);margin-top:2px}
+.bitscroll{overflow-x:auto;padding-bottom:4px}
+
+footer{border-top:1px solid var(--line);margin-top:64px;padding-block:24px 10px;color:var(--muted);font-size:12.5px;font-family:var(--fm)}
+</style>
+
+<div class="bar">
+  <span class="who"><b>IE4756</b> · Tutorial Solutions</span>
+  <nav>
+    <a href="#t1">T1</a><a href="#t2">T2</a><a href="#t3">T3</a><a href="#t4">T4</a><a href="#t5">T5</a>
+  </nav>
+</div>
+
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">Tutorial 1–5 · 逐题详解</p>
+  <h1>五份 Tutorial，<br>十七道题，全部拆到底</h1>
+  <p class="lede">从图灵机的状态转移表，到 MIPS 机器码的每一个比特，再到分支预测要多准才划算——每题都给出完整推理过程，而不只是一个结论。数值题的答案都经过程序验算。</p>
+  <div class="tags">
+    <span class="tag">TM / RAM / PM 模型</span>
+    <span class="tag">缓存与中断</span>
+    <span class="tag">加法器与触发器</span>
+    <span class="tag">MIPS 编码</span>
+    <span class="tag">性能与存储</span>
+  </div>
+</header>
+
+<!-- ============================ TUTORIAL 1 ============================ -->
+<section class="tut" id="t1">
+  <div class="tuthead"><span class="no">TUTORIAL 1</span><h2>抽象机器模型与早期存储</h2></div>
+  <p class="tutnote">对应模块 08（TM / RAM / PM 三种抽象机器模型）与模块 01（早期计算机的输入介质）。</p>
+
+  <!-- T1 Q1 -->
+  <article class="q" id="t1q1">
+    <div class="qhead">
+      <span class="qid">T1 · Q1</span>
+      <p class="qtext">Specify a TM that treats the input binary string as a little-endian binary integer n and decrements n by 1 if n &gt; 0 but leaves it unchanged if n = 0.</p>
+    </div>
+    <div class="qbody">
+      <p>先把算法想清楚，再翻译成状态转移表。</p>
+
+      <h4>① 二进制减一的本质</h4>
+      <p><strong>小端序（little-endian）</strong>意味着磁带最左边那一格是<strong>最低位</strong>，读写头初始就停在这一格——这对我们极其有利，因为减一恰好是从最低位开始处理的。</p>
+      <p>十进制里 <code>...000 − 1</code> 要借位；二进制的规则更简单：<strong>从最低位往高位扫，把遇到的每一个 0 改成 1，直到遇见第一个 1，把它改成 0，然后就结束了</strong>，更高位一律不动。</p>
+      <p>验证一下：n = 12，大端 <code>1100</code>，小端写成 <code>0011</code>。从左（最低位）扫：0→1、0→1，遇到第一个 1→改成 0，停。得到小端 <code>1101</code>，还原成大端就是 <code>1011</code> = 11 = 12−1。✓</p>
+      <p>那 n = 0 怎么办？全是 0，一路把它们都翻成了 1，却始终没遇到 1——扫到磁带末尾的空白 <code>−</code> 时才发现。所以需要一个<strong>撤销阶段</strong>：往回走，把刚才翻出来的 1 全部改回 0。</p>
+
+      <h4>② 还有一个容易漏掉的约束</h4>
+      <p>课程的 TM 定义里，<strong>输出是运行结束时读写头所在格子往后的那串二进制</strong>。所以不能"算完就地停下"——必须把读写头送回<strong>最低位那一格</strong>再停机，否则输出会少几位。这就是下面 B、C 两个"回程"状态存在的理由。</p>
+
+      <h4>③ 状态转移表</h4>
+      <div class="tw">
+        <table>
+          <caption>TM：小端二进制减一（A = 初始状态，H = 终止状态）</caption>
+          <thead><tr><th class="m">当前状态</th><th class="m">读到</th><th class="m">写入</th><th class="m">移动</th><th class="m">转到</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td class="m">A</td><td class="m">0</td><td class="m">1</td><td class="m">右 →</td><td class="m">A</td><td>还没遇到 1，把这个 0 翻成 1，继续往高位找</td></tr>
+            <tr><td class="m">A</td><td class="m">1</td><td class="m">0</td><td class="m">左 ←</td><td class="m">B</td><td><strong>找到了</strong>：把它改成 0，减法完成，开始回程</td></tr>
+            <tr><td class="m">A</td><td class="m">−</td><td class="m">−</td><td class="m">左 ←</td><td class="m">C</td><td>扫到头都没有 1 ⇒ <strong>n = 0</strong>，进入撤销阶段</td></tr>
+            <tr><td class="m">B</td><td class="m">0 或 1</td><td class="m">不变</td><td class="m">左 ←</td><td class="m">B</td><td>回程：一路左移，不改动任何内容</td></tr>
+            <tr><td class="m">B</td><td class="m">−</td><td class="m">−</td><td class="m">右 →</td><td class="m">H</td><td>越过左边界了，退回第一格，停机</td></tr>
+            <tr><td class="m">C</td><td class="m">1</td><td class="m">0</td><td class="m">左 ←</td><td class="m">C</td><td>撤销：把刚才翻出来的 1 改回 0</td></tr>
+            <tr><td class="m">C</td><td class="m">−</td><td class="m">−</td><td class="m">右 →</td><td class="m">H</td><td>撤销完毕，退回第一格，停机</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>一共 <strong>3 个工作状态 + 1 个终止状态</strong>，转移表 7 条。注意状态 B 里不需要区分读到 0 还是 1——因为经过状态 A 之后，左边的格子要么是被翻成 1 的，要么是那个刚被改成 0 的格子，两种情况都只需要路过。</p>
+
+      <h4>④ 三种情况各走一遍</h4>
+      <div class="tw">
+        <table>
+          <caption>执行轨迹（<u>下划线</u>标出读写头位置）</caption>
+          <thead><tr><th class="m">输入</th><th>过程</th><th class="m">输出</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="m">0011<br><small>n = 12</small></td>
+              <td class="m"><u>0</u>011 →A 1<u>0</u>11 →A 11<u>1</u>1 →A(找到) 1<u>1</u>01 →B <u>1</u>101 →B（越界）→H <u>1</u>101</td>
+              <td class="m">1101<br><small>= 11 ✓</small></td>
+            </tr>
+            <tr>
+              <td class="m">1<br><small>n = 1</small></td>
+              <td class="m"><u>1</u> →A(找到，左移越界) →B →H <u>0</u></td>
+              <td class="m">0<br><small>= 0 ✓</small></td>
+            </tr>
+            <tr>
+              <td class="m">000<br><small>n = 0</small></td>
+              <td class="m"><u>0</u>00 →A 1<u>0</u>0 →A 11<u>0</u> →A 111<u>−</u> →A(空白) 11<u>1</u> →C 1<u>1</u>0 →C <u>1</u>00 →C（越界）→H <u>0</u>00</td>
+              <td class="m">000<br><small>原封不动 ✓</small></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note rust">
+        <div class="lb">为什么这题要用小端序</div>
+        <p>如果输入是<strong>大端序</strong>（最高位在左），同样一道减一题会麻烦得多：读写头得先跑到最右端找到最低位，再往<em>左</em>处理借位，还要处理"最高位变 0 后要不要截断"的问题。小端序让"借位方向"和"读写头自然移动方向"一致，程序短了一半——这正是 TM 这类模型的典型特征：<strong>数据的物理排布方式直接决定算法复杂度</strong>，因为 TM 完全局部，换个方向就要多跑一趟。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T1 Q2 -->
+  <article class="q" id="t1q2">
+    <div class="qhead">
+      <span class="qid">T1 · Q2</span>
+      <p class="qtext">Write a RAM program that finds the maximum of all the input integers and stores it in the next memory cell after the input.</p>
+    </div>
+    <div class="qbody">
+      <p>RAM 模型的约定：开始时 <code>reg[0] = n</code>（输入个数），输入放在 <code>mem[0..n)</code>，指令只有三类——<strong>[条件]跳转</strong>、<strong>基本运算</strong>、<strong>内存读写</strong>（<code>reg[k] ← mem[reg[j]]</code> / <code>mem[reg[j]] ← reg[k]</code>，注意地址必须先放在某个寄存器里）。</p>
+
+      <pre class="code"><i>// reg[0] = n（输入个数，已给定）
+// reg[1] = i（当前下标）   reg[2] = max（当前最大值）
+// reg[3],reg[4],reg[5] = 临时</i>
+
+reg[1] ← 0
+reg[2] ← mem[reg[1]]      <i>// max := mem[0]，先拿第一个元素打底</i>
+reg[1] ← reg[1] + 1       <i>// i := 1</i>
+
+<b>maxloop:</b>
+reg[3] ← reg[1] &lt; reg[0]  <i>// i &lt; n ?</i>
+goto <b>done</b> if reg[3] = 0
+reg[4] ← mem[reg[1]]      <i>// x := mem[i]</i>
+reg[5] ← reg[2] &lt; reg[4]  <i>// max &lt; x ?</i>
+goto <b>skip</b> if reg[5] = 0
+reg[2] ← reg[4]           <i>// max := x</i>
+<b>skip:</b>
+reg[1] ← reg[1] + 1       <i>// i := i+1</i>
+goto <b>maxloop</b>
+
+<b>done:</b>
+mem[reg[1]] ← reg[2]      <i>// 此刻 reg[1] 恰好 = n，所以写的就是 mem[n]</i></pre>
+
+      <div class="note">
+        <div class="lb">最关键的一个细节</div>
+        <p>最后一行为什么能直接写 <code>mem[reg[1]]</code>？因为循环的退出条件是 <code>i &lt; n</code> 不成立，也就是 <strong>i 恰好等于 n</strong> 的那一刻跳出。于是 <code>reg[1]</code> 天然就等于 n，<code>mem[n]</code> 正好是"输入之后的下一格"。不需要再算一次地址，也不需要额外的寄存器——这是循环变量复用的典型写法，考试时能省掉两行。</p>
+      </div>
+
+      <ul class="list">
+        <li><strong>为什么要先取 mem[0] 打底</strong>，而不是把 max 初始化成 0？因为输入可能全是负数，初始化成 0 会得到错误答案。用"第一个元素"打底对任何取值范围都安全。</li>
+        <li><strong>边界情况</strong>：n = 0 时不存在最大值，上面的程序会读 <code>mem[0]</code>（越界读一个没定义的值）。严谨的写法应在开头加一句 <code>goto end if reg[0] = 0</code>。考试时写一句注释说明即可。</li>
+        <li><strong>复杂度</strong>：循环体是常数条指令，执行 n−1 轮，<strong>Θ(n) 时间、O(1) 额外空间</strong>。注意 RAM 模型里 <code>mem[reg[1]]</code> 这种"随机访问"只算<strong>一步</strong>——这正是模块 08.3 说的"完全非局部"，也是 RAM 比 TM 高效得多的根本原因（同样一道求最大值，TM 需要来回搬运比特，远不止 Θ(n)）。</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- T1 Q3 -->
+  <article class="q" id="t1q3">
+    <div class="qhead">
+      <span class="qid">T1 · Q3</span>
+      <p class="qtext">Explain how to translate any PM to some other PM in which each memory node has only 3 fields.</p>
+    </div>
+    <div class="qbody">
+      <p>核心思路一句话：<strong>把一个"胖节点"拆成一小棵由"瘦节点"搭成的树，原来指向胖节点的指针改成指向树根。</strong></p>
+
+      <h4>① 为什么这件事一定做得到</h4>
+      <p>关键前提：<strong>字段数 f 是由原 PM 的程序固定下来的常数</strong>，不随输入规模变化。这是 PM 模型定义的一部分（"节点有固定数量的字段"）。正因为 f 是常数，下面所有"多花几步"的开销都是<strong>常数倍</strong>，不会改变任何算法的渐进复杂度。</p>
+
+      <h4>② 构造：把 f 个字段挂到一棵二叉树的叶子上</h4>
+      <p>新 PM 的节点统一有 3 个字段，我们把它们用作 <code>(left, right, value)</code>。对原来那个有 f 个字段的节点：</p>
+      <ul class="list">
+        <li>造一棵有 ⌈f⌉ 个叶子的<strong>完全二叉树</strong>，深度 d = ⌈log₂ f⌉。内部节点只用 <code>left</code>/<code>right</code> 两个字段，<code>value</code> 空着；</li>
+        <li>第 j 个叶子的 <code>value</code> 字段，存原节点第 j 个字段的内容（原字段存的是字还是指针都无所谓——PM 允许一个字段存字或指针）；</li>
+        <li>原来任何"指向该节点"的指针，现在一律改成<strong>指向这棵树的根</strong>。</li>
+      </ul>
+
+      <div class="fig">
+        <div class="cap">Fig. 1 · 一个 8 字段节点 → 一棵 3 字段节点搭成的二叉树</div>
+        <div class="scroll">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="左边是一个含8个字段的胖节点，右边是一棵深度为3的二叉树，树的8个叶子分别存放原来的8个字段，指向原节点的指针改为指向树根">
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <text x="0" y="14" fill="var(--muted)">原 PM：1 个节点 = 8 个字段</text>
+            <g stroke="var(--line-strong)" stroke-width="1.3" fill="var(--surface-2)">
+              <rect x="6" y="34" width="46" height="26"/><rect x="6" y="60" width="46" height="26"/>
+              <rect x="6" y="86" width="46" height="26"/><rect x="6" y="112" width="46" height="26"/>
+              <rect x="6" y="138" width="46" height="26"/><rect x="6" y="164" width="46" height="26"/>
+              <rect x="6" y="190" width="46" height="26"/><rect x="6" y="216" width="46" height="26"/>
+            </g>
+            <g fill="var(--ink-soft)" text-anchor="middle">
+              <text x="29" y="51">f₁</text><text x="29" y="77">f₂</text><text x="29" y="103">f₃</text><text x="29" y="129">f₄</text>
+              <text x="29" y="155">f₅</text><text x="29" y="181">f₆</text><text x="29" y="207">f₇</text><text x="29" y="233">f₈</text>
+            </g>
+            <path d="M 66 138 L 104 138" stroke="var(--accent-strong)" stroke-width="1.6" fill="none"/>
+            <path d="M 104 138 l -8 -4 v 8 z" fill="var(--accent-strong)"/>
+
+            <text x="150" y="14" fill="var(--muted)">新 PM：每个节点只有 3 个字段 (left, right, value)</text>
+            <g stroke="var(--line-strong)" stroke-width="1.4" fill="var(--surface)">
+              <rect x="150" y="122" width="72" height="32" rx="3"/>
+              <rect x="272" y="74" width="72" height="32" rx="3"/><rect x="272" y="170" width="72" height="32" rx="3"/>
+              <rect x="394" y="46" width="72" height="30" rx="3"/><rect x="394" y="104" width="72" height="30" rx="3"/>
+              <rect x="394" y="142" width="72" height="30" rx="3"/><rect x="394" y="200" width="72" height="30" rx="3"/>
+            </g>
+            <g fill="var(--ink-soft)" text-anchor="middle" font-size="10.5">
+              <text x="186" y="142">root</text>
+              <text x="308" y="94">·</text><text x="308" y="190">·</text>
+              <text x="430" y="65">·</text><text x="430" y="123">·</text><text x="430" y="161">·</text><text x="430" y="219">·</text>
+            </g>
+            <g stroke="var(--line-strong)" stroke-width="1.3" fill="none">
+              <path d="M 222 132 L 272 92"/><path d="M 222 146 L 272 184"/>
+              <path d="M 344 84 L 394 62"/><path d="M 344 96 L 394 118"/>
+              <path d="M 344 180 L 394 158"/><path d="M 344 192 L 394 214"/>
+            </g>
+            <g stroke="var(--teal)" stroke-width="1.3" fill="none">
+              <path d="M 466 54 L 508 42"/><path d="M 466 68 L 508 76"/>
+              <path d="M 466 112 L 508 104"/><path d="M 466 126 L 508 138"/>
+              <path d="M 466 150 L 508 166"/><path d="M 466 164 L 508 200"/>
+              <path d="M 466 208 L 508 228"/><path d="M 466 222 L 508 246"/>
+            </g>
+            <g fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.2">
+              <rect x="508" y="30" width="54" height="24" rx="3"/><rect x="508" y="64" width="54" height="24" rx="3"/>
+              <rect x="508" y="92" width="54" height="24" rx="3"/><rect x="508" y="126" width="54" height="24" rx="3"/>
+              <rect x="508" y="154" width="54" height="24" rx="3"/><rect x="508" y="188" width="54" height="24" rx="3"/>
+              <rect x="508" y="216" width="54" height="24" rx="3"/><rect x="574" y="126" width="0" height="0"/>
+            </g>
+            <g fill="var(--teal)" text-anchor="middle" font-size="10.5" font-weight="700">
+              <text x="535" y="46">f₁</text><text x="535" y="80">f₂</text><text x="535" y="108">f₃</text><text x="535" y="142">f₄</text>
+              <text x="535" y="170">f₅</text><text x="535" y="204">f₆</text><text x="535" y="232">f₇</text>
+            </g>
+            <text x="580" y="130" fill="var(--muted)" font-size="10.5">⋯ f₈</text>
+            <text x="580" y="150" fill="var(--muted)" font-size="10.5">叶子的 value</text>
+            <text x="580" y="166" fill="var(--muted)" font-size="10.5">存原来的字段</text>
+            <text x="150" y="108" fill="var(--accent-strong)" font-size="10.5">指针改为指向树根</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">内部节点只借用 left / right 两个字段做导航，叶子只借用 value 字段存数据——三个字段就够了。</p>
+      </div>
+
+      <h4>③ 指令怎么翻译</h4>
+      <ul class="list">
+        <li><strong>读/写字段 j</strong>：原来是一步，现在变成"从根出发，按 j 的二进制位依次走 left/right，走 d 步到叶子，再读/写它的 value"。因为 j 是指令里写死的常数，这条路径也是<strong>固定的</strong>——编译期就能展开成 d+1 条指令，没有循环、没有判断。</li>
+        <li><strong>新建一个节点</strong>：原来一步，现在变成新建 2f−1 个 3 字段节点并把 left/right 接好——同样是固定长度的一段代码。</li>
+        <li><strong>指针的比较与赋值</strong>：完全不变。PM 里指针只能"存储"和"判等"，而两个原节点相等 ⟺ 它们的树根相等，所以判等语义自动保持。</li>
+        <li><strong>寄存器</strong>：走路径时需要几个临时寄存器存中间指针。PM 允许固定数量 c 个寄存器，把 c 增大一个常数即可。</li>
+      </ul>
+
+      <h4>④ 代价</h4>
+      <p>每一步原指令 → 至多 d+1 = ⌈log₂ f⌉+1 步新指令。f 是常数 ⇒ 这是 <strong>O(1) 的常数倍减速</strong>，任何算法的渐进复杂度完全不变。空间上从 f 个字段变成约 2f 个字段，也是常数倍。</p>
+
+      <div class="note">
+        <div class="lb">用链表更简单，但慢一点</div>
+        <p>也可以不用树，直接把 f 个字段串成一条<strong>链表</strong>：节点用作 <code>(value, next, 空)</code>，访问字段 j 就 next 走 j 次。实现更简单，代价是每次访问最多 f 步而不是 log f 步——反正 f 是常数，两种都合格。树的写法在 f 较大时常数更小，也更能体现"3 个字段能干什么"这个题眼：<strong>2 个字段做链表就够了，第 3 个字段才让你能做分叉</strong>。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T1 Q4 -->
+  <article class="q" id="t1q4">
+    <div class="qhead">
+      <span class="qid">T1 · Q4</span>
+      <p class="qtext">Name benefits and drawbacks of punched cards.</p>
+    </div>
+    <div class="qbody">
+      <p>穿孔卡片（IBM 80 列卡是事实标准，一张卡 80 个字符 ≈ 80 字节）是第 1～3 代计算机的主力输入介质。评价它要放回当时的语境：那个年代<strong>机时极其昂贵</strong>，而人力和纸张便宜。</p>
+
+      <div class="tw">
+        <table>
+          <caption>穿孔卡片的两面</caption>
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>完全机械、不需要电子学</strong><br><small>读卡机就是一套机械/光学装置，断电也不会丢数据，是天然的非易失性介质，也不怕磁场干扰。</small></td>
+              <td><strong>信息密度低得离谱</strong><br><small>一张卡 ≈ 80 字节。今天一张 1 MB 的照片要一万两千多张卡，重几十公斤——物理体积是它的死穴。</small></td>
+            </tr>
+            <tr>
+              <td><strong>人眼可读、可单张修改</strong><br><small>孔的位置肉眼可见；某一行写错了，只需重新打这一张卡插回去，不用重做整副牌。这是最早的"编辑"能力。</small></td>
+              <td><strong>速度极慢</strong><br><small>高速读卡机约 1000 张/分钟 ≈ 1.3 KB/s，和当时 CPU 的速度差了好几个数量级，I/O 成为绝对瓶颈。</small></td>
+            </tr>
+            <tr>
+              <td><strong>程序天然模块化</strong><br><small>一副卡就是一个有序序列，可以插入、删除、重排——这直接催生了"子程序库"这种复用方式。</small></td>
+              <td><strong>只能顺序访问，且实质上一次性写入</strong><br><small>打好的孔补不回去，改一个字符要整张重打；也谈不上随机访问。</small></td>
+            </tr>
+            <tr>
+              <td><strong>标准化、便宜、可离线准备</strong><br><small>程序员在打孔机上离线备好卡，昂贵的主机只负责跑——这正是批处理（batch processing）模式的物理基础，让一台机器能服务很多人。</small></td>
+              <td><strong>物理上很脆弱</strong><br><small>会折、会撕、怕潮（湿度变化会让卡片尺寸改变而卡纸）；一副卡掉在地上顺序就全乱了——所以 73–80 列通常专门打上序号，就为了能用分拣机排回去。</small></td>
+            </tr>
+            <tr>
+              <td><strong>保存寿命长</strong><br><small>干燥保存几十年仍可读，不像磁介质会退磁。</small></td>
+              <td><strong>周转慢、纠错差</strong><br><small>交卡 → 排队 → 批量运行 → 几小时后拿到打印结果，一个小错就要再等一轮；校验要靠专门的 verifier 机器和第二个操作员重新键入一遍。</small></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note rust">
+        <div class="lb">答这道题的加分点</div>
+        <p>不要只罗列"慢、容量小"。真正的判分点是说出<strong>它为什么在当时是合理选择</strong>：在机时比人力贵得多的年代，"离线准备 + 批处理"把昂贵资源的利用率拉满；而它最终被淘汰，不是因为某一条缺点，而是因为<strong>磁带和终端同时解决了密度和交互性</strong>，让"离线打孔"这个前提本身消失了。</p>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ============================ TUTORIAL 2 ============================ -->
+<section class="tut" id="t2">
+  <div class="tuthead"><span class="no">TUTORIAL 2</span><h2>通用性、缓存、分支预测与中断</h2></div>
+  <p class="tutnote">对应模块 08.5（程序即字符串）、模块 02–03（缓存与分支预测）、模块 04（中断机制）。</p>
+
+  <!-- T2 Q1 -->
+  <article class="q" id="t2q1">
+    <div class="qhead">
+      <span class="qid">T2 · Q1</span>
+      <p class="qtext">Design one way to encode a TM as a binary string.</p>
+    </div>
+    <div class="qbody">
+      <p>这题的意义远大于题面：<strong>只有能把 TM 编码成字符串，才可能有通用图灵机（UTM）</strong>，也才有"程序可以被当作数据"这件事——模块 08.5 那一跃的技术基础就在这里。</p>
+
+      <h4>① 要编码的东西</h4>
+      <p>一台 TM 由这些成分决定：状态集合 Q、转移函数 δ、初始状态、终止状态。磁带字母表固定为 <code>{0, 1, −}</code>，移动方向为 <code>{左, 右, 停}</code>。</p>
+
+      <h4>② 关键技巧：用固定顺序消灭分隔符</h4>
+      <p>最省事的做法是给转移表规定一个<strong>标准顺序</strong>，这样就不必编码"这条转移属于哪个状态、读到什么符号"——位置本身已经说明了一切：</p>
+      <ul class="list">
+        <li>把状态编号为 1…|Q|，<strong>约定状态 1 是初始状态、状态 |Q| 是终止状态</strong>（终止状态没有转移），这样两者都不用额外编码。</li>
+        <li>按 <code>(状态 1, 读到 0) , (状态 1, 读到 1) , (状态 1, 读到 −) , (状态 2, 读到 0) , …</code> 的顺序，依次列出每条转移的<strong>输出部分</strong>。一共 3(|Q|−1) 条。</li>
+      </ul>
+
+      <h4>③ 每条转移的比特布局</h4>
+      <div class="bitscroll">
+        <div class="bits">
+          <div class="bf" style="flex:2 1 0"><div class="n">写入符号</div><div class="v">2 bit</div><div class="d">00=0　01=1　10=−</div></div>
+          <div class="bf" style="flex:2 1 0"><div class="n">移动方向</div><div class="v">2 bit</div><div class="d">00=左　01=右　10=停</div></div>
+          <div class="bf" style="flex:3 1 0"><div class="n">下一状态</div><div class="v">k bit</div><div class="d">k = ⌈log₂|Q|⌉，状态编号的定长二进制</div></div>
+        </div>
+      </div>
+
+      <h4>④ 完整串的格式</h4>
+      <pre class="code">E(M) =  <b>⟨|Q|⟩</b>  ‖  <b>T₁,₀ T₁,₁ T₁,−</b>  ‖  <b>T₂,₀ T₂,₁ T₂,−</b>  ‖ … ‖  <b>T|Q|−1,−</b>
+
+其中 ⟨m⟩ 是 m 的<i>自定界</i>编码，例如一元码：m 个 1 后跟一个 0
+     （读到第一个 0 就知道 |Q| 是多少，于是 k = ⌈log₂|Q|⌉ 也确定了，
+      后面每条转移的长度 4+k 就固定了，整串可以无歧义地切开）</pre>
+      <p>总长度 = |Q| + 1 + 3(|Q|−1)(4+k) = <strong>O(|Q| log |Q|)</strong>。</p>
+
+      <h4>⑤ 举个完整的例子</h4>
+      <p>用 T1·Q1 那台减一 TM：状态 A=1（初始）、B=2、C=3、H=4（终止），|Q|=4 ⇒ k=2。按标准顺序列出 3×3 = 9 条转移：</p>
+      <div class="tw">
+        <table>
+          <caption>减一 TM 的编码（|Q| 的一元码 <code>11110</code> 之后接 9 条转移）</caption>
+          <thead><tr><th class="m">顺序</th><th class="m">(状态, 读到)</th><th class="m">写入</th><th class="m">移动</th><th class="m">下一状态</th><th class="m">这 6 个比特</th></tr></thead>
+          <tbody>
+            <tr><td class="m">1</td><td class="m">(A, 0)</td><td class="m">1 → 01</td><td class="m">右 → 01</td><td class="m">A=1 → 01</td><td class="m">01 01 01</td></tr>
+            <tr><td class="m">2</td><td class="m">(A, 1)</td><td class="m">0 → 00</td><td class="m">左 → 00</td><td class="m">B=2 → 10</td><td class="m">00 00 10</td></tr>
+            <tr><td class="m">3</td><td class="m">(A, −)</td><td class="m">− → 10</td><td class="m">左 → 00</td><td class="m">C=3 → 11</td><td class="m">10 00 11</td></tr>
+            <tr><td class="m">4</td><td class="m">(B, 0)</td><td class="m">0 → 00</td><td class="m">左 → 00</td><td class="m">B=2 → 10</td><td class="m">00 00 10</td></tr>
+            <tr><td class="m">5</td><td class="m">(B, 1)</td><td class="m">1 → 01</td><td class="m">左 → 00</td><td class="m">B=2 → 10</td><td class="m">01 00 10</td></tr>
+            <tr><td class="m">6</td><td class="m">(B, −)</td><td class="m">− → 10</td><td class="m">右 → 01</td><td class="m">H=4 → 00*</td><td class="m">10 01 00</td></tr>
+            <tr><td class="m">7</td><td class="m">(C, 0)</td><td class="m">0 → 00</td><td class="m">停 → 10</td><td class="m">C=3 → 11</td><td class="m">00 10 11</td></tr>
+            <tr><td class="m">8</td><td class="m">(C, 1)</td><td class="m">0 → 00</td><td class="m">左 → 00</td><td class="m">C=3 → 11</td><td class="m">00 00 11</td></tr>
+            <tr><td class="m">9</td><td class="m">(C, −)</td><td class="m">− → 10</td><td class="m">右 → 01</td><td class="m">H=4 → 00*</td><td class="m">10 01 00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted)">* 4 号状态在 2 比特里写成 <code>00</code>（按模 4 编号，或把 k 取 3 位写成 <code>100</code>——只要发送方和接收方约定一致即可，这是编码方案的自由度）。</p>
+
+      <div class="note">
+        <div class="lb">另一种常见写法：加分隔符</div>
+        <p>如果不想规定标准顺序，就得显式写出每条转移的 <code>(旧状态, 读到, 写入, 移动, 新状态)</code> 五元组，并用分隔符隔开。经典做法是<strong>把每个比特加倍</strong>（0→<code>00</code>，1→<code>01</code>），于是 <code>11</code> 这个模式在数据内部<em>永远不会出现</em>，可以安全地当分隔符用。代价是长度翻倍，好处是格式灵活、转移表可以稀疏。两种方案都正确，考试写清楚"怎么保证可以无歧义地解码"才是得分点。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T2 Q2 -->
+  <article class="q" id="t2q2">
+    <div class="qhead">
+      <span class="qid">T2 · Q2</span>
+      <p class="qtext">Explain why we separate instruction/data caches.</p>
+    </div>
+    <div class="qbody">
+      <p>有五个层次的理由，第一个是决定性的，其余是加成。</p>
+
+      <h4>① 消除结构冒险：同一拍里要取两次</h4>
+      <p>这是<strong>最根本</strong>的原因。在流水线 CPU 里，<code>IF</code>（取指令）阶段和 <code>MEM</code>（访存）阶段是<strong>同时</strong>工作的：当第 4 条指令在取指时，第 1 条 <code>lw</code> 正好在访存。如果只有一块统一缓存、一个访问端口，这两件事必须排队——也就是<strong>每遇到一条 load/store 就要停一拍</strong>。这种因为硬件资源不够而被迫停顿的情况叫<strong>结构冒险（structural hazard）</strong>。拆成两块物理独立的缓存 = 两个独立端口，取指和访存各走各的，冲突从根上消失。</p>
+
+      <h4>② 两种访问模式的特性完全不同，可以分别优化</h4>
+      <div class="tw">
+        <table>
+          <caption>指令流与数据流的差异</caption>
+          <thead><tr><th></th><th>指令（I-Cache）</th><th>数据（D-Cache）</th></tr></thead>
+          <tbody>
+            <tr><td><strong>读写</strong></td><td>几乎<strong>只读</strong>（不考虑自修改代码）</td><td>读写都有</td></tr>
+            <tr><td><strong>局部性</strong></td><td>空间局部性极强，基本顺序执行</td><td>分散得多，取决于数据结构</td></tr>
+            <tr><td><strong>可省掉的电路</strong></td><td>不需要脏位、不需要写回逻辑 ⇒ 更简单更快</td><td>必须有写回/写直达、脏位、写缓冲</td></tr>
+            <tr><td><strong>可独立调的参数</strong></td><td>可用更大的 cache line（顺序预取收益高）</td><td>可用更高的相联度（减少冲突失效）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>③ 互相不干扰，避免"数据把代码冲掉"</h4>
+      <p>设想一个遍历大数组的循环：如果共用一块缓存，数据流会像洪水一样把整个缓存冲刷一遍，<strong>连循环体自己的指令都会被挤出去</strong>，于是每一轮迭代都要重新取指令——这叫缓存颠簸（thrashing）。分开之后，数据流量再大也碰不到指令缓存，循环体的指令能稳稳驻留。</p>
+
+      <h4>④ 物理布局：线更短，频率更高</h4>
+      <p>I-Cache 可以直接放在取指单元旁边，D-Cache 放在访存单元旁边，两段导线都很短。共用一块缓存则必须放在两者之间，两边都要拉长线——在 GHz 级频率下，导线延迟是实打实的时钟周期限制（回想模块 12.5 那条"线越长越难同步"的物理规律）。</p>
+
+      <h4>⑤ 总带宽直接翻倍</h4>
+      <p>两块缓存各有自己的通路，每拍能同时供给一条指令和一个数据字，聚合带宽是统一缓存的两倍。</p>
+
+      <div class="note warn">
+        <div class="lb">为什么只在 L1 这么做</div>
+        <p>代价是两块缓存要各占面积，而且引入了<strong>一致性问题</strong>：如果程序修改了自己的代码（JIT 编译器就会这么干），新写的内容进了 D-Cache，而 I-Cache 里还缓存着旧指令——必须显式执行"指令缓存失效"操作。所以 L2 及以下一律是<strong>统一缓存</strong>：那里离核心远、访问频率低，结构冒险早已不是瓶颈，统一起来反而更省面积、更灵活。这也正是模块 09.4 说的：<strong>底层是冯·诺依曼（统一），只在最顶层借用哈佛架构（分离）的速度红利。</strong></p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T2 Q3 -->
+  <article class="q" id="t2q3">
+    <div class="qhead">
+      <span class="qid">T2 · Q3</span>
+      <p class="qtext">Explain how branch prediction is helpful for loops.<span class="sub">（提示：查 Wikipedia 的 “branch predictor”，重点看 2-bit saturating counter）</span></p>
+    </div>
+    <div class="qbody">
+      <h4>① 为什么非猜不可</h4>
+      <p>流水线 CPU 在分支指令<strong>还没算出结果</strong>时，就必须决定下一拍取哪条指令。等结果出来意味着流水线要空转好几拍（分支惩罚）。所以只能猜——猜对了零代价，猜错了才付出清空流水线的代价。</p>
+
+      <h4>② 循环是"几乎完全可预测"的完美案例</h4>
+      <p>一个执行 n 轮的循环，它末尾那条<strong>向后跳的分支</strong>会被执行 n 次，其中 <strong>n−1 次跳转、只有最后 1 次不跳</strong>。也就是说结果的规律性高达 (n−1)/n——n=100 时是 99%。而循环恰恰占据了程序绝大部分执行时间，所以"把循环分支猜准"几乎等于"把整个程序猜准"。</p>
+
+      <h4>③ 1 位预测器：每进一次循环错两次</h4>
+      <p>最朴素的做法是记住"上次跳没跳"，这次就照做。对循环而言：</p>
+      <ul class="list">
+        <li><strong>最后一轮</strong>：预测器说"跳"（因为上次跳了），实际不跳 → <strong>错 1 次</strong>；</li>
+        <li>预测器因此被改写成"不跳"。等<strong>下次再进入这个循环</strong>（比如外层循环的下一轮）时，第一轮它说"不跳"，实际要跳 → <strong>又错 1 次</strong>。</li>
+      </ul>
+      <p>所以每执行一遍循环要错 <strong>2 次</strong>。对于跑在外层循环里的内层循环，这个代价会被放大 m 倍。</p>
+
+      <h4>④ 2 位饱和计数器：每进一次循环只错一次</h4>
+      <p>用 2 个比特记 4 个状态，跳转就加一、不跳就减一，<strong>到两端就饱和不再变</strong>；预测结果只看最高位。</p>
+
+      <div class="fig">
+        <div class="cap">Fig. 2 · 2-bit saturating counter 状态机</div>
+        <div class="scroll">
+        <svg viewBox="0 0 740 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="四状态机：00强不跳、01弱不跳、10弱跳、11强跳；taken事件向右移动一格并在11自环，not-taken事件向左移动一格并在00自环；左两个状态预测不跳，右两个预测跳">
+          <g font-family="IBM Plex Mono, monospace" font-size="11.5" text-anchor="middle">
+            <rect x="24" y="16" width="332" height="24" rx="12" fill="var(--surface-2)" stroke="var(--line)"/>
+            <text x="190" y="32" fill="var(--muted)" font-size="11">这两个状态 → 预测「不跳转」</text>
+            <rect x="384" y="16" width="332" height="24" rx="12" fill="var(--accent-soft)" stroke="var(--accent-strong)"/>
+            <text x="550" y="32" fill="var(--accent-strong)" font-size="11" font-weight="700">这两个状态 → 预测「跳转」</text>
+
+            <g stroke-width="1.6">
+              <circle cx="100" cy="112" r="42" fill="var(--surface)" stroke="var(--line-strong)"/>
+              <circle cx="280" cy="112" r="42" fill="var(--surface)" stroke="var(--line-strong)"/>
+              <circle cx="460" cy="112" r="42" fill="var(--accent-soft)" stroke="var(--accent-strong)"/>
+              <circle cx="640" cy="112" r="42" fill="var(--accent-soft)" stroke="var(--accent-strong)"/>
+            </g>
+            <g font-size="15" font-weight="700">
+              <text x="100" y="110" fill="var(--ink)">00</text><text x="280" y="110" fill="var(--ink)">01</text>
+              <text x="460" y="110" fill="var(--accent-strong)">10</text><text x="640" y="110" fill="var(--accent-strong)">11</text>
+            </g>
+            <g font-size="9.5" fill="var(--muted)">
+              <text x="100" y="126">强不跳</text><text x="280" y="126">弱不跳</text>
+            </g>
+            <g font-size="9.5" fill="var(--accent-strong)">
+              <text x="460" y="126">弱跳</text><text x="640" y="126">强跳</text>
+            </g>
+
+            <!-- taken arrows (rightward, teal) -->
+            <g stroke="var(--teal)" stroke-width="1.8" fill="none">
+              <path d="M 142 96 L 234 96"/><path d="M 322 96 L 414 96"/><path d="M 502 96 L 594 96"/>
+            </g>
+            <g fill="var(--teal)">
+              <path d="M 238 96 l -9 -4.5 v 9 z"/><path d="M 418 96 l -9 -4.5 v 9 z"/><path d="M 598 96 l -9 -4.5 v 9 z"/>
+            </g>
+            <text x="188" y="88" fill="var(--teal)" font-size="10">taken</text>
+            <text x="368" y="88" fill="var(--teal)" font-size="10">taken</text>
+            <text x="548" y="88" fill="var(--teal)" font-size="10">taken</text>
+
+            <!-- not taken arrows (leftward, warn) -->
+            <g stroke="var(--warn)" stroke-width="1.8" fill="none">
+              <path d="M 234 132 L 142 132"/><path d="M 414 132 L 322 132"/><path d="M 594 132 L 502 132"/>
+            </g>
+            <g fill="var(--warn)">
+              <path d="M 138 132 l 9 -4.5 v 9 z"/><path d="M 318 132 l 9 -4.5 v 9 z"/><path d="M 498 132 l 9 -4.5 v 9 z"/>
+            </g>
+            <text x="188" y="150" fill="var(--warn)" font-size="10">not taken</text>
+            <text x="368" y="150" fill="var(--warn)" font-size="10">not taken</text>
+            <text x="548" y="150" fill="var(--warn)" font-size="10">not taken</text>
+
+            <!-- self loops -->
+            <path d="M 72 148 A 30 30 0 1 0 78 84" fill="none" stroke="var(--warn)" stroke-width="1.6"/>
+            <path d="M 78 84 l 1 10 l 8 -6 z" fill="var(--warn)"/>
+            <text x="34" y="176" fill="var(--warn)" font-size="9.5">not taken</text>
+            <path d="M 668 84 A 30 30 0 1 1 662 148" fill="none" stroke="var(--teal)" stroke-width="1.6"/>
+            <path d="M 662 148 l -1 -10 l -8 6 z" fill="var(--teal)"/>
+            <text x="706" y="176" fill="var(--teal)" font-size="9.5">taken</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">向右是"跳转"事件，向左是"不跳转"事件，两端饱和自环。预测值 = 最高位。</p>
+      </div>
+
+      <p>现在重看循环：跑了几轮之后，计数器早已<strong>饱和在 11（强跳）</strong>。循环退出时那唯一一次"不跳"只把它拉到 <strong>10（弱跳）</strong>——<em>最高位仍然是 1，仍然预测跳转</em>。于是下次再进入这个循环时，第一轮预测"跳"，<strong>正确</strong>。</p>
+
+      <div class="ans"><span class="lb">结论</span> 2 位饱和计数器把每次循环的误预测从 2 次降到 1 次（只错在退出那一刻）；循环轮数 n 越大，准确率 (n−1)/n 越接近 100%。</div>
+
+      <div class="note">
+        <div class="lb">这一位比特买到的是什么</div>
+        <p>多出来的那一位提供了<strong>迟滞（hysteresis）</strong>：<em>单次异常的结果不足以翻转预测方向，必须连错两次才改口。</em>而循环正是"绝大多数时候结果相同、只有一次例外"的典型模式——这一位比特刚好就是为这种模式设计的。嵌套循环收益最明显：内层循环执行 m 次、每次 n 轮，1 位预测器错 2m 次，2 位只错 m 次，直接砍半。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T2 Q4 -->
+  <article class="q" id="t2q4">
+    <div class="qhead">
+      <span class="qid">T2 · Q4</span>
+      <p class="qtext">Explain why the CPU and not the OS must save the PC before jumping to the interrupt handler.</p>
+    </div>
+    <div class="qbody">
+      <div class="ans"><span class="lb">一句话</span> 这是个"先有鸡还是先有蛋"的死结：要执行任何一条保存 PC 的指令，PC 必须<strong>已经</strong>被改成处理程序的地址——那时旧值早就没了。</div>
+
+      <h4>① 把时间轴摊开看</h4>
+      <p>中断发生时，硬件必须做一件事：<strong>把 PC 改成中断处理程序的入口地址</strong>，否则处理程序根本不会被执行。问题在于，PC 只有一个，一旦写进新值，被中断程序的"下一条指令地址"就<strong>被覆盖掉了</strong>。</p>
+      <p>假设保存 PC 是操作系统（软件）的责任，那么这段保存代码只可能出现在中断处理程序的开头。但等到处理程序的<strong>第一条指令</strong>开始执行时，PC 里装的已经是处理程序自己的地址了。软件根本没有任何一个指令槽可以插进"跳转之前"这个时刻——<strong>那个时刻在定义上就不属于软件</strong>。</p>
+
+      <h4>② 中断是"非自愿"的，被中断方也没机会自救</h4>
+      <p>中断与函数调用有本质区别：函数调用是<em>程序自己发起</em>的，所以 <code>jal</code> 可以顺手把返回地址存进 <code>$31</code>。而中断是<strong>异步</strong>的，可能发生在任意两条指令之间，被中断的程序完全不知情、也没做任何准备，当然不可能提前保存什么。</p>
+
+      <h4>③ 还必须是原子的</h4>
+      <p>"保存 PC"和"载入处理程序地址"这两步必须<strong>不可分割</strong>。如果它们之间存在任何一个可被打断的间隙，另一个中断恰好在此时到达，就会把刚保存的 PC 覆盖掉，被中断的程序永远回不去了。只有硬件能提供这种原子性——它在取指周期的边界上一次性完成整个动作序列（压栈保存 PC 与状态字、关中断、载入向量地址），中间不存在任何"指令边界"。</p>
+
+      <div class="note rust">
+        <div class="lb">对照 MIPS 的具体实现</div>
+        <p>MIPS 用一个专用寄存器 <strong>EPC</strong>（Exception Program Counter）接住旧 PC，x86 则是把 PC 和标志寄存器一起压进栈。两者都是<strong>硬件在跳转的同一个动作里</strong>完成的，软件在这件事上没有任何发言权。同样的逻辑也适用于状态标志寄存器——这正好引出下一题。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T2 Q5 -->
+  <article class="q" id="t2q5">
+    <div class="qhead">
+      <span class="qid">T2 · Q5</span>
+      <p class="qtext">Explain why the return-from-interrupt instruction is necessary if there are read-only CPU flags.</p>
+    </div>
+    <div class="qbody">
+      <p>先说清楚"只读标志位"指什么：CPU 内部有一批状态位——<strong>中断使能位、特权/内核模式位、条件码</strong>等——它们对普通指令而言是<strong>不可写</strong>的，软件读得到、改不了。</p>
+
+      <h4>① 中断进入时，硬件改动了这些标志位</h4>
+      <p>接受中断时硬件不只改 PC，还会顺手：<strong>关闭中断使能</strong>（免得处理程序刚开头就被再次打断）、<strong>切到内核/特权模式</strong>。所以要正确返回，必须把这些标志位连同 PC 一起<strong>恢复原样</strong>。</p>
+
+      <h4>② 它们是只读的 ⇒ 根本没有普通指令能写回去</h4>
+      <p>这是最直接的理由：既然没有任何一条普通指令能改写这些位，就必须专门提供一条指令，它的<strong>定义</strong>就是"把先前保存的标志位和 PC 一起恢复"。这条指令就是 return-from-interrupt（MIPS 的 <code>eret</code>、x86 的 <code>iret</code>）。</p>
+
+      <h4>③ 就算能分开写，拆成两条指令也必然出错</h4>
+      <p>这是更深一层、也是考试最想看到的论证。假设我们有"恢复标志位"和"跳回去"两条独立指令，无论怎么排都是坏的：</p>
+      <div class="tw">
+        <table>
+          <caption>为什么必须原子</caption>
+          <thead><tr><th>顺序</th><th>会发生什么</th></tr></thead>
+          <tbody>
+            <tr><td><strong>先恢复标志位<br>再跳转</strong></td><td>标志位一恢复，就<strong>立刻回到用户模式、并重新开放中断</strong>——可此刻还停在中断处理程序里！接下来那条跳转指令将以用户权限执行，可能<strong>没有权限</strong>做这次跳转；更糟的是，中断已开放，一个新中断可能正好在这个缝隙里到达，把还没用上的返回地址冲掉。</td></tr>
+            <tr><td><strong>先跳转<br>再恢复标志位</strong></td><td>跳转一旦执行，控制权已经回到用户程序，<strong>第二条指令永远不会被执行</strong>——标志位就停留在"内核模式、中断关闭"的状态，系统从此再也响应不了任何中断。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>结论：恢复标志位与恢复 PC 必须在<strong>同一个不可分割的步骤</strong>里完成，而这正是 return-from-interrupt 这条指令存在的全部意义。</p>
+
+      <div class="note warn">
+        <div class="lb">"只读"本身是一道安全设计</div>
+        <p>这些标志位被设成只读并不是偷懒，而是刻意的<strong>安全边界</strong>：如果用户程序能随手写"特权模式位"，那它一句话就能把自己提权成内核，整个保护模式（模块 02.2）就形同虚设。所以 ISA 的做法是——<strong>彻底禁止普通指令写它们，只留 return-from-interrupt 这一个受控出口</strong>，而且这个出口只能把标志位恢复成先前由硬件保存过的值，不能任意设定。权限只能"还回去"，不能"拿上来"。</p>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ============================ TUTORIAL 3 ============================ -->
+<section class="tut" id="t3">
+  <div class="tuthead"><span class="no">TUTORIAL 3</span><h2>加法器与触发器：从门到寄存器</h2></div>
+  <p class="tutnote">对应模块 05（加法器）、模块 06（晶体管与传输门）、模块 07（触发器）。这一份是纯动手题，下面给出设计结构与分析，实际连线在 Logisim 里按此搭建即可。</p>
+
+  <!-- T3 P1 -->
+  <article class="q" id="t3p1">
+    <div class="qhead">
+      <span class="qid">T3 · P1</span>
+      <p class="qtext">1. Implement a 32-bit slow-adder in Logisim. 2. Implement a 32-bit fast-adder in Logisim. 3. Compare the gate-delays between the two adders.</p>
+    </div>
+    <div class="qbody">
+      <h4>① 慢加法器（行波进位 ripple-carry）的结构</h4>
+      <p>地基是<strong>全加器</strong>：输入 aᵢ、bᵢ、cᵢ，输出</p>
+      <pre class="code">sᵢ    = aᵢ ⊕ bᵢ ⊕ cᵢ
+cᵢ₊₁  = (aᵢ · bᵢ) + (cᵢ · (aᵢ ⊕ bᵢ))     <i>// 两个都为1必进位；恰一个为1则把进位传下去</i></pre>
+      <p>把 32 个全加器串成一排，<code>cᵢ₊₁</code> 接到下一位的 <code>cᵢ</code>，最低位的 <code>c₀</code> 接 0（或减法时接 1）。</p>
+      <p><strong>关键路径</strong>在进位链上：<code>aᵢ⊕bᵢ</code> 在第 0 级就能算好（不依赖进位），所以每一级<em>从 cᵢ 到 cᵢ₊₁</em> 只经过 AND → OR 两级门。32 级串联：</p>
+      <pre class="code">延迟 ≈ 1 (先算所有 aᵢ⊕bᵢ) + 2×32 (进位链) + 1 (末位求和的 XOR) ≈ <b>66 级门延迟</b>，即 Θ(n)</pre>
+
+      <h4>② 快加法器（进位超前 / 并行前缀）的结构</h4>
+      <p>课程的表述是定义 <code>carry(k,m,c)</code> = "第 k 位到第 m 位这一段，在外部进位为 c 的假设下产生的进位"，并<strong>同时预先算出 c=0 和 c=1 两个答案</strong>。合并公式是</p>
+      <pre class="code">carry(k,m,c) = carry(k,p, carry(p+1,m,c))      <i>// p 是区间中点</i></pre>
+      <p>硬件上，这个"合并"就是一个 <strong>2 选 1 MUX</strong>：用低半区在外部进位 c 下的输出，去<em>选择</em>高半区两个预算好的答案之一。等价的经典写法是生成/传播对：</p>
+      <pre class="code">gᵢ = aᵢ · bᵢ          <i>// generate：本位必定产生进位</i>
+pᵢ = aᵢ ⊕ bᵢ          <i>// propagate：本位会把进位原样传下去</i>
+
+合并：  G = G_hi + P_hi · G_lo          P = P_hi · P_lo</pre>
+      <p>因为这个合并操作<strong>满足结合律</strong>，32 位可以排成一棵<strong>平衡二叉树</strong>：自底向上 log₂32 = <strong>5 层</strong>算出所有区间的 (G,P)，再自顶向下 5 层把真实进位分发到每一位。</p>
+      <pre class="code">延迟 ≈ 1 (算 g/p) + 2×5 (上行合并) + 2×5 (下行分发) + 1 (求和 XOR) ≈ <b>22 级门延迟</b>，即 Θ(log n)</pre>
+
+      <h4>③ 两者对比</h4>
+      <div class="tw">
+        <table>
+          <caption>32 位加法器：两种实现的代价对比</caption>
+          <thead><tr><th></th><th>慢加法器（ripple-carry）</th><th>快加法器（carry-lookahead）</th></tr></thead>
+          <tbody>
+            <tr><td><strong>关键路径</strong></td><td class="m">Θ(n) ≈ 2n+2 ≈ <strong>66</strong> 级</td><td class="m">Θ(log n) ≈ 4·log₂n+2 ≈ <strong>22</strong> 级</td></tr>
+            <tr><td><strong>加速比</strong></td><td class="m">1×</td><td class="m">约 <strong>3×</strong></td></tr>
+            <tr><td><strong>门数量</strong></td><td>Θ(n)，约 5 门/位 ≈ 160 门</td><td>Θ(n log n)，约 2–3 倍于前者</td></tr>
+            <tr><td><strong>最大扇出</strong></td><td>很小（每个进位只驱动下一级）</td><td>需要留意——所以进位<strong>沿树逐层分发</strong>，而不是一根线扇出到 32 位</td></tr>
+            <tr><td><strong>结构</strong></td><td>一维链，好搭好懂</td><td>二叉树，层次化子电路</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>位宽越大差距越夸张：n=8 时约 18 : 14，优势还不明显；n=64 时变成 130 : 26，<strong>5 倍</strong>。这就是为什么现代 64 位 CPU 里绝不可能用行波进位——它会直接锁死整颗芯片的时钟频率。</p>
+
+      <div class="note">
+        <div class="lb">在 Logisim 里的实操建议</div>
+        <p>用<strong>层次化子电路</strong>，不要在一张图上铺 32 位：先做 <code>full-adder</code>（1 位）→ 再做 <code>adder-4</code>（4 位块）→ 再拼 32 位。快加法器同理，先做<strong>合并单元</strong>（输入两组 (G,P)，输出一组 (G,P)）这一个子电路，再用它搭树。<br><br>Logisim 不会自动报告门延迟，验证方法有两条：<strong>一是数</strong>——沿最长路径数经过几级门；<strong>二是测</strong>——给两个加法器同一组输入，用 Logisim 的单步时钟（tick）观察输出稳定需要多少个传播步。功能正确性则用几组关键向量验：<code>0+0</code>、<code>全1 + 1</code>（测最长进位链）、<code>0x7FFFFFFF + 1</code>（测溢出）、以及若干随机值。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T3 P2 Q1 -->
+  <article class="q" id="t3p2q1">
+    <div class="qhead">
+      <span class="qid">T3 · P2 · Q1</span>
+      <p class="qtext">Translate the D Flip-Flop with Enable completely to transistors (i.e. implement the multiplexer). Hint: use transmission gates just like for the Reset.</p>
+    </div>
+    <div class="qbody">
+      <h4>① Enable 到底是什么电路</h4>
+      <p>先想清楚 Enable 的语义：<strong>Enable = 1 时，时钟上升沿把 Data 存进去；Enable = 0 时，上升沿照样发生，但存进去的值必须和原来一样。</strong></p>
+      <p>注意后半句——触发器每个上升沿<em>总要</em>采样一次，我们没法"取消"时钟沿。所以实现方式不是"挡住时钟"，而是<strong>换掉它采样的内容</strong>：Enable=0 时，让它采样自己当前的输出 Q，于是存回去的还是同一个值，等效于没变。</p>
+      <p>这正好是一个 <strong>2 选 1 多路选择器</strong>：</p>
+      <pre class="code">D_internal = Enable ? Data : Q          <i>// Q 是触发器自己的输出，反馈回来</i></pre>
+
+      <h4>② 用传输门实现这个 MUX：只要 6 个晶体管</h4>
+      <ul class="list">
+        <li><strong>TG₁</strong> 接在 Data 与内部节点之间：NMOS 栅极接 <code>Enable</code>，PMOS 栅极接 <code>Enable′</code> ⇒ <strong>Enable=1 时导通</strong>。</li>
+        <li><strong>TG₂</strong> 接在 Q（反馈）与同一个内部节点之间：NMOS 栅极接 <code>Enable′</code>，PMOS 栅极接 <code>Enable</code> ⇒ <strong>Enable=0 时导通</strong>。</li>
+        <li>一个<strong>反相器</strong>从 Enable 生成 Enable′（2 个晶体管）。</li>
+      </ul>
+      <p>两个 TG 的输出直接短接成内部节点 <code>D_internal</code>。因为控制信号互补，<strong>任意时刻恰好有一个导通、另一个呈高阻</strong>——绝不会两个源同时驱动同一个节点，没有冲突。</p>
+
+      <div class="fig">
+        <div class="cap">Fig. 3 · 带 Enable 的 D 触发器：Enable 就是输入端的一个传输门 MUX</div>
+        <div class="scroll">
+        <svg viewBox="0 0 740 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data经受Enable控制的传输门TG1到达内部节点，Q经受Enable反相控制的传输门TG2也到达同一内部节点，内部节点送入主从D触发器，触发器输出Q再反馈回TG2">
+          <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+            <!-- Data input -->
+            <text x="4" y="64" fill="var(--ink)" font-size="12">Data</text>
+            <path d="M 46 60 L 128 60" stroke="var(--line-strong)" stroke-width="1.8" fill="none"/>
+
+            <!-- TG1 -->
+            <g>
+              <path d="M 128 44 L 128 76 L 168 60 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.6"/>
+              <path d="M 168 44 L 168 76 L 128 60 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.6"/>
+              <text x="148" y="34" text-anchor="middle" fill="var(--teal)" font-size="10.5" font-weight="700">TG₁</text>
+              <text x="148" y="94" text-anchor="middle" fill="var(--muted)" font-size="9.5">En=1 导通</text>
+            </g>
+            <path d="M 168 60 L 300 60 L 300 120" stroke="var(--line-strong)" stroke-width="1.8" fill="none"/>
+
+            <!-- TG2 -->
+            <g>
+              <path d="M 128 172 L 128 204 L 168 188 Z" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+              <path d="M 168 172 L 168 204 L 128 188 Z" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+              <text x="148" y="164" text-anchor="middle" fill="var(--accent-strong)" font-size="10.5" font-weight="700">TG₂</text>
+              <text x="148" y="222" text-anchor="middle" fill="var(--muted)" font-size="9.5">En=0 导通</text>
+            </g>
+            <path d="M 168 188 L 300 188 L 300 140" stroke="var(--line-strong)" stroke-width="1.8" fill="none"/>
+            <circle cx="300" cy="130" r="3.5" fill="var(--ink)"/>
+            <text x="310" y="118" fill="var(--ink-soft)" font-size="10.5">D_internal</text>
+
+            <!-- enable + inverter -->
+            <text x="4" y="256" fill="var(--ink)" font-size="12">Enable</text>
+            <path d="M 60 252 L 96 252" stroke="var(--line-strong)" stroke-width="1.6" fill="none"/>
+            <path d="M 96 240 L 96 264 L 120 252 Z" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <circle cx="125" cy="252" r="4" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+            <text x="137" y="256" fill="var(--warn)" font-size="11">Enable′</text>
+            <path d="M 78 252 L 78 116 L 128 116" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+            <text x="86" y="112" fill="var(--muted)" font-size="9">En 控制 TG₁/TG₂ 的互补栅极</text>
+
+            <!-- DFF box -->
+            <rect x="352" y="96" width="196" height="68" rx="4" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.6"/>
+            <text x="450" y="124" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="700">主从 D 触发器</text>
+            <text x="450" y="142" text-anchor="middle" fill="var(--muted)" font-size="10">（2 个 TG 锁存器 + 时钟反相器，18 管）</text>
+            <path d="M 300 130 L 352 130" stroke="var(--line-strong)" stroke-width="1.8" fill="none"/>
+            <text x="352" y="188" fill="var(--muted)" font-size="10.5">Clock</text>
+            <path d="M 330 182 L 400 182 L 400 164" stroke="var(--line-strong)" stroke-width="1.5" fill="none"/>
+
+            <!-- output + feedback -->
+            <path d="M 548 130 L 690 130" stroke="var(--warn)" stroke-width="2" fill="none"/>
+            <circle cx="702" cy="130" r="12" fill="var(--surface)" stroke="var(--warn)" stroke-width="1.8"/>
+            <text x="702" y="134" text-anchor="middle" fill="var(--warn)" font-size="11" font-weight="700">Q</text>
+            <circle cx="624" cy="130" r="3.5" fill="var(--warn)"/>
+            <path d="M 624 130 L 624 248 L 60 248 L 60 188 L 128 188" stroke="var(--warn)" stroke-width="1.6" fill="none" stroke-dasharray="5 4"/>
+            <text x="330" y="262" fill="var(--warn)" font-size="10.5">反馈：Enable=0 时把 Q 重新存一遍 = 保持不变</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">传输门画成一对相向的三角形——这是它的标准符号，表示"双向导通的开关"，而不是有方向的逻辑门。</p>
+      </div>
+
+      <h4>③ 为什么用传输门而不是 AND/OR 门</h4>
+      <div class="tw">
+        <table>
+          <caption>同一个 2:1 MUX 的两种做法</caption>
+          <thead><tr><th></th><th>传输门实现</th><th>AND-OR 门实现</th></tr></thead>
+          <tbody>
+            <tr><td><strong>表达式</strong></td><td>两个互补开关直接短接</td><td class="m">D·En + Q·En′</td></tr>
+            <tr><td class="m"><strong>晶体管数</strong></td><td class="m">2 TG + 1 反相器 = <strong>6</strong></td><td class="m">2 AND + 1 OR + 1 NOT ≈ <strong>20</strong></td></tr>
+            <tr><td class="m"><strong>门延迟</strong></td><td class="m">≈ 0（只是导通一条通路）</td><td class="m">2 级</td></tr>
+            <tr><td><strong>信号质量</strong></td><td>NMOS+PMOS 并联，传 0 传 1 都不掉阈值电压</td><td>正常</td></tr>
+            <tr><td><strong>会不会冲突</strong></td><td>控制信号互补 ⇒ 永远只有一条通路 ⇒ 不会</td><td>不会</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>这也正是题目提示里说的"<em>just like for the Reset</em>"——Reset 用的是同一招：Reset=1 时用一个传输门把内部节点拉到 0（或选中常量 0 这一路），Reset=0 时让正常通路导通。<strong>凡是"二选一"的地方，在晶体管级都优先考虑一对互补传输门。</strong></p>
+
+      <div class="ans"><span class="lb">总账</span> 基础主从 D 触发器 18 管 + Enable 的 MUX 6 管 + Reset 的传输门 ≈ 4 管 ≈ <strong>28 个 MOSFET</strong>。</div>
+    </div>
+  </article>
+
+  <!-- T3 P2 Q2/Q3 -->
+  <article class="q" id="t3p2q2">
+    <div class="qhead">
+      <span class="qid">T3 · P2 · Q2–3</span>
+      <p class="qtext">2. Use 4 D Flip-Flops with Enable to make a 4-bit counter that increases on each clock rising edge. 3. Use 32 D Flip-Flops with Enable to make a 32-bit register PC, and combine it with a fast-adder with constant second input 1 to get a program counter.</p>
+    </div>
+    <div class="qbody">
+      <p>这两题是同一个模式的小号版和大号版，一起看最清楚：<strong>寄存器存"现在"，组合逻辑算"下一步"，时钟沿把"下一步"变成"现在"。</strong>这就是所有时序电路的通用骨架。</p>
+
+      <h4>① 4 位计数器</h4>
+      <p>把 4 个带 Enable 的 D 触发器并排放，它们<strong>共用同一个 Clock 和同一个 Enable</strong>，构成一个 4 位寄存器，输出记作 <code>Q[3:0]</code>。然后用组合逻辑算出 <code>Q+1</code>，接回各触发器的 Data 端：</p>
+      <pre class="code">D[3:0]  =  Q[3:0] + 1        <i>// 组合逻辑，一个 4 位加一电路</i></pre>
+      <p>每个上升沿，4 个触发器<strong>同时</strong>把各自的 D 端锁存进去，于是 Q 整体变成 Q+1。加一电路可以直接写成半加器链（比通用加法器省很多门）：</p>
+      <pre class="code">Q₀′ = ¬Q₀
+Q₁′ = Q₁ ⊕ Q₀
+Q₂′ = Q₂ ⊕ (Q₀·Q₁)
+Q₃′ = Q₃ ⊕ (Q₀·Q₁·Q₂)        <i>// 第 i 位翻转 ⟺ 比它低的位全是 1</i></pre>
+
+      <div class="note warn">
+        <div class="lb">为什么一定要用"同步"计数器</div>
+        <p>另一种更省事的写法是<strong>行波计数器</strong>：把每一位的输出当作下一位的<em>时钟</em>。它能工作，但各位翻转的时刻是<strong>错开</strong>的（一级一级传下去），中间会短暂出现错误的中间值（比如 0111 → 1111 → 1011 → …→ 1000 这样的毛刺），而且整体延迟随位数线性增长。所以一旦这个计数值要被别的电路读取（PC 恰恰就是），<strong>必须用上面那种所有触发器共享同一个时钟的同步写法</strong>。</p>
+      </div>
+
+      <h4>② 32 位程序计数器 PC</h4>
+      <p>结构一模一样，只是把规模放大、把"加一电路"换成上一题做好的<strong>快加法器</strong>：</p>
+      <ul class="list">
+        <li><strong>32 个带 Enable 的 D 触发器</strong>并排 ⇒ 32 位寄存器 PC，共享 Clock 与 Enable；</li>
+        <li>PC 的输出接到快加法器的<strong>第一个输入</strong>，第二个输入接<strong>常量 1</strong>（字节寻址的真实 MIPS 里接常量 4，因为每条指令占 4 字节）；</li>
+        <li>加法器的输出接回 32 个触发器的 Data 端。</li>
+      </ul>
+      <p>于是每个上升沿 <code>PC ← PC + 1</code>，程序计数器就诞生了。</p>
+
+      <div class="note">
+        <div class="lb">这里才看出前面那些题的用处</div>
+        <p>为什么第二个输入是常量就仍然值得用<strong>快</strong>加法器？因为 PC 的更新处在 CPU 的关键路径上——<strong>每一拍都要做一次</strong>，它的延迟直接决定时钟周期的下限。这里省下的 40 多级门延迟，是整颗 CPU 主频的一部分。<br><br>另外注意 <strong>Enable 端在这里终于派上用场了</strong>：流水线停顿（stall）时需要让 PC 保持不动，靠的就是把 Enable 拉低；而 <strong>Reset 端</strong>则对应模块 07.3 的上电复位——保证开机时 PC 从一个已知地址开始，否则 CPU 会从随机地址取指令。真实 CPU 还会在加法器之后加一个多路选择器，用来在 <code>PC+4</code>、分支目标、跳转目标之间选择——那就是模块 10.6 里控制单元做的事了。</p>
+      </div>
+    </div>
+  </article>
+</section>
+
+<!-- ============================ TUTORIAL 4 ============================ -->
+<section class="tut" id="t4">
+  <div class="tuthead"><span class="no">TUTORIAL 4</span><h2>MIPS 编码与递归比较器</h2></div>
+  <p class="tutnote">对应模块 10（指令集架构与 MIPS）。前三题是纯编解码训练，第四题是 ALU 内部的一个漂亮电路。</p>
+
+  <!-- T4 Q1 -->
+  <article class="q" id="t4q1">
+    <div class="qhead">
+      <span class="qid">T4 · Q1</span>
+      <p class="qtext">What do the following MIPS instructions do? a) 0x00000000　b) 0x8c82fffc</p>
+    </div>
+    <div class="qbody">
+      <p>解码的第一步永远一样：<strong>先看最前面 6 位 opcode</strong>，它决定后面 26 位怎么切。</p>
+
+      <h4>a) 0x00000000</h4>
+      <p>32 位全是 0。opcode = <code>000000</code> ⇒ <strong>R 型</strong>，于是要看最后 6 位 funct = <code>000000</code> ⇒ <strong>sll</strong>（逻辑左移）。其余字段：rs=0, rt=0, rd=0, shamt=0。</p>
+      <div class="bitscroll">
+        <div class="bits">
+          <div class="bf" style="flex:6 1 0"><div class="n">opcode</div><div class="v">000000</div><div class="d">R 型</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rs</div><div class="v">00000</div><div class="d">$0</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rt</div><div class="v">00000</div><div class="d">$0</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rd</div><div class="v">00000</div><div class="d">$0</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">shamt</div><div class="v">00000</div><div class="d">移 0 位</div></div>
+          <div class="bf" style="flex:6 1 0"><div class="n">funct</div><div class="v">000000</div><div class="d">sll</div></div>
+        </div>
+      </div>
+      <p>逐字翻译是 <code>sll $0, $0, 0</code>，语义为 <code>R[0] := R[0] &lt;&lt; 0</code>。而 <code>$0</code> 硬接线为常数 0、写它没有任何效果，移 0 位本身也什么都不做——</p>
+      <div class="ans"><span class="lb">答案 a</span> 什么也不做，这是 MIPS 的标准空指令 <strong>NOP</strong>。</div>
+      <p>顺带一个设计观察：MIPS 特意让"全 0"这个最容易出现的比特模式恰好是无害的 NOP。这样一来，<strong>一段被清零的内存被当作代码执行时不会造成破坏</strong>，而且流水线插入气泡时只要往指令寄存器里塞 0 即可，不需要额外电路。</p>
+
+      <h4>b) 0x8c82fffc</h4>
+      <p>先展开成二进制：</p>
+      <pre class="code">0x8c82fffc = 1000 1100 1000 0010 1111 1111 1111 1100</pre>
+      <p>取前 6 位：<code>100011</code> = 35 ⇒ <strong>lw</strong>，这是 I 型指令，按 6-5-5-16 切开：</p>
+      <div class="bitscroll">
+        <div class="bits">
+          <div class="bf" style="flex:6 1 0"><div class="n">opcode</div><div class="v">100011</div><div class="d">lw</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rs（基址）</div><div class="v">00100</div><div class="d">= 4 → $4</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rt（目的）</div><div class="v">00010</div><div class="d">= 2 → $2</div></div>
+          <div class="bf" style="flex:16 1 0"><div class="n">immediate</div><div class="v">1111111111111100</div><div class="d">最高位是 1 ⇒ 负数；0xFFFC − 0x10000 = −4</div></div>
+        </div>
+      </div>
+      <div class="ans"><span class="lb">答案 b</span> <code>lw $2, -4($4)</code>　⇒　R[2] := mem[(R[4] − 4) / 4]</div>
+      <p>也就是"把 <code>$4</code> 所指地址<strong>往前一个字</strong>的内容装进 <code>$2</code>"。<code>−4</code> 这个偏移在真实代码里非常常见：数组元素是 4 字节，<code>−4</code> 就是"前一个元素"，通常出现在倒序遍历或访问栈上的局部变量时。</p>
+      <div class="note rust">
+        <div class="lb">符号扩展不是"看出来"的</div>
+        <p>这里把 <code>1111111111111100</code> 读成 −4 而不是 65532，依据<strong>不是</strong>比特模式本身——同样 16 个比特，在 <code>andi</code> 里就必须当作 65532（零扩展）。真正的依据是 <strong>opcode</strong>：ISA 规定 <code>lw</code> 的立即数做<strong>符号扩展</strong>，控制单元据此把 Signed-Imm 信号置 1。比特永远是中立的，<em>怎么解释它是指令说了算</em>。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T4 Q2 -->
+  <article class="q" id="t4q2">
+    <div class="qhead">
+      <span class="qid">T4 · Q2</span>
+      <p class="qtext">Encode the following MIPS instructions (in hex): a) sw $1,-4($4)　b) add $3,$1,$4</p>
+    </div>
+    <div class="qbody">
+      <h4>a) sw $1, -4($4)</h4>
+      <p><code>sw</code> 的 opcode = <code>101011</code>，I 型。注意汇编写法 <code>sw $rt, imm($rs)</code> 里，<strong>括号里的是基址寄存器 rs，前面那个才是 rt</strong>——这是最容易写反的地方。所以 rs = $4，rt = $1，imm = −4 = <code>1111111111111100</code>。</p>
+      <div class="bitscroll">
+        <div class="bits">
+          <div class="bf" style="flex:6 1 0"><div class="n">opcode</div><div class="v">101011</div><div class="d">sw</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rs</div><div class="v">00100</div><div class="d">$4</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rt</div><div class="v">00001</div><div class="d">$1</div></div>
+          <div class="bf" style="flex:16 1 0"><div class="n">immediate</div><div class="v">1111111111111100</div><div class="d">−4 的补码</div></div>
+        </div>
+      </div>
+      <pre class="code">1010 1100 1000 0001 1111 1111 1111 1100
+  a    c    8    1    f    f    f    c</pre>
+      <div class="ans"><span class="lb">答案 a</span> <code>0xac81fffc</code></div>
+      <p>和上一题的 <code>0x8c82fffc</code>（<code>lw $2,-4($4)</code>）对照着看很有意思：两条指令<strong>只差 opcode 的一个比特和 rt 字段</strong>，因为 lw 和 sw 的寻址方式、立即数处理完全相同，区别只在数据流方向。这正是 RISC 规整编码的体现。</p>
+
+      <h4>b) add $3, $1, $4</h4>
+      <p>R 型：opcode = <code>000000</code>，funct = <code>100000</code>。汇编写法 <code>add $rd, $rs, $rt</code> ⇒ rd = $3，rs = $1，rt = $4。<strong>注意编码顺序是 rs, rt, rd，和汇编书写顺序（rd 在最前）正好错开</strong>——这是第二个高频失分点。shamt 不用，填 0。</p>
+      <div class="bitscroll">
+        <div class="bits">
+          <div class="bf" style="flex:6 1 0"><div class="n">opcode</div><div class="v">000000</div><div class="d">R 型</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rs</div><div class="v">00001</div><div class="d">$1</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rt</div><div class="v">00100</div><div class="d">$4</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">rd</div><div class="v">00011</div><div class="d">$3</div></div>
+          <div class="bf" style="flex:5 1 0"><div class="n">shamt</div><div class="v">00000</div><div class="d">不用</div></div>
+          <div class="bf" style="flex:6 1 0"><div class="n">funct</div><div class="v">100000</div><div class="d">add</div></div>
+        </div>
+      </div>
+      <pre class="code">000000 00001 00100 00011 00000 100000
+→ 0000 0000 0010 0100 0001 1000 0010 0000
+    0    0    2    4    1    8    2    0</pre>
+      <div class="ans"><span class="lb">答案 b</span> <code>0x00241820</code></div>
+    </div>
+  </article>
+
+  <!-- T4 Q3 -->
+  <article class="q" id="t4q3">
+    <div class="qhead">
+      <span class="qid">T4 · Q3</span>
+      <p class="qtext">MIPS R-type instructions should have shamt = 0 except for sll, srl, sra. How many new instructions can we add to MIPS with opcode 000000 and 3 input registers by using shamt ≠ 0?</p>
+    </div>
+    <div class="qbody">
+      <p>这题考的是<strong>编码空间</strong>的算法：题干已经告诉我们一个事实——除了三条移位指令，所有 R 型指令的 shamt 字段都是 0。这意味着<strong>"shamt ≠ 0"的那一整片编码目前是空的</strong>，可以拿来当 opcode 的扩展位用。</p>
+
+      <h4>① 数一数可用的格子</h4>
+      <ul class="list">
+        <li><strong>shamt 是 5 位</strong> ⇒ 共 32 种取值，其中 shamt ≠ 0 的有 <strong>31</strong> 种。</li>
+        <li><strong>funct 是 6 位</strong> ⇒ 共 <strong>64</strong> 种取值。</li>
+        <li>但 <strong>sll (000000)、srl (000010)、sra (000011)</strong> 这三个 funct 值不能用——它们的 shamt 字段承载的是<em>真实的移位量</em>，32 种取值全部已被占用。</li>
+      </ul>
+
+      <h4>② 算式</h4>
+      <pre class="code">可用的 funct 值 = 64 − 3 = 61
+每个 funct 值下 shamt≠0 的编码 = 32 − 1 = 31
+
+新指令数 = 61 × 31 = <b>1891</b></pre>
+      <div class="ans"><span class="lb">答案</span> 1891 条</div>
+
+      <h4>③ 两个容易搞错的地方</h4>
+      <ul class="list">
+        <li><strong>不需要排除已被占用的 funct 值</strong>（add、sub、and…）。因为那些指令是以 <em>shamt = 0</em> 的形式定义的，同一个 funct 配上 shamt ≠ 0 是一个<strong>完全不同、且当前未使用</strong>的比特模式。这正是题干那句"should have shamt = 0"想让你注意到的。</li>
+        <li><strong>"3 input registers" 这个条件的作用</strong>：它说明我们保留 rs、rt、rd 三个字段原样作为寄存器编号，只把 shamt 挪作他用。如果连某个寄存器字段也牺牲掉，编码空间会大得多，但指令就只剩两个寄存器操作数了。</li>
+      </ul>
+
+      <div class="note">
+        <div class="lb">这不是纸上谈兵</div>
+        <p>真实的 MIPS 演进正是这么干的：MIPS32 Release 2 新增的一批指令（如 <code>ins</code>、<code>ext</code> 位域操作、<code>rotr</code> 循环右移）就是靠<strong>复用 shamt/sa 字段的比特作为额外操作码</strong>塞进既有编码空间的。1891 个空位意味着这套指令集在不破坏任何向后兼容的前提下，还有非常充裕的扩展余地——<strong>编码空间的预留，是 ISA 设计中最需要远见的部分之一</strong>，因为它一旦用完就再也收不回来了。</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T4 Q4 -->
+  <article class="q" id="t4q4">
+    <div class="qhead">
+      <span class="qid">T4 · Q4</span>
+      <p class="qtext">Explain how the recursive eq/lt unit works.<span class="sub">Hint: To compute ( A✻B &lt; C✻D ) where A,B,C,D are bit strings of equal length and ✻ denotes concatenation, we can compute ( A &lt; C or ( A = C and B &lt; D ) ).</span></p>
+    </div>
+    <div class="qbody">
+      <p>这个单元的任务是比较两个 32 位数，它出现在 ALU 里是为了实现 <code>slt</code>/<code>sltu</code>，也为分支指令 <code>beq</code>/<code>bne</code> 提供判等结果。库名里的 "no-adder" 是关键提示：<strong>它不做减法</strong>。</p>
+
+      <h4>① 为什么必须同时算 eq 和 lt</h4>
+      <p>这是整道题的题眼。假设我们只想要 lt（小于），能不能由两个半区的 lt 合并出来？<strong>不能。</strong>因为高半区如果平手，结论完全取决于低半区；高半区如果分出胜负，低半区就完全无关。所以"高半区是否相等"这个信息<strong>必须</strong>一起往上传——于是每个单元输出一对信号：</p>
+      <pre class="code">eq = (左操作数这一段 == 右操作数这一段)
+lt = (左操作数这一段 &lt;  右操作数这一段)</pre>
+
+      <h4>② 基本情形（1 位）</h4>
+      <pre class="code">eq = ¬(a ⊕ c)        <i>// 同或：两位相同则为 1</i>
+lt = ¬a · c          <i>// 只有 0 &lt; 1 这一种情况</i></pre>
+
+      <h4>③ 合并规则（把提示翻译成电路）</h4>
+      <p>设高半区比较的是 A 与 C、低半区比较的是 B 与 D，完整操作数是 A✻B 与 C✻D：</p>
+      <pre class="code">eq = eq_hi · eq_lo                       <i>// 整体相等 ⟺ 两半都相等</i>
+lt = lt_hi + ( eq_hi · lt_lo )           <i>// 正是提示里的 (A&lt;C) or (A=C and B&lt;D)</i></pre>
+
+      <div class="fig">
+        <div class="cap">Fig. 4 · 合并单元与 4 位比较树</div>
+        <div class="scroll">
+        <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="左侧是单个合并单元的内部逻辑：eq由两个eq相与得到，lt由lt_hi与eq_hi乘lt_lo相或得到；右侧是四个1位比较器经两层合并成为4位比较结果的二叉树">
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <text x="0" y="14" fill="var(--muted)">① 一个合并单元的内部</text>
+            <g fill="var(--ink-soft)" font-size="10.5">
+              <text x="2" y="52">eq_hi</text><text x="2" y="78">lt_hi</text>
+              <text x="2" y="122">eq_lo</text><text x="2" y="148">lt_lo</text>
+            </g>
+            <!-- AND for eq -->
+            <path d="M 60 38 L 96 38 A 16 16 0 0 1 96 70 L 60 70 Z" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.5"/>
+            <text x="76" y="58" fill="var(--teal)" font-size="10" text-anchor="middle">AND</text>
+            <path d="M 34 48 L 60 48" stroke="var(--line-strong)" stroke-width="1.4" fill="none"/>
+            <path d="M 34 118 L 46 118 L 46 60 L 60 60" stroke="var(--line-strong)" stroke-width="1.4" fill="none"/>
+            <path d="M 112 54 L 150 54" stroke="var(--teal)" stroke-width="1.8" fill="none"/>
+            <text x="156" y="58" fill="var(--teal)" font-size="11" font-weight="700">eq</text>
+
+            <!-- AND for eq_hi . lt_lo -->
+            <path d="M 60 110 L 96 110 A 16 16 0 0 1 96 142 L 60 142 Z" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="76" y="130" fill="var(--ink-soft)" font-size="10" text-anchor="middle">AND</text>
+            <path d="M 34 48 L 40 48 L 40 120 L 60 120" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+            <path d="M 34 144 L 60 132" stroke="var(--line-strong)" stroke-width="1.4" fill="none"/>
+            <!-- OR for lt -->
+            <path d="M 132 86 Q 148 110 132 134 Q 158 134 172 110 Q 158 86 132 86 Z" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.5"/>
+            <text x="146" y="114" fill="var(--accent-strong)" font-size="9.5" text-anchor="middle">OR</text>
+            <path d="M 34 74 L 110 74 L 110 96 L 136 96" stroke="var(--line-strong)" stroke-width="1.4" fill="none"/>
+            <path d="M 112 126 L 136 122" stroke="var(--line-strong)" stroke-width="1.4" fill="none"/>
+            <path d="M 172 110 L 210 110" stroke="var(--accent-strong)" stroke-width="1.8" fill="none"/>
+            <text x="216" y="114" fill="var(--accent-strong)" font-size="11" font-weight="700">lt</text>
+            <text x="0" y="186" fill="var(--muted)" font-size="10">eq = eq_hi · eq_lo</text>
+            <text x="0" y="202" fill="var(--muted)" font-size="10">lt = lt_hi + eq_hi · lt_lo</text>
+            <text x="0" y="224" fill="var(--teal)" font-size="10">每级只有 2 级门延迟</text>
+
+            <!-- right: tree -->
+            <text x="300" y="14" fill="var(--muted)">② 4 位比较树（32 位就是 5 层）</text>
+            <g stroke="var(--line-strong)" stroke-width="1.4" fill="var(--surface-2)">
+              <rect x="300" y="34" width="86" height="28" rx="3"/><rect x="396" y="34" width="86" height="28" rx="3"/>
+              <rect x="492" y="34" width="86" height="28" rx="3"/><rect x="588" y="34" width="86" height="28" rx="3"/>
+            </g>
+            <g fill="var(--ink-soft)" font-size="10" text-anchor="middle">
+              <text x="343" y="52">bit3</text><text x="439" y="52">bit2</text><text x="535" y="52">bit1</text><text x="631" y="52">bit0</text>
+            </g>
+            <text x="300" y="78" fill="var(--muted)" font-size="9.5">↑ 高位</text>
+            <text x="640" y="78" fill="var(--muted)" font-size="9.5">低位 ↑</text>
+
+            <g stroke="var(--line-strong)" stroke-width="1.3" fill="none">
+              <path d="M 343 62 L 380 104"/><path d="M 439 62 L 412 104"/>
+              <path d="M 535 62 L 572 104"/><path d="M 631 62 L 604 104"/>
+            </g>
+            <g stroke="var(--teal)" stroke-width="1.5" fill="var(--teal-soft)">
+              <rect x="348" y="104" width="96" height="30" rx="3"/><rect x="540" y="104" width="96" height="30" rx="3"/>
+            </g>
+            <g fill="var(--teal)" font-size="10" text-anchor="middle" font-weight="700">
+              <text x="396" y="123">合并 bit3:2</text><text x="588" y="123">合并 bit1:0</text>
+            </g>
+            <g stroke="var(--line-strong)" stroke-width="1.3" fill="none">
+              <path d="M 396 134 L 452 180"/><path d="M 588 134 L 532 180"/>
+            </g>
+            <rect x="420" y="180" width="144" height="34" rx="3" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.6"/>
+            <text x="492" y="201" fill="var(--accent-strong)" font-size="11" text-anchor="middle" font-weight="700">合并 bit3:0 → (eq, lt)</text>
+            <text x="300" y="248" fill="var(--muted)" font-size="10">深度 = log₂n 层，每层 2 级门</text>
+            <text x="300" y="266" fill="var(--teal)" font-size="10">⇒ 32 位总延迟 ≈ 2 × 5 = 10 级门</text>
+            <text x="300" y="284" fill="var(--warn)" font-size="10">对比：先做 32 位减法再看符号 ≈ 66 级</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">高位在左：合并时高半区拥有绝对优先权，低半区只有在高半区 eq=1（平手）时才有发言权。</p>
+      </div>
+
+      <h4>④ 为什么是"递归"、以及它为什么快</h4>
+      <p>合并操作<strong>满足结合律</strong>——先合并 bit3:2 和 bit1:0 再合并，与从左到右逐位合并，结果完全一样。满足结合律就意味着可以摆成<strong>平衡二叉树</strong>而不是一条链：32 位只需 log₂32 = 5 层，每层 2 级门，总共约 <strong>10 级门延迟</strong>。</p>
+      <p>相比之下，如果用"算 a−b 再看符号位"的办法，就得先付一次完整的 32 位减法（行波的话 66 级），而且还要额外处理溢出。这就是这个库叫 <strong>no-adder</strong> 的原因：<em>比较大小根本不需要算出差值。</em></p>
+
+      <div class="note rust">
+        <div class="lb">它和快加法器是同一个把戏</div>
+        <p>把两者并排看：</p>
+        <ul class="list" style="margin-bottom:0">
+          <li>快加法器：每段输出 <strong>(G, P)</strong>——G = 本段必产生进位，P = 本段会传递进位；合并式 <code>G = G_hi + P_hi·G_lo</code>。</li>
+          <li>比较器：每段输出 <strong>(lt, eq)</strong>——lt = 本段已分出胜负，eq = 本段平手需往下问；合并式 <code>lt = lt_hi + eq_hi·lt_lo</code>。</li>
+        </ul>
+        <p style="margin-top:8px">两个公式<strong>形状完全一样</strong>：lt 扮演 generate（拍板），eq 扮演 propagate（传递）。这不是巧合——它们都是<strong>并行前缀（parallel prefix）</strong>这一通用模式的实例：只要一个"从右往左的依赖"可以写成结合律运算，就能用二叉树把 Θ(n) 压成 Θ(log n)。认出这个模式，两道题就变成了一道题。</p>
+      </div>
+
+      <h4>⑤ 有符号 vs 无符号（slt 和 sltu 的差别）</h4>
+      <p>上面的电路直接给出的是<strong>无符号</strong>比较（sltu）。对补码有符号数，只有最高位的含义相反——符号位为 1 表示负数、反而更小。所以：</p>
+      <pre class="code">slt：若两数<b>符号位不同</b> ⇒ 结果 = 左操作数的符号位（它是 1 就说明左边是负数，更小）
+      若<b>符号位相同</b> ⇒ 直接用剩下 31 位的无符号比较结果
+
+等价的省事写法：把两个操作数的<b>最高位取反</b>，再做无符号比较。</pre>
+      <p>所以 ALU 里 slt 和 sltu 可以<strong>共用同一棵比较树</strong>，只在最高位那一级做一点特殊处理——这也是为什么它们在控制表里的 ALU-Ctrl 编码只差一位（<code>0100</code> 与 <code>0101</code>）。</p>
+    </div>
+  </article>
+</section>
+
+<!-- ============================ TUTORIAL 5 ============================ -->
+<section class="tut" id="t5">
+  <div class="tuthead"><span class="no">TUTORIAL 5</span><h2>性能计算与存储介质选型</h2></div>
+  <p class="tutnote">对应模块 11（性能评估与阿姆达尔定律）与模块 12（存储系统）。两道计算题都给出完整代数过程。</p>
+
+  <!-- T5 Q1 -->
+  <article class="q" id="t5q1">
+    <div class="qhead">
+      <span class="qid">T5 · Q1</span>
+      <p class="qtext">We wish to add branch prediction to a CPU. This would make each branch 3 times as fast if the predictor is correct but 2 times as slow if the predictor is wrong. How accurate must the predictor be to achieve a speedup of 1.25 if the original CPU spends 40% of time on branches?</p>
+    </div>
+    <div class="qbody">
+      <h4>① 建模</h4>
+      <p>把原来的总时间设为 <strong>1</strong>。其中分支占 0.4，非分支占 0.6（非分支部分完全不受影响，这一点是阿姆达尔定律的核心）。设预测准确率为 <strong>p</strong>：</p>
+      <ul class="list">
+        <li>猜对（概率 p）：该次分支耗时变成原来的 <strong>1/3</strong>；</li>
+        <li>猜错（概率 1−p）：该次分支耗时变成原来的 <strong>2 倍</strong>。</li>
+      </ul>
+      <pre class="code">新的分支耗时 = 0.4 × [ p × (1/3) + (1−p) × 2 ]
+新的总耗时   = 0.6 + 0.4 × [ p/3 + 2(1−p) ]</pre>
+
+      <h4>② 解方程</h4>
+      <p>加速比 1.25 ⇒ 新总耗时 = 1 / 1.25 = <strong>0.8</strong>：</p>
+      <pre class="code">0.6 + 0.4 × [ p/3 + 2 − 2p ]  =  0.8
+       0.4 × [ 2 − 5p/3 ]      =  0.2
+              2 − 5p/3         =  0.5
+                   5p/3        =  1.5
+                      p        =  <b>0.9</b></pre>
+      <p>回代验算：p=0.9 ⇒ 0.9/3 + 0.1×2 = 0.3 + 0.2 = 0.5；0.6 + 0.4×0.5 = 0.8；1/0.8 = 1.25 ✓</p>
+      <div class="ans"><span class="lb">答案</span> 预测器准确率必须达到 <strong>90%</strong></div>
+
+      <h4>③ 把整条曲线画出来，能看到两件更重要的事</h4>
+      <p>把 p 当变量，加速比 = 1 / (1.4 − 2p/3)：</p>
+
+      <div class="fig">
+        <div class="cap">Fig. 5 · 加速比随预测准确率的变化</div>
+        <div class="scroll">
+        <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="曲线图：横轴为预测准确率0到100%，纵轴为加速比0.7到1.4。曲线在准确率60%处穿过加速比1.0的盈亏平衡线，在90%处达到目标1.25，准确率100%时到达上限1.364。">
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <!-- grid -->
+            <g stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4">
+              <path d="M 70 40 L 700 40"/><path d="M 70 74.3 L 700 74.3"/><path d="M 70 108.6 L 700 108.6"/>
+              <path d="M 70 142.9 L 700 142.9"/><path d="M 70 177.1 L 700 177.1"/>
+              <path d="M 70 211.4 L 700 211.4"/><path d="M 70 245.7 L 700 245.7"/>
+            </g>
+            <!-- axes -->
+            <path d="M 70 40 L 70 280 L 706 280" stroke="var(--line-strong)" stroke-width="1.6" fill="none"/>
+            <!-- y labels -->
+            <g fill="var(--muted)" text-anchor="end" font-size="10.5">
+              <text x="62" y="44">1.40</text><text x="62" y="112.6">1.20</text>
+              <text x="62" y="181.1">1.00</text><text x="62" y="249.7">0.80</text>
+              <text x="62" y="284">0.70</text>
+            </g>
+            <text x="14" y="30" fill="var(--ink-soft)" font-size="11">加速比</text>
+            <!-- x labels -->
+            <g fill="var(--muted)" text-anchor="middle" font-size="10.5">
+              <text x="70" y="298">0%</text><text x="196" y="298">20%</text><text x="322" y="298">40%</text>
+              <text x="448" y="298">60%</text><text x="574" y="298">80%</text><text x="700" y="298">100%</text>
+            </g>
+            <text x="640" y="318" fill="var(--ink-soft)" font-size="11">预测准确率 p</text>
+
+            <!-- break-even line -->
+            <path d="M 70 177.1 L 700 177.1" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="6 4" fill="none"/>
+            <text x="78" y="171" fill="var(--warn)" font-size="10">加速比 = 1.0 盈亏平衡线</text>
+            <!-- ceiling -->
+            <path d="M 70 52 L 700 52" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="2 5" fill="none"/>
+            <text x="560" y="46" fill="var(--muted)" font-size="10">理论上限 1.364（p = 100%）</text>
+
+            <!-- curve -->
+            <path d="M 70 275 L 133 263 L 196 249 L 259 234 L 322 218 L 385 199 L 448 177 L 511 153 L 574 124 L 637 91 L 700 52"
+                  fill="none" stroke="var(--teal)" stroke-width="2.6" stroke-linejoin="round"/>
+
+            <!-- break-even point -->
+            <circle cx="448" cy="177.1" r="5.5" fill="var(--warn)"/>
+            <path d="M 448 177.1 L 448 262" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+            <text x="448" y="256" fill="var(--warn)" font-size="10" text-anchor="middle">p = 60%</text>
+
+            <!-- target point -->
+            <circle cx="637" cy="91" r="6.5" fill="var(--accent-strong)"/>
+            <path d="M 637 91 L 637 262" stroke="var(--accent-strong)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+            <path d="M 70 91 L 637 91" stroke="var(--accent-strong)" stroke-width="1.2" stroke-dasharray="3 3" fill="none"/>
+            <text x="637" y="256" fill="var(--accent-strong)" font-size="10.5" text-anchor="middle" font-weight="700">p = 90%</text>
+            <text x="560" y="84" fill="var(--accent-strong)" font-size="10.5" font-weight="700">目标 1.25</text>
+          </g>
+        </svg>
+        </div>
+        <p class="foot">曲线并非直线——因为加速比是耗时的倒数。准确率越高，每提高一个百分点带来的收益越大。</p>
+      </div>
+
+      <div class="note warn">
+        <div class="lb">① 预测器不是"猜不准也无妨"</div>
+        <p>令加速比 = 1 解得 <strong>p = 60%</strong>。也就是说，<strong>准确率低于 60% 的分支预测器会让 CPU 变得更慢</strong>——猜错的惩罚（2 倍）比猜对的收益（1/3）更重，所以必须有足够高的命中率才能把这笔账扳回来。这就是为什么现代 CPU 宁可花掉可观的芯片面积去做复杂的预测器（回想 T2·Q3 的 2 位饱和计数器：正是因为要把准确率从 6 成拉到 9 成以上，才值得多花那一位比特）。</p>
+      </div>
+      <div class="note">
+        <div class="lb">② 天花板就在那里：阿姆达尔定律</div>
+        <p>令 p = 1（预测器完美无缺）得新耗时 = 0.6 + 0.4/3 = 11/15，加速比 = <strong>1.364</strong>。这就是这项优化的<strong>理论上限</strong>：无论预测器多神，那 60% 的非分支时间纹丝不动。题目要的 1.25 已经用掉了这个上限的九成——再想往上挤，必须去优化别的部分，而不是继续砸钱在分支预测上。<strong>做性能题时先算一下天花板，往往比解方程本身更有价值。</strong></p>
+      </div>
+    </div>
+  </article>
+
+  <!-- T5 Q2 -->
+  <article class="q" id="t5q2">
+    <div class="qhead">
+      <span class="qid">T5 · Q2</span>
+      <p class="qtext">For magnetic hard disk that spins at 15000 RPM with seek time 5 ms, how long would it take to retrieve from it 100 files each of size 1 MB?</p>
+    </div>
+    <div class="qbody">
+      <div class="ans"><span class="lb">官方答案</span> <strong>700 ms</strong>　（= 100 × 7 ms，只计 latency，不计传输时间）</div>
+
+      <h4>① 旋转延迟</h4>
+      <pre class="code">15000 RPM = 15000 转/分 = <b>250 RPS</b>（转/秒）
+每转耗时 = 1/250 秒 = <b>4 ms</b>
+平均旋转延迟 = 半转 = 4 ms / 2 = <b>2 ms</b></pre>
+      <p>为什么是<strong>半转</strong>？磁头移到目标磁道之后，目标扇区可能刚好就在磁头下方（等 0），也可能刚刚转过去（要等整整一圈）。位置均匀分布，期望值就是半圈。</p>
+
+      <h4>② 平均延迟（average latency）</h4>
+      <pre class="code">平均延迟 = 寻道 + 旋转延迟 = 5 ms + 2 ms = <b>7 ms</b></pre>
+      <p>注意课程对 <strong>latency</strong> 的定义（模块 12.5）：<em>「要多久才能<u>开始</u>传输」</em>——它由控制器 + 寻道 + 旋转三段构成，<strong>本身不包含传输时间</strong>。控制器耗时是微秒级，忽略。</p>
+
+      <h4>③ 总时间</h4>
+      <pre class="code">100 个文件 × 7 ms = <b>700 ms</b></pre>
+
+      <div class="fig">
+        <div class="cap">Fig. 6 · 单次访问的耗时构成</div>
+        <div class="scroll">
+        <svg viewBox="0 0 740 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="横向堆叠条：寻道5毫秒与旋转延迟2毫秒合起来是7毫秒的平均延迟，本题按此计算；右侧灰色虚线段表示传输时间，因题目未给传输速率而不计入">
+          <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+            <rect x="20" y="40" width="197" height="42" fill="var(--accent-soft)" stroke="var(--accent-strong)" stroke-width="1.5"/>
+            <rect x="217" y="40" width="79" height="42" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+            <rect x="296" y="40" width="394" height="42" fill="none" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="6 5"/>
+            <text x="118" y="66" text-anchor="middle" fill="var(--accent-strong)" font-weight="700">寻道 5 ms</text>
+            <text x="256" y="59" text-anchor="middle" fill="var(--warn)" font-size="10" font-weight="700">旋转</text>
+            <text x="256" y="73" text-anchor="middle" fill="var(--warn)" font-size="10" font-weight="700">2 ms</text>
+            <text x="493" y="60" text-anchor="middle" fill="var(--muted)" font-size="11">传输时间</text>
+            <text x="493" y="76" text-anchor="middle" fill="var(--muted)" font-size="10">题目未给速率 ⇒ 本题不计入</text>
+
+            <path d="M 20 96 L 296 96" stroke="var(--accent-strong)" stroke-width="1.4" fill="none"/>
+            <path d="M 20 92 L 20 100 M 296 92 L 296 100" stroke="var(--accent-strong)" stroke-width="1.4"/>
+            <text x="158" y="116" text-anchor="middle" fill="var(--accent-strong)" font-size="12" font-weight="700">average latency = 7 ms</text>
+            <text x="158" y="134" text-anchor="middle" fill="var(--ink)" font-size="11.5">×100 个文件 = 700 ms</text>
+            <text x="20" y="30" fill="var(--muted)" font-size="10">纯机械等待，与文件大小无关</text>
+          </g>
+        </svg>
+        </div>
+      </div>
+
+      <div class="note warn">
+        <div class="lb">为什么"1 MB"这个条件没被用上</div>
+        <p>这是本题最容易困惑的地方——题目特意说了每个文件 1 MB，答案里却没出现。原因是<strong>题目没有给出传输速率</strong>，没有速率就算不出传输时间，所以标准答案只统计 latency 这一部分。<br><br>换句话说，"1 MB"在这里是一个<strong>干扰项</strong>，它的作用是提醒你：这些文件不是同一个连续块，<em>每取一个文件都要重新寻道一次</em>，所以要乘 100。如果卷子上给了传输速率（比如讲义里的典型值 100 MB/s），那才需要再补上 <code>100 × 10 ms = 1000 ms</code>，总计 1.7 秒。<strong>考试按老师的口径答 700 ms。</strong></p>
+      </div>
+
+      <div class="tw">
+        <table>
+          <caption>如果题目给出了传输速率，答案会变成多少</caption>
+          <thead><tr><th class="m">传输速率</th><th class="m">传 1 MB</th><th class="m">单文件合计</th><th class="m">100 个文件</th></tr></thead>
+          <tbody>
+            <tr><td class="m">未给出 <small>（本题）</small></td><td class="m">不计</td><td class="m">7 ms</td><td class="m"><strong>700 ms</strong></td></tr>
+            <tr><td class="m">200 MB/s</td><td class="m">5 ms</td><td class="m">12 ms</td><td class="m">1.2 s</td></tr>
+            <tr><td class="m">100 MB/s <small>（讲义典型值）</small></td><td class="m">10 ms</td><td class="m">17 ms</td><td class="m">1.7 s</td></tr>
+            <tr><td class="m">50 MB/s</td><td class="m">20 ms</td><td class="m">27 ms</td><td class="m">2.7 s</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note rust">
+        <div class="lb">顺带看懂 SSD 为什么"快得不讲道理"</div>
+        <p>这 7 ms 全部花在"等机械零件动到位"上，而且<strong>完全不随文件大小变化</strong>——读 1 KB 也要等这 7 ms，读 1 MB 还是这 7 ms。SSD 没有任何机械部件，这一段直接塌缩到几十微秒。<br><br>所以 SSD 在<strong>顺序读大文件</strong>时可能只比机械盘快几倍（那时瓶颈在带宽），但在<strong>大量小文件</strong>上能快上百倍——差距几乎全在这个固定的 7 ms 里。本题算出来的 700 ms 正是这个固定开销的纯粹体现：<em>一个字节的数据都还没开始传，就已经花掉 0.7 秒了。</em>这也再次印证模块 12.3 那条：<strong>带宽能堆，延迟堆不上去。</strong></p>
+      </div>
+
+      <div class="note">
+        <div class="lb">另一个常见追问：如果文件是连续存放的呢</div>
+        <p>那就只需要<strong>一次</strong>寻道和一次旋转等待，总 latency = 7 ms 而不是 700 ms——相差 100 倍。这正是"磁盘碎片整理"存在的意义，也是为什么数据库和文件系统都拼命想让相关数据在物理上<strong>相邻</strong>。本题乘以 100，隐含的前提就是这 100 个文件散落在盘面各处。</p>
+      </div>
+    </div>
+  </article>
+
+  
+<!-- T5 Q3 -->
+  <article class="q" id="t5q3">
+    <div class="qhead">
+      <span class="qid">T5 · Q3</span>
+      <p class="qtext">Which storage media (magnetic disk / optical disk / magnetic tape / flash memory) are suitable for: a) Documents for work? b) Server data backup? c) Computer games? d) Camera storage? e) Medical scans?</p>
+    </div>
+    <div class="qbody">
+      <p>选型的依据就是模块 12.4 的四个指标——<strong>容量、数据率、延迟、成本</strong>——再加两个实际因素：<strong>访问方式（随机 / 顺序）</strong>和<strong>耐久性 / 便携性</strong>。先把四种介质的性格摆出来：</p>
+      <div class="tw">
+        <table>
+          <caption>四种介质的性格速查</caption>
+          <thead><tr><th>介质</th><th>随机访问</th><th>单位容量成本</th><th>耐用/寿命</th><th>最擅长的场景</th></tr></thead>
+          <tbody>
+            <tr><td><strong>闪存</strong><small>SSD / SD 卡</small></td><td>极好，延迟微秒级</td><td>最贵</td><td>无机械部件、抗震；写入次数有上限</td><td>频繁随机读写、需要便携抗震</td></tr>
+            <tr><td><strong>磁盘</strong><small>HDD</small></td><td>可以，但有 ~10 ms 机械延迟</td><td>便宜</td><td>怕震动，机械件会磨损</td><td>大容量在线存储</td></tr>
+            <tr><td><strong>光盘</strong><small>CD/DVD/BD</small></td><td>差，寻道很慢</td><td>低（介质本身很便宜）</td><td>介质极耐存放；可做一次写入(WORM)</td><td>分发、归档、不可篡改的留存</td></tr>
+            <tr><td><strong>磁带</strong></td><td><strong>没有</strong>——只能顺序访问</td><td>最便宜</td><td>寿命长，适合离线保存</td><td>整卷写入、整卷读回的冷备份</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tw">
+        <table>
+          <caption>五个场景的选型与理由</caption>
+          <thead><tr><th>场景</th><th>选择</th><th>理由</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>a) 工作文档</strong></td>
+              <td><strong>闪存（SSD）</strong></td>
+              <td>文件小而多、一天要开关无数次，主导因素是<strong>随机访问延迟</strong>而不是容量或带宽——这正是磁盘那 10 ms 机械延迟最难受的场景。总容量需求也不大（几十 GB），SSD 更贵的单位成本无所谓。笔记本还能顺带获得抗震和静音。</td>
+            </tr>
+            <tr>
+              <td><strong>b) 服务器数据备份</strong></td>
+              <td><strong>磁带</strong><small>（近线层可配磁盘）</small></td>
+              <td>备份的访问模式是<strong>整卷写入、极少读回、真要读就整卷恢复</strong>——磁带"只能顺序访问"这个致命缺点在这里<em>完全不构成缺点</em>。于是它的优势全部兑现：单卷约 10 TB、单位容量成本最低、离线保存寿命长、断电不耗任何电力。<br>实践中常做分层：最近几天的备份放磁盘（恢复快），更久远的转到磁带（便宜、离线，还能防勒索软件加密）。</td>
+            </tr>
+            <tr>
+              <td><strong>c) 电脑游戏</strong></td>
+              <td><strong>闪存（SSD）为主<br>磁盘作大容量仓库</strong></td>
+              <td>现代游戏一边玩一边<strong>随机流式加载</strong>贴图和场景资源，读取延迟直接决定卡不卡、加载屏多久。这是随机读密集型负载，SSD 优势巨大。但单个游戏动辄上百 GB，一整个游戏库用 SSD 太贵，所以常见做法是<strong>正在玩的放 SSD、不常玩的放 HDD</strong>。光盘则只剩下"分发介质"这一个历史角色。</td>
+            </tr>
+            <tr>
+              <td><strong>d) 相机存储</strong></td>
+              <td><strong>闪存（SD / CF 卡）</strong></td>
+              <td>几乎是唯一答案，而且理由不只是速度：<strong>没有机械部件</strong>意味着能承受拍摄时的震动、跌落和姿态变化——机械硬盘在运动中读写会直接损坏。此外还要<strong>体积极小、功耗低（靠电池供电）、可插拔更换</strong>。连拍和视频录制需要的是持续<em>顺序写入</em>带宽，这恰好是闪存卡的强项。</td>
+            </tr>
+            <tr>
+              <td><strong>e) 医学影像</strong></td>
+              <td><strong>分两个阶段：<br>在线用磁盘/闪存<br>归档用光盘或磁带</strong></td>
+              <td>这题的题眼是<strong>它有两种截然不同的生命周期</strong>：<br><strong>诊断期</strong>——医生要随时调阅、影像文件很大（一次 CT 可达数 GB），需要随机访问和高带宽 ⇒ 磁盘或闪存。<br><strong>归档期</strong>——法规通常要求病历保存很多年甚至几十年，这时需要的是<strong>介质寿命长、单位成本低</strong>，而且最好是<strong>一次写入不可改（WORM）</strong>，以便在医疗纠纷中证明记录未被篡改 ⇒ 光盘（或专用归档磁带）。<br>把影像刻成光盘交给病人带去别家医院，也是这一用途的延伸。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <div class="lb">答这类题的通用套路</div>
+        <p>不要凭印象答"哪个快选哪个"。把每个场景先问三句话：<strong>① 访问模式是随机还是顺序？② 数据规模有多大、成本敏感吗？③ 有没有速度之外的硬约束（抗震、法规、寿命、便携、不可篡改）？</strong>答案几乎总是被第三个问题决定——磁带不是因为"慢"才只能做备份，而是因为<em>备份根本不需要随机访问</em>，于是它的成本优势才成为决定性因素。</p>
+      </div>
+    </div>
+  </article>
+</section>
+
+<footer>IE4756 / IE6156 / EE6156 · Tutorial 1–5 逐题详解 · 数值结果均经程序验算 · 仅供个人学习复习使用</footer>
+
+</div>
+
+</body></html>
