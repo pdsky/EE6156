@@ -1,10 +1,19 @@
 # EE6156 复习站
 
-IE4756 / IE6156 / EE6156 **Computer Architecture Part 1** 的个人复习页面集合。全部是纯静态 HTML，用浏览器直接打开即可，不需要安装任何东西。
+IE4756 / IE6156 / EE6156 **Computer Architecture**（Part 1 与 Part 2）的个人复习页面集合。全部是纯静态 HTML，用浏览器直接打开即可，不需要安装任何东西。
 
 开启 GitHub Pages 后的在线地址：**https://pdsky.github.io/EE6156/**
 
 ## 内容
+
+### Part 2 · 存储与流水线（Lesson 7–12）
+
+| 页面 | 用途 | 内容 |
+|---|---|---|
+| [存储与流水线学习手册](part2-learn.html) | 系统学习 | 6 课覆盖讲义 7–12，含缓存模拟器、地址拆分器、写策略演示、流水线计时器、DLX 数据通路步进器、流水线时序图生成器、分支 CPI 计算器 |
+| [Part 2 习题小程序](part2-practice.html) | 做题 | Tutorial 7–12 全部 48 题（可自动核对）、讲义 Exercise 全解、10 类随机刷题 |
+
+### Part 1
 
 | 页面 | 用途 | 内容 |
 |---|---|---|

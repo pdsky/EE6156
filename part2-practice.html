@@ -1,0 +1,1742 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EE6156 Part 2 习题</title>
+<meta name="description" content="EE6156 Part 2（Lesson 7–12）习题小程序：Tutorial 7–12 逐题精讲与自动核对、讲义 Exercise 全解、随机刷题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap">
+<style>
+/* ============ Design tokens（与 Part 1 芯片蓝图同一套） ============ */
+:root{
+  color-scheme:light;
+  --bg:#eef2f6; --bg-grid:#dfe8ef;
+  --surface:#ffffff; --surface-2:#e3eaf1; --surface-3:#d3dfea;
+  --ink:#12222f; --ink-soft:#33495a; --muted:#5c7182;
+  --accent:#b85c17; --accent-strong:#8f4610; --accent-soft:#f3e2cf; --accent-ink:#fff8f0;
+  --line:#c7d4e0; --line-strong:#a9bccb;
+  --teal:#0e6d61; --teal-soft:#dcefec;
+  --warn:#a5301d; --warn-soft:#f6e0db;
+  --ok:#1d6b2f; --ok-soft:#ddf0e1;
+  /* 图表序列色：dataviz 参考调色板 slot 1-5 */
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
+  --shadow:0 1px 2px rgba(20,35,50,.06), 0 8px 24px -12px rgba(20,35,50,.18);
+  --radius:3px;
+  --font-display:'IBM Plex Sans Condensed','IBM Plex Sans','PingFang SC','Microsoft YaHei',sans-serif;
+  --font-body:'IBM Plex Sans','PingFang SC','Microsoft YaHei',-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0a1725; --bg-grid:#0f2032;
+    --surface:#0f2136; --surface-2:#153049; --surface-3:#1c3c59;
+    --ink:#e9f1f7; --ink-soft:#c1d2e0; --muted:#87a1b6;
+    --accent:#ef9f4f; --accent-strong:#ffc083; --accent-soft:#2c2011; --accent-ink:#1b1102;
+    --line:#22415e; --line-strong:#2e577a;
+    --teal:#5fd9c8; --teal-soft:#0e2f2b;
+    --warn:#ff8b71; --warn-soft:#3a1a14;
+    --ok:#7fd98f; --ok-soft:#12301a;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0a1725; --bg-grid:#0f2032;
+  --surface:#0f2136; --surface-2:#153049; --surface-3:#1c3c59;
+  --ink:#e9f1f7; --ink-soft:#c1d2e0; --muted:#87a1b6;
+  --accent:#ef9f4f; --accent-strong:#ffc083; --accent-soft:#2c2011; --accent-ink:#1b1102;
+  --line:#22415e; --line-strong:#2e577a;
+  --teal:#5fd9c8; --teal-soft:#0e2f2b;
+  --warn:#ff8b71; --warn-soft:#3a1a14;
+  --ok:#7fd98f; --ok-soft:#12301a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:.01ms !important; transition-duration:.01ms !important;} }
+body{
+  margin:0;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  background:
+    repeating-linear-gradient(0deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, var(--bg-grid) 0 1px, transparent 1px 28px),
+    var(--bg);
+  color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent-strong);}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+::selection{background:var(--accent-soft); color:var(--ink);}
+[hidden]{display:none !important;}
+
+/* ============ 顶部工具条 ============ */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; gap:12px; flex-wrap:nowrap;
+  padding:10px 16px; overflow-x:auto;
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .brand{font-family:var(--font-mono); font-weight:600; font-size:13px; letter-spacing:.06em; color:var(--muted); display:flex; gap:8px; align-items:center; white-space:nowrap; flex-shrink:0;}
+.topbar .brand b{color:var(--ink); font-weight:700;}
+.topbar .brand a{color:inherit; text-decoration:none;}
+.topbar .spacer{flex:1; min-width:0;}
+.navtoggle{display:none;}
+.iconbtn{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; white-space:nowrap; flex-shrink:0;
+  border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft);
+  padding:7px 12px; border-radius:var(--radius); cursor:pointer; text-decoration:none;
+}
+.iconbtn:hover{background:var(--surface-3);}
+.progresspill{font-family:var(--font-mono); font-size:12px; color:var(--muted); white-space:nowrap; flex-shrink:0; border:1px solid var(--line); padding:6px 10px; border-radius:20px; display:flex; align-items:center; gap:8px;}
+.progresspill .bar{width:60px; height:5px; background:var(--surface-3); border-radius:3px; overflow:hidden; flex-shrink:0;}
+.progresspill .bar i{display:block; height:100%; width:0%; background:var(--accent); transition:width .3s;}
+.navbackdrop{display:none;}
+
+/* ============ 布局 ============ */
+.shell{display:grid; grid-template-columns:288px minmax(0,1fr); max-width:1320px; margin:0 auto; align-items:start;}
+.nav{position:sticky; top:53px; align-self:start; height:calc(100vh - 53px); overflow-y:auto; padding:22px 14px 60px 20px; border-right:1px solid var(--line);}
+.nav::-webkit-scrollbar{width:8px;}
+.nav::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:8px;}
+.nav .navhead{font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; color:var(--muted); margin:0 0 14px 2px; text-transform:uppercase;}
+.navmod{margin-bottom:4px;}
+.navmod > a{display:flex; align-items:baseline; gap:8px; padding:8px; border-radius:var(--radius); color:var(--ink-soft); text-decoration:none; font-weight:600; font-size:14.5px;}
+.navmod > a .tag{font-family:var(--font-mono); font-size:11px; color:var(--accent-strong); font-weight:700;}
+.navmod > a:hover{background:var(--surface-2);}
+.navmod.active > a{background:var(--accent-soft); color:var(--ink);}
+.navsub{list-style:none; margin:2px 0 10px 0; padding:0 0 0 26px; border-left:1px solid var(--line);}
+.navsub li a{display:block; padding:4px 10px; margin:1px 0; font-size:13px; color:var(--muted); text-decoration:none; border-radius:var(--radius);}
+.navsub li a:hover{color:var(--ink); background:var(--surface-2);}
+.navsub li a.active{color:var(--accent-strong); font-weight:600;}
+.navsub li a.lablink::before{content:"▶ "; font-size:9px; color:var(--teal);}
+.navcheck{display:inline-flex; width:14px; height:14px; border:1.5px solid var(--line-strong); border-radius:3px; margin-right:2px; flex-shrink:0; cursor:pointer; position:relative; vertical-align:-2px;}
+.navcheck.done{background:var(--teal); border-color:var(--teal);}
+.navcheck.done::after{content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;}
+main{min-width:0; padding:0 40px 120px 40px;}
+
+/* ============ Hero ============ */
+.hero{padding:64px 0 40px 0; border-bottom:1px solid var(--line); margin-bottom:56px;}
+.hero .eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; color:var(--accent-strong); text-transform:uppercase; display:flex; align-items:center; gap:10px; margin:0 0 18px 0;}
+.hero .eyebrow::before{content:""; width:26px; height:1px; background:var(--accent-strong);}
+.hero h1{font-family:var(--font-display); font-weight:700; font-size:clamp(34px,5.4vw,62px); line-height:1.06; margin:0 0 20px 0; text-wrap:balance; letter-spacing:-.01em;}
+.hero h1 em{font-style:normal; color:var(--accent-strong);}
+.hero p.lede{max-width:62ch; font-size:18px; color:var(--ink-soft); margin:0 0 28px 0;}
+.hero .meta{display:flex; flex-wrap:wrap; gap:10px;}
+.chip{font-family:var(--font-mono); font-size:12px; color:var(--muted); border:1px solid var(--line); padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; background:var(--surface);}
+.chip b{color:var(--ink);}
+.examcard{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:30px; max-width:860px;}
+.examcard > div{background:var(--surface); border:1px solid var(--line); border-top:3px solid var(--accent-strong); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+.examcard .k{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);}
+.examcard .v{font-family:var(--font-display); font-weight:700; font-size:20px; margin:2px 0 4px 0;}
+.examcard p{margin:0; font-size:14px; color:var(--ink-soft);}
+.examcard .countdown{font-family:var(--font-mono); font-size:12px; color:var(--accent-strong); font-weight:600;}
+
+/* ============ Module ============ */
+.module{padding-top:26px; margin-top:-26px; scroll-margin-top:70px; margin-bottom:90px;}
+.modhead{display:flex; align-items:flex-end; gap:18px; margin-bottom:8px; flex-wrap:wrap;}
+.modhead .ref{font-family:var(--font-mono); font-weight:700; font-size:13px; color:var(--accent-strong); border:1px solid var(--accent-strong); padding:3px 9px; border-radius:3px; letter-spacing:.05em;}
+.modhead h2{font-family:var(--font-display); font-size:clamp(26px,3.4vw,38px); margin:0; font-weight:700; text-wrap:balance;}
+.modhead .scope{font-family:var(--font-mono); font-size:11.5px; color:var(--teal); border:1px solid var(--teal); border-radius:20px; padding:2px 10px;}
+.modintro{color:var(--ink-soft); max-width:74ch; font-size:16.5px; margin:14px 0 40px 0;}
+.modintro strong{color:var(--ink);}
+.sub{scroll-margin-top:70px; margin:0 0 46px 0; padding-top:8px;}
+.sub h3{font-family:var(--font-display); font-size:22px; font-weight:700; margin:0 0 14px 0; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+.sub h3 .num{font-family:var(--font-mono); font-size:13px; color:var(--muted); font-weight:500;}
+.sub p{max-width:72ch; margin:0 0 14px 0;}
+.sub h4{font-family:var(--font-display); font-size:16.5px; font-weight:700; margin:24px 0 8px 0;}
+ul.speclist{margin:0 0 16px 0; padding-left:0; list-style:none; max-width:72ch;}
+ul.speclist li{position:relative; padding-left:20px; margin-bottom:9px;}
+ul.speclist li::before{content:"▸"; position:absolute; left:0; color:var(--accent-strong); font-size:13px; top:1px;}
+ol.steps{max-width:72ch; padding-left:22px; margin:0 0 16px 0;}
+ol.steps li{margin-bottom:8px;}
+
+/* 公式块 */
+.formula{font-family:var(--font-mono); font-size:15px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:16px 0 20px 0; max-width:72ch; overflow-x:auto; line-height:1.85; box-shadow:var(--shadow);}
+.formula .fl{display:block; white-space:nowrap;}
+.formula .cm{color:var(--muted); font-size:13px;}
+.formula b{color:var(--teal);}
+
+/* callouts */
+.callout{border:1px solid var(--line); border-left:3px solid var(--accent-strong); background:var(--surface); border-radius:0 var(--radius) var(--radius) 0; padding:16px 18px; margin:20px 0; max-width:72ch; box-shadow:var(--shadow);}
+.callout .lbl{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; color:var(--accent-strong); text-transform:uppercase; margin-bottom:6px; font-weight:700;}
+.callout p:last-child, .callout ul:last-child{margin-bottom:0;}
+.callout.warn{border-left-color:var(--warn);}
+.callout.warn .lbl{color:var(--warn);}
+.callout.teal{border-left-color:var(--teal);}
+.callout.teal .lbl{color:var(--teal);}
+
+/* tables */
+.tablewrap{overflow-x:auto; margin:18px 0 26px 0; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); max-width:100%;}
+table{border-collapse:collapse; width:100%; background:var(--surface);}
+.tablewrap table{min-width:520px;}
+table caption{text-align:left; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:10px 14px; border-bottom:1px solid var(--line);}
+th,td{text-align:left; padding:9px 14px; border-bottom:1px solid var(--line); font-size:14.5px;}
+th{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); background:var(--surface-2); font-weight:600; white-space:nowrap;}
+td.num, th.num, td.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--surface-2);}
+code{font-family:var(--font-mono); font-size:.9em; background:var(--surface-2); border:1px solid var(--line); border-radius:2px; padding:1px 5px; color:var(--ink); overflow-wrap:break-word;}
+.mono{font-family:var(--font-mono);}
+.hl{color:var(--accent-strong); font-weight:600;}
+.okc{color:var(--ok); font-weight:600;}
+.badc{color:var(--warn); font-weight:600;}
+
+/* 示意图框 */
+.diagram{border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin:22px 0 28px 0; position:relative; max-width:100%;}
+.diagram .dcap{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;}
+.diagram svg{width:100%; height:auto; display:block;}
+.diagram .scrollx{overflow-x:auto;}
+.diagram .scrollx svg{min-width:620px;}
+.diagram::before, .diagram::after{content:""; position:absolute; width:10px; height:10px; border:2px solid var(--line-strong); top:6px;}
+.diagram::before{left:6px; border-right:none; border-bottom:none;}
+.diagram::after{right:6px; border-left:none; border-bottom:none;}
+svg text{font-family:var(--font-mono);}
+.svg-box{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.5;}
+.svg-ink{fill:var(--ink);}
+.svg-muted{fill:var(--muted);}
+.svg-acc{fill:var(--accent-strong);}
+.svg-line{stroke:var(--ink-soft); stroke-width:1.5; fill:none;}
+
+/* 层次金字塔 */
+.hier{display:flex; flex-direction:column; align-items:center; gap:4px; margin:22px 0; max-width:72ch;}
+.hier > div{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 14px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--line); font-size:14px;}
+.hier > div b{font-family:var(--font-display); font-size:15px;}
+.hier > div span{font-family:var(--font-mono); font-size:12px; color:var(--muted); white-space:nowrap;}
+
+/* ============ 交互实验通用 ============ */
+.lab{border:1px solid var(--line); background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 20px 22px 20px; margin:26px 0 34px 0; max-width:100%; position:relative;}
+.lab::before{content:""; position:absolute; left:-1px; top:-1px; width:56px; height:3px; background:var(--teal);}
+.lab-head{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;}
+.lab-cap{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); font-weight:700;}
+.lab-title{font-family:var(--font-display); font-weight:700; font-size:18px; margin:2px 0 0 0;}
+.lab-desc{font-size:14px; color:var(--ink-soft); margin:0 0 14px 0; max-width:80ch;}
+.ctlgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px 14px; margin-bottom:14px;}
+.ctl{display:flex; flex-direction:column; gap:4px; min-width:0;}
+.ctl > span{font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--muted); text-transform:uppercase;}
+.ctl input, .ctl select, .lab textarea, .lab input[type=text]{
+  font-family:var(--font-mono); font-size:14px; color:var(--ink); background:var(--surface-2);
+  border:1px solid var(--line-strong); border-radius:var(--radius); padding:7px 9px; width:100%; min-width:0;
+}
+.ctl input:focus, .ctl select:focus, .lab textarea:focus{outline:2px solid var(--teal); outline-offset:0; border-color:var(--teal);}
+.lab textarea{resize:vertical; line-height:1.5;}
+.btnrow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:6px 0 12px 0;}
+.btn{font-family:var(--font-mono); font-size:12.5px; padding:8px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink-soft); cursor:pointer;}
+.btn:hover{background:var(--surface-3);}
+.btn:disabled{opacity:.4; cursor:default;}
+.btn.primary{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:700;}
+:root[data-theme="dark"] .btn.primary{color:#04231f;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn.primary{color:#04231f;} }
+.btnrow .steplabel{font-family:var(--font-mono); font-size:12px; color:var(--muted); margin-left:auto;}
+.seg{display:inline-flex; border:1px solid var(--line-strong); border-radius:20px; overflow:hidden; flex-wrap:wrap;}
+.seg button{font-family:var(--font-mono); font-size:12px; padding:6px 12px; border:none; background:var(--surface-2); color:var(--ink-soft); cursor:pointer; border-right:1px solid var(--line-strong);}
+.seg button:last-child{border-right:none;}
+.seg button.on{background:var(--accent-strong); color:var(--accent-ink); font-weight:700;}
+.kpis{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin:10px 0 14px 0;}
+.kpi{background:var(--surface-2); border-radius:var(--radius); padding:10px 12px; min-width:0;}
+.kpi .k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em; color:var(--muted);}
+.kpi .v{font-family:var(--font-mono); font-size:20px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; overflow-wrap:anywhere;}
+.kpi .v small{font-size:12px; color:var(--muted); font-weight:500;}
+.kpi.em{background:var(--teal-soft);}
+.kpi.em .v{color:var(--teal);}
+.workings{font-family:var(--font-mono); font-size:13px; background:var(--surface-2); border-radius:var(--radius); padding:12px 14px; color:var(--ink-soft); line-height:1.8; overflow-x:auto; white-space:pre-wrap; word-break:break-word;}
+.workings b{color:var(--ink);}
+.labnote{font-size:13px; color:var(--muted); margin:10px 0 0 0;}
+.presets{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+.presets button{font-family:var(--font-mono); font-size:11.5px; padding:5px 10px; border-radius:20px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-soft); cursor:pointer;}
+.presets button:hover{background:var(--surface-2);}
+.presets button.on{background:var(--teal-soft); border-color:var(--teal); color:var(--teal); font-weight:600;}
+
+/* 堆叠条（CPI 组成） */
+.stackbar{display:flex; height:30px; border-radius:4px; overflow:hidden; gap:2px; background:var(--surface); margin:6px 0 6px 0;}
+.stackbar > i{display:block; height:100%; min-width:2px; position:relative; cursor:default;}
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color:var(--ink-soft); font-family:var(--font-mono);}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:12px; height:12px; border-radius:2px; display:inline-block;}
+.tip{position:fixed; z-index:80; pointer-events:none; background:var(--ink); color:var(--surface); font-family:var(--font-mono); font-size:12px; padding:6px 9px; border-radius:3px; box-shadow:var(--shadow); max-width:260px;}
+
+/* 缓存模拟器 */
+.simtable td, .simtable th{font-family:var(--font-mono); font-size:13px; white-space:nowrap; padding:7px 10px;}
+.simtable tr.cur td{background:var(--accent-soft);}
+.res{display:inline-block; font-family:var(--font-mono); font-size:11.5px; font-weight:700; padding:2px 7px; border-radius:2px;}
+.res.hit{background:var(--ok-soft); color:var(--ok);}
+.res.miss{background:var(--warn-soft); color:var(--warn);}
+.cachegrid{display:grid; gap:8px; margin:12px 0;}
+.cset{display:grid; grid-template-columns:62px repeat(var(--ways),minmax(0,1fr)); gap:6px; align-items:stretch;}
+.cset .sl{font-family:var(--font-mono); font-size:11px; color:var(--muted); display:flex; align-items:center;}
+.cline{border:1px dashed var(--line-strong); border-radius:var(--radius); padding:6px 8px; font-family:var(--font-mono); font-size:12px; min-height:46px; background:var(--surface); min-width:0; overflow:hidden;}
+.cline.v{border-style:solid; background:var(--surface-2);}
+.cline.new{border-color:var(--warn); box-shadow:0 0 0 2px color-mix(in srgb, var(--warn) 25%, transparent);}
+.cline.hitnow{border-color:var(--ok); box-shadow:0 0 0 2px color-mix(in srgb, var(--ok) 25%, transparent);}
+.cline .t{font-weight:700; color:var(--ink);}
+.cline .r{color:var(--muted); font-size:11px;}
+.addrbits{display:flex; flex-wrap:wrap; gap:2px; font-family:var(--font-mono); font-size:15px; margin:8px 0 4px 0;}
+.addrbits span{padding:5px 7px; border-radius:2px; color:#fff; font-weight:600;}
+.addrbits .ft{background:var(--s1);} .addrbits .fi{background:var(--s2);} .addrbits .fo{background:var(--s3);}
+.addrbits .fv{background:var(--s1);} .addrbits .fp{background:var(--s3);}
+:root[data-theme="dark"] .addrbits span{color:#0a1725;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .addrbits span{color:#0a1725;} }
+.fieldkey{display:flex; gap:14px; flex-wrap:wrap; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+.fieldkey i{display:inline-block; width:11px; height:11px; border-radius:2px; vertical-align:-1px; margin-right:5px;}
+
+/* 写策略 */
+.wpgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:12px 0;}
+.wpbox{border:1px solid var(--line); border-radius:var(--radius); padding:12px; background:var(--surface-2);}
+.wpbox .h{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between;}
+.cells{display:grid; grid-template-columns:repeat(4,1fr); gap:4px;}
+.cells div{background:var(--surface); border:1px solid var(--line); border-radius:2px; text-align:center; padding:6px 2px; font-family:var(--font-mono); font-size:15px; font-weight:700;}
+.cells div small{display:block; font-size:10px; color:var(--muted); font-weight:500;}
+.cells div.chg{background:var(--accent-soft); border-color:var(--accent-strong);}
+.dirty{font-family:var(--font-mono); font-size:12px; padding:2px 8px; border-radius:20px; border:1px solid var(--line-strong);}
+.dirty.on{background:var(--warn-soft); color:var(--warn); border-color:var(--warn); font-weight:700;}
+
+/* 流水线时序表 */
+.pipewrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); margin:12px 0; background:var(--surface);}
+table.pipe{border-collapse:separate; border-spacing:2px; width:auto; min-width:0; background:transparent;}
+table.pipe th, table.pipe td{border:none; padding:0; font-family:var(--font-mono); font-size:11.5px; text-align:center;}
+table.pipe th{background:transparent; color:var(--muted); padding:4px 2px; min-width:40px;}
+table.pipe th.ins, table.pipe td.ins{text-align:left; padding:0 10px 0 6px; white-space:nowrap; font-size:12.5px; color:var(--ink); min-width:150px; position:sticky; left:0; background:var(--surface); z-index:1;}
+table.pipe td.c{height:30px; min-width:40px; border-radius:2px; font-weight:700; color:var(--ink);}
+table.pipe tbody tr:hover td{background:inherit;}
+table.pipe tbody tr:hover td.ins{background:var(--surface-2);}
+.st-IF{background:color-mix(in srgb, var(--s1) 26%, var(--surface));}
+.st-ID{background:color-mix(in srgb, var(--s2) 26%, var(--surface));}
+.st-EX{background:color-mix(in srgb, var(--s3) 26%, var(--surface));}
+.st-MEM{background:color-mix(in srgb, var(--s4) 30%, var(--surface));}
+.st-WB{background:color-mix(in srgb, var(--s5) 30%, var(--surface));}
+.st-stall{background:repeating-linear-gradient(135deg, var(--warn-soft) 0 5px, var(--surface) 5px 9px); color:var(--warn) !important; font-weight:600 !important; font-size:10px !important;}
+.st-bub{background:repeating-linear-gradient(135deg, var(--surface-3) 0 5px, var(--surface) 5px 9px); color:var(--muted) !important; font-weight:600 !important; font-size:10px !important;}
+td.fwd{box-shadow:inset 0 -3px 0 var(--teal);}
+.hazlist{list-style:none; padding:0; margin:8px 0; font-size:14px;}
+.hazlist li{padding:6px 10px; border-left:3px solid var(--line-strong); margin-bottom:6px; background:var(--surface-2); border-radius:0 var(--radius) var(--radius) 0;}
+.hazlist li.raw{border-left-color:var(--warn);}
+.hazlist li.cth{border-left-color:var(--s4);}
+.hazlist li.str{border-left-color:var(--s5);}
+.hazlist li.ok{border-left-color:var(--ok);}
+
+/* 甘特（任务流水线） */
+.gantt{position:relative; margin:12px 0; overflow-x:auto;}
+.gantt .row{display:flex; align-items:center; gap:8px; height:26px; margin-bottom:3px;}
+.gantt .lbl{font-family:var(--font-mono); font-size:11.5px; color:var(--muted); width:58px; flex-shrink:0;}
+.gantt .track{position:relative; height:22px; flex:1; min-width:520px;}
+.gantt .seg2{position:absolute; top:0; height:22px; border-radius:2px; font-family:var(--font-mono); font-size:10.5px; font-weight:700; color:var(--ink); display:flex; align-items:center; justify-content:center; overflow:hidden; white-space:nowrap;}
+.gantt .axis{font-family:var(--font-mono); font-size:10.5px; color:var(--muted); margin-left:66px; display:flex; justify-content:space-between; min-width:520px;}
+
+/* DLX 数据通路 */
+.dp .blk{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.5; transition:fill .25s, stroke .25s;}
+.dp .buf{fill:var(--surface-3); stroke:var(--line-strong); stroke-width:1.2; transition:fill .25s;}
+.dp .w{stroke:var(--line-strong); stroke-width:1.6; fill:none; transition:stroke .25s, stroke-width .25s;}
+.dp .lab2{font-size:11px; fill:var(--ink-soft); font-weight:600;}
+.dp .small{font-size:9.5px; fill:var(--muted);}
+.dp .stg{font-size:12px; font-weight:700; fill:var(--muted);}
+.dp .on .blk, .dp .blk.on{fill:var(--accent-soft); stroke:var(--accent-strong); stroke-width:2.2;}
+.dp .buf.on{fill:var(--teal); stroke:var(--teal);}
+.dp .w.on{stroke:var(--accent-strong); stroke-width:2.6;}
+.dp .stg.on{fill:var(--accent-strong);}
+.dp .val{font-size:10.5px; fill:var(--teal); font-weight:700;}
+.regtable td{font-family:var(--font-mono); font-size:13px; padding:6px 10px;}
+.regtable td.on{background:var(--accent-soft); color:var(--ink); font-weight:700;}
+.bufrow{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:12px 0;}
+.bufrow > div{border:1px solid var(--line); border-radius:var(--radius); padding:8px 10px; background:var(--surface-2); font-family:var(--font-mono); font-size:12px; min-width:0; overflow-wrap:anywhere;}
+.bufrow > div .h{font-weight:700; color:var(--muted); font-size:11px; letter-spacing:.06em; margin-bottom:4px;}
+.bufrow > div.on{border-color:var(--teal); background:var(--teal-soft);}
+.bufrow > div.on .h{color:var(--teal);}
+.binline{font-family:var(--font-mono); font-size:13px; overflow-wrap:anywhere;}
+
+/* quiz */
+.quizblock{margin-top:38px; border-top:1px dashed var(--line-strong); padding-top:22px;}
+.quizblock > .qtitle{font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 12px 0;}
+details.qcard{border:1px solid var(--line); border-radius:var(--radius); margin-bottom:10px; background:var(--surface); max-width:72ch;}
+details.qcard summary{cursor:pointer; padding:13px 16px; font-weight:600; list-style:none; display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+details.qcard summary::-webkit-details-marker{display:none;}
+details.qcard summary::before{content:"Q"; font-family:var(--font-mono); font-weight:700; color:var(--accent-strong); flex:0 0 auto;}
+details.qcard[open] summary{border-bottom:1px solid var(--line);}
+details.qcard .a{padding:13px 16px 15px 40px; color:var(--ink-soft); font-size:14.5px;}
+details.qcard .a b{color:var(--teal);}
+.nextmod{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:26px; font-family:var(--font-mono); font-size:13px;}
+.nextmod a{text-decoration:none; border:1px solid var(--line-strong); padding:8px 12px; border-radius:var(--radius); background:var(--surface);}
+
+footer.pagefoot{border-top:1px solid var(--line); margin-top:60px; padding:26px 0 60px 0; color:var(--muted); font-size:13px; font-family:var(--font-mono);}
+
+@media (max-width: 920px){
+  .shell{grid-template-columns:minmax(0,1fr);}
+  .nav{position:fixed; inset:53px 0 0 0; background:var(--bg); z-index:39; transform:translateX(-100%); transition:transform .25s ease; height:calc(100vh - 53px); width:82vw; max-width:320px; box-shadow:var(--shadow);}
+  .nav.open{transform:translateX(0);}
+  .navtoggle{display:inline-flex;}
+  main{padding:0 16px 100px 16px;}
+  .navbackdrop.open{display:block; position:fixed; inset:53px 0 0 0; z-index:38; background:rgba(6,14,22,.45);}
+  .bufrow{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .lab{padding:16px 14px 18px 14px;}
+}
+@media (max-width: 640px){
+  .mapwrap{grid-template-columns:minmax(0,1fr) !important;}
+  .brand-sub{display:none;}
+  .progresspill .bar{display:none;}
+  .hero{padding-top:40px;}
+  .cset{grid-template-columns:44px repeat(var(--ways),minmax(0,1fr));}
+}
+@media print{
+  .topbar, .nav, .lab .btnrow, .navbackdrop{display:none !important;}
+  .shell{display:block;} main{padding:0;}
+  details.qcard{break-inside:avoid;} details.qcard .a{display:block;}
+}
+
+
+
+/* ============ 习题页专用 ============ */
+.pwrap{max-width:980px; margin:0 auto; padding:0 20px 120px 20px;}
+.phero{padding:48px 0 26px 0;}
+.phero .eyebrow{font-family:var(--font-mono); font-size:12px; letter-spacing:.14em; color:var(--accent-strong); text-transform:uppercase; display:flex; align-items:center; gap:10px; margin:0 0 14px 0;}
+.phero .eyebrow::before{content:""; width:26px; height:1px; background:var(--accent-strong);}
+.phero h1{font-family:var(--font-display); font-weight:700; font-size:clamp(30px,4.6vw,48px); line-height:1.08; margin:0 0 14px 0; text-wrap:balance;}
+.phero h1 em{font-style:normal; color:var(--accent-strong);}
+.phero p{max-width:66ch; color:var(--ink-soft); margin:0 0 6px 0;}
+.tabs{position:sticky; top:53px; z-index:30; display:flex; gap:6px; flex-wrap:wrap; padding:10px 0; background:color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); margin-bottom:18px;}
+.tabs button{font-family:var(--font-display); font-weight:700; font-size:15px; padding:8px 16px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer;}
+.tabs button.on{background:var(--accent-strong); border-color:var(--accent-strong); color:var(--accent-ink);}
+.tabs .sp{flex:1;}
+.filters{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 18px 0;}
+.filters .lbl{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; margin-right:4px;}
+.fchip{font-family:var(--font-mono); font-size:12px; padding:5px 11px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer;}
+.fchip.on{background:var(--teal-soft); border-color:var(--teal); color:var(--teal); font-weight:700;}
+.fchk{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); display:inline-flex; gap:6px; align-items:center; margin-left:auto;}
+.tuthead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin:40px 0 6px 0; scroll-margin-top:120px;}
+.tuthead .no{font-family:var(--font-mono); font-weight:700; font-size:13px; color:var(--accent-strong); border:1px solid var(--accent-strong); padding:3px 9px; border-radius:3px;}
+.tuthead h2{font-family:var(--font-display); font-size:clamp(22px,3vw,30px); margin:0;}
+.tutnote{color:var(--muted); font-size:14px; margin:0 0 16px 0; max-width:80ch;}
+article.q{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin:0 0 18px 0; scroll-margin-top:120px;}
+article.q.mastered{border-left:4px solid var(--ok);}
+.qhead{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--surface-2);}
+.qid{font-family:var(--font-mono); font-weight:700; font-size:14px; color:var(--accent-strong);}
+.qtopic{font-family:var(--font-display); font-weight:700; font-size:16px;}
+.qtag{font-family:var(--font-mono); font-size:11px; color:var(--teal); border:1px solid var(--teal); border-radius:20px; padding:1px 8px;}
+.qhead .mk{margin-left:auto; font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); display:inline-flex; gap:6px; align-items:center; cursor:pointer;}
+.qbody{padding:14px 16px 16px 16px;}
+.qtext{margin:0 0 12px 0; max-width:80ch;}
+.qtext ul, .qtext ol{margin:6px 0 6px 0; padding-left:22px;}
+.qtext li{margin-bottom:3px;}
+.qtext table{width:auto; min-width:0; margin:8px 0; border:1px solid var(--line);}
+.qtext table td, .qtext table th{padding:5px 12px; font-size:13.5px;}
+.checks{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:flex-end; padding:12px 14px; background:var(--surface-2); border-radius:var(--radius); margin:0 0 12px 0;}
+.checks label{display:flex; flex-direction:column; gap:3px; font-family:var(--font-mono); font-size:11.5px; color:var(--muted); min-width:0;}
+.checks input, .checks select{font-family:var(--font-mono); font-size:14px; width:132px; max-width:100%; padding:6px 8px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);}
+.checks input.right, .checks select.right{border-color:var(--ok); background:var(--ok-soft);}
+.checks input.wrong, .checks select.wrong{border-color:var(--warn); background:var(--warn-soft);}
+.checks .verdict{font-family:var(--font-mono); font-size:12.5px; font-weight:700; align-self:center;}
+.checks .verdict.good{color:var(--ok);} .checks .verdict.bad{color:var(--warn);}
+.checks .hintline{flex-basis:100%; font-size:12px; color:var(--muted); font-family:var(--font-body);}
+details.hint, details.sol{border:1px solid var(--line); border-radius:var(--radius); margin:0 0 8px 0;}
+details.hint > summary, details.sol > summary{cursor:pointer; padding:9px 14px; font-family:var(--font-mono); font-size:12.5px; font-weight:700; list-style:none;}
+details.hint > summary::-webkit-details-marker, details.sol > summary::-webkit-details-marker{display:none;}
+details.hint > summary{color:var(--s4);}
+:root:not([data-theme="dark"]) details.hint > summary{color:#8a5a00;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) details.hint > summary{color:#e7b44a;} }
+details.sol > summary{color:var(--teal);}
+details.hint > summary::before{content:"▸ ";}
+details.sol > summary::before{content:"▸ ";}
+details[open].hint > summary::before, details[open].sol > summary::before{content:"▾ ";}
+details.hint > div, details.sol > div{padding:4px 16px 14px 16px; border-top:1px dashed var(--line);}
+.sol p, .hint p{max-width:78ch; margin:10px 0;}
+.sol h4{font-family:var(--font-display); font-size:15px; margin:16px 0 6px 0;}
+.calc{font-family:var(--font-mono); font-size:14px; background:var(--surface-2); border-left:3px solid var(--teal); border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:10px 0; line-height:1.85; overflow-x:auto; max-width:80ch;}
+.calc .l{display:block; white-space:nowrap;}
+.calc b{color:var(--teal);}
+.ans{display:inline-block; font-family:var(--font-mono); font-weight:700; color:var(--ok); background:var(--ok-soft); padding:1px 8px; border-radius:3px;}
+.trap{border-left:3px solid var(--warn); background:var(--warn-soft); padding:8px 12px; border-radius:0 var(--radius) var(--radius) 0; font-size:14px; margin:10px 0; max-width:80ch;}
+.trap b{color:var(--warn);}
+.sol .tablewrap table{min-width:420px;}
+.sol .simtable td{font-size:12.5px;}
+.exgroup{margin:0 0 30px 0;}
+.exgroup h3{font-family:var(--font-display); font-size:20px; margin:26px 0 10px 0; display:flex; gap:10px; align-items:baseline;}
+.exgroup h3 .no{font-family:var(--font-mono); font-size:12px; color:var(--accent-strong);}
+details.ex{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); margin-bottom:8px;}
+details.ex > summary{cursor:pointer; list-style:none; padding:11px 14px; display:flex; gap:10px; align-items:baseline; font-size:14.5px;}
+details.ex > summary::-webkit-details-marker{display:none;}
+details.ex > summary .eid{font-family:var(--font-mono); font-weight:700; color:var(--accent-strong); flex:0 0 auto; font-size:13px;}
+details.ex[open] > summary{border-bottom:1px solid var(--line);}
+details.ex > div{padding:6px 16px 14px 16px;}
+/* 刷题 */
+.drillbar{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+.drillcard{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 18px 20px 18px;}
+.drillcard .dq{font-size:16px; margin:6px 0 14px 0; max-width:80ch;}
+.drillcard .dq code{font-size:.92em;}
+.score{display:flex; gap:10px; flex-wrap:wrap; margin:0 0 14px 0;}
+.choice{display:flex; gap:8px; flex-wrap:wrap;}
+.choice button{font-family:var(--font-mono); font-size:13px; padding:7px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); cursor:pointer;}
+.choice button.right{background:var(--ok-soft); border-color:var(--ok); color:var(--ok); font-weight:700;}
+.choice button.wrong{background:var(--warn-soft); border-color:var(--warn); color:var(--warn);}
+.toc{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 6px 0;}
+.toc a{font-family:var(--font-mono); font-size:12px; text-decoration:none; padding:3px 9px; border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--ink-soft);}
+.toc a.m{border-color:var(--ok); color:var(--ok);}
+@media (max-width:640px){ .pwrap{padding:0 16px 100px 16px;} .tabs{top:53px;} .qhead .mk{margin-left:0;} .fchk{margin-left:0;} }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><a href="index.html" title="回到复习站首页"><b>EE6156</b></a><span class="brand-sub"> · PART 2 习题小程序</span></div>
+  <div class="spacer"></div>
+  <a class="iconbtn" href="part2-learn.html">← 学习手册</a>
+  <div class="progresspill"><span id="progressLabel">已掌握 0 / 48</span><span class="bar"><i id="progressBar"></i></span></div>
+  <button class="iconbtn" id="themeToggleBtn">主题</button>
+</div>
+
+<div class="pwrap">
+  <header class="phero">
+    <p class="eyebrow">EE6156 Part 2 · Tutorial 7–12</p>
+    <h1>先自己算，<em>再核对</em>，最后看完整推导</h1>
+    <p>三种用法：<b>Tutorial 精讲</b>收录 Tutorial 7–12 全部 48 题，每题可以先填关键数值让页面自动核对，再展开提示或完整解答；<b>课堂练习</b>是讲义里 Exercise 7.1–12.17 的解答（讲义学生版的答案页是空白的）；<b>随机刷题</b>每次随机出一道同类型的新题，适合考前热手。</p>
+    <p style="font-size:14px;color:var(--muted)">数值答案允许 ±0.5% 或 ±0.01 的误差；百分数直接填数字（例如 37.5% 填 37.5）。勾选"已掌握"会保存在这个浏览器里。</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="习题分区">
+    <button data-tab="tut" class="on">Tutorial 精讲</button>
+    <button data-tab="ex">课堂练习 Exercise</button>
+    <button data-tab="drill">随机刷题</button>
+  </nav>
+
+  <section id="pane-tut">
+    <div class="filters" id="tutFilters">
+      <span class="lbl">筛选</span>
+      <button class="fchip on" data-l="all">全部</button>
+      <button class="fchip" data-l="7">T7 存储基础</button>
+      <button class="fchip" data-l="8">T8 缓存映射</button>
+      <button class="fchip" data-l="9">T9 缓存 II · VM</button>
+      <button class="fchip" data-l="10">T10 流水线入门</button>
+      <button class="fchip" data-l="11">T11 DLX 流水线</button>
+      <button class="fchip" data-l="12">T12 冒险</button>
+      <label class="fchk"><input type="checkbox" id="onlyTodo"> 只看未掌握</label>
+    </div>
+    <div class="toc" id="tutToc"></div>
+    <div class="tuthead" id="tut7"><span class="no">TUTORIAL 7</span><h2>缓存加速比与存储停顿</h2></div>
+    <p class="tutnote">对应 Lesson 7。核心公式：AMAT = HR × HT + MR × (HT + MP)；实际 CPI = 理想 CPI + 每条指令的停顿；每条指令访存 = 1 + load/store 比例。</p>
+
+    <article class="q" data-l="7" id="t7-1">
+      <div class="qhead"><span class="qid">T7.1</span><span class="qtopic">缓存带来的加速比</span><span class="qtag">AMAT</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">缓存比主存快 10 倍，命中率 90%。使用缓存能获得多少加速比？</div>
+        <div class="checks"><label>加速比<input data-ans="5"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>设缓存访问时间 = 1，主存 = 10。按课程约定，一次缺失要先查缓存再去主存：缺失时间 = 1 + 10。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">无缓存：每次访问 = 10</span><span class="l">有缓存：AMAT = 0.9 × 1 + 0.1 × (1 + 10) = 0.9 + 1.1 = 2.0</span><span class="l"><b>加速比 = 10 / 2.0 = 5</b></span></div>
+          <div class="trap"><b>另一种口径</b>：如果认为缺失时只花主存时间（缓存和主存并行查找），AMAT = 0.9 × 1 + 0.1 × 10 = 1.9，加速比 = 1 / (0.1 + 0.9/10) ≈ 5.26。讲义明确规定缺失时间 = 缓存访问时间 + 缺失代价，所以答 <span class="ans">5</span>。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-2">
+      <div class="qhead"><span class="qid">T7.2</span><span class="qtopic">要快多少倍才能加速 5 倍</span><span class="qtag">反推</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">命中率 0.85。缓存要比主存快多少倍，整体才能获得 5 倍加速？</div>
+        <div class="checks"><label>倍数 k<input data-ans="20"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>设缓存 = 1，主存 = k。写出 AMAT，令 k / AMAT = 5 解方程。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">AMAT = 0.85 × 1 + 0.15 × (1 + k) = 1 + 0.15k</span><span class="l">加速比 = k / (1 + 0.15k) = 5</span><span class="l">k = 5 + 0.75k → 0.25k = 5 → <b>k = 20</b></span><span class="l">验算：AMAT = 1 + 3 = 4，20 / 4 = 5 ✓</span></div>
+          <p>缓存要比主存快 <span class="ans">20 倍</span>。注意上限：k → ∞ 时加速比趋于 1/0.15 ≈ 6.67，所以 5 倍是可以达到的。若按"缺失只花 k"的口径，1/(0.15 + 0.85/k) = 5 得 k = 17。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-3">
+      <div class="qhead"><span class="qid">T7.3</span><span class="qtopic">缺失让机器慢多少</span><span class="qtag">实际 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">理想 CPI 2.0（全部命中）。load/store 占 40%。取指和取数的缺失率都是 2%，缺失代价 25 周期。
+          <ol type="a"><li>比全命中的理想机器慢多少？</li><li>如果完全没有缓存，每次访存都要 25 周期，会怎样？</li><li>理想 CPI 降到 1.0，缺失率不变，要保持 (a) 的性能比，缺失代价应为多少？</li></ol></div>
+        <div class="checks"><label>(a) 实际 CPI<input data-ans="2.7"></label><label>(a) 慢几倍<input data-ans="1.35"></label><label>(b) 无缓存 CPI<input data-ans="37"></label><label>(c) 缺失代价<input data-ans="12.5"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>每条指令访存 1.4 次。(c) 中"性能比相同"指实际 CPI / 理想 CPI 仍为 1.35。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <h4>(a)</h4>
+          <div class="calc"><span class="l">每条指令访存 = 1 + 0.4 = 1.4</span><span class="l">停顿 = 1.4 × 0.02 × 25 = 0.7</span><span class="l">实际 CPI = 2.0 + 0.7 = <b>2.7</b></span><span class="l">比值 = 2.7 / 2.0 = <b>1.35</b>，即慢 35%</span></div>
+          <h4>(b)</h4>
+          <div class="calc"><span class="l">停顿 = 1.4 × 25 = 35</span><span class="l">CPI = 2.0 + 35 = <b>37</b></span><span class="l">比理想慢 37 / 2 = 18.5 倍；比有缓存时慢 37 / 2.7 ≈ 13.7 倍</span></div>
+          <h4>(c)</h4>
+          <div class="calc"><span class="l">要求实际 CPI = 1.0 × 1.35 = 1.35 → 停顿 = 0.35</span><span class="l">1.4 × 0.02 × MP = 0.35 → MP = 0.35 / 0.028 = <b>12.5 周期</b></span></div>
+          <p>理想 CPI 减半后，缺失代价也必须减半才能保持同样的相对损失：CPU 越快，缓存越要紧。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-4">
+      <div class="qhead"><span class="qid">T7.4</span><span class="qtopic">循环访存计时</span><span class="qtag">数访存次数</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>sum = 0; i = 0; while (sum &lt; 15 &amp;&amp; i &lt; 8) { sum += a[i]; i++; }</code>，数组 a = [3, 4, 2, 6, 5, 1, 7, 2]。求最终 sum、访存次数、无缓存总时间、有缓存总时间、性能提升倍数。（按讲义假设：缓存 1 ms，主存 10 ms；sum、i 在寄存器；数组在同一块，首次访问缺失，之后全命中。）</div>
+        <div class="checks"><label>sum<input data-ans="15"></label><label>访存次数<input data-ans="4"></label><label>无缓存 ms<input data-ans="40"></label><label>有缓存 ms<input data-ans="14"></label><label>提升倍数<input data-ans="2.857" data-tol="0.01"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>先模拟循环：每轮结束检查 sum &lt; 15。sum 一旦等于 15 循环就停。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>轮</th><th>读 a[i]</th><th>sum</th><th>条件 sum &lt; 15 且 i &lt; 8</th></tr></thead><tbody>
+            <tr><td class="num">1</td><td class="num">a[0] = 3</td><td class="num">3</td><td>真，继续</td></tr>
+            <tr><td class="num">2</td><td class="num">a[1] = 4</td><td class="num">7</td><td>真</td></tr>
+            <tr><td class="num">3</td><td class="num">a[2] = 2</td><td class="num">9</td><td>真</td></tr>
+            <tr><td class="num">4</td><td class="num">a[3] = 6</td><td class="num">15</td><td>15 &lt; 15 为假，退出</td></tr>
+          </tbody></table></div>
+          <div class="calc"><span class="l">最终 sum = <b>15</b>，访问 a[0]–a[3] 共 <b>4</b> 次</span><span class="l">无缓存：4 × 10 = <b>40 ms</b></span><span class="l">有缓存：1 次把块搬进缓存 10 ms + 4 次缓存访问 × 1 ms = <b>14 ms</b></span><span class="l">提升 = 40 / 14 ≈ <b>2.86 倍</b></span></div>
+          <div class="trap"><b>注意</b>：循环条件只用寄存器里的 sum 和 i，不产生访存。讲义例子 10 次访问得到 5 倍，这里只有 4 次访问，第一次缺失的固定开销占比更大，所以提升只有 2.86 倍。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-5">
+      <div class="qhead"><span class="qid">T7.5</span><span class="qtopic">分离缓存的有效 CPI</span><span class="qtag">ns → 周期</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">500 MHz 处理器，主存访问 60 ns，理想 CPI 2，load/store 占 25%，指令缓存缺失率 2%，数据缓存缺失率 5%。求有效 CPI。</div>
+        <div class="checks"><label>缺失代价（周期）<input data-ans="30"></label><label>有效 CPI<input data-ans="2.975"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>500 MHz → 时钟周期 2 ns，先把 60 ns 换成周期数。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">时钟周期 = 1 / 500 MHz = 2 ns → MP = 60 / 2 = <b>30 周期</b></span><span class="l">指令停顿 = 1 × 0.02 × 30 = 0.6</span><span class="l">数据停顿 = 0.25 × 0.05 × 30 = 0.375</span><span class="l">有效 CPI = 2 + 0.6 + 0.375 = <b>2.975</b></span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-6">
+      <div class="qhead"><span class="qid">T7.6</span><span class="qtopic">去掉缓存省还是亏</span><span class="qtag">执行时间</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">缓存比主存快 5 倍。命中 10 ns，一次缺失 100 ns，缺失率 0.1。程序运行 1 小时，其中 20% 的时间花在访存（缓存）上。如果不用缓存，执行时间会省多少还是多多少？</div>
+        <div class="checks"><label>有缓存 AMAT ns<input data-ans="19"></label><label>无缓存访存时间 min<input data-ans="31.58" data-tol="0.05"></label><label>多出的时间 min<input data-ans="19.58" data-tol="0.05"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>主存 = 5 × 10 = 50 ns。只有 20% 那部分时间随访存时间变化；访存次数不变，时间按 50/AMAT 放大。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">主存访问 = 5 × 10 ns = 50 ns（无缓存时每次访问的时间）</span><span class="l">有缓存 AMAT = 0.9 × 10 + 0.1 × 100 = 9 + 10 = <b>19 ns</b></span><span class="l">1 小时中：访存 12 分钟，其他 48 分钟</span><span class="l">访存次数 N = 12 min / 19 ns（不变）</span><span class="l">无缓存访存时间 = N × 50 ns = 12 × 50/19 = <b>31.58 分钟</b></span><span class="l">无缓存总时间 = 48 + 31.58 = 79.58 分钟</span></div>
+          <p>不用缓存会<b>多花</b> <span class="ans">约 19.6 分钟</span>（总时间约 1 小时 19.6 分钟，慢约 33%）。换句话说，缓存为这个程序节省了 19.6 分钟。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-7">
+      <div class="qhead"><span class="qid">T7.7</span><span class="qtopic">由实际 CPI 反推缺失率</span><span class="qtag">解方程</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">理想 CPI 1.5，实测 CPI 2.7。load/store 占 40%，指令缓存缺失代价 30 周期，数据缓存缺失代价 60 周期，数据缺失率是指令缺失率的 3.3 倍。求指令缺失率、数据缺失率、每条指令的总停顿。</div>
+        <div class="checks"><label>I-缺失率 %<input data-ans="1.099" data-tol="0.01"></label><label>D-缺失率 %<input data-ans="3.626" data-tol="0.01"></label><label>停顿/条<input data-ans="1.2"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>停顿 = 2.7 − 1.5。设指令缺失率为 m，写出停顿关于 m 的式子。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">总停顿 = 2.7 − 1.5 = <b>1.2 周期/条</b></span><span class="l">1.2 = m × 30 + 0.4 × (3.3m) × 60 = 30m + 79.2m = 109.2m</span><span class="l">m = 1.2 / 109.2 = 0.010989 → 指令缺失率 ≈ <b>1.10%</b></span><span class="l">数据缺失率 = 3.3 × 1.0989% ≈ <b>3.63%</b></span><span class="l">检验：指令停顿 0.330 + 数据停顿 0.870 = 1.2 ✓</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="7" id="t7-8">
+      <div class="qhead"><span class="qid">T7.8</span><span class="qtopic">统一缺失率的 CPI</span><span class="qtag">实际 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">理想 CPI 1.8。指令构成：60% 算术逻辑、25% load/store、15% 分支。每条指令取指一次，只有 load/store 访问数据。综合缺失率 3%，缺失代价 40 周期。求每条指令访存次数、每条指令停顿、实际 CPI、停顿占执行时间的百分比。</div>
+        <div class="checks"><label>访存次数<input data-ans="1.25"></label><label>停顿/条<input data-ans="1.5"></label><label>实际 CPI<input data-ans="3.3"></label><label>停顿占比 %<input data-ans="45.45" data-tol="0.05"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">访存次数 = 1 + 0.25 = <b>1.25</b>（分支和算术不访问数据存储器）</span><span class="l">停顿 = 1.25 × 0.03 × 40 = <b>1.5</b></span><span class="l">实际 CPI = 1.8 + 1.5 = <b>3.3</b></span><span class="l">停顿占比 = 1.5 / 3.3 = <b>45.45%</b></span></div>
+        </div></details>
+      </div>
+    </article>
+    <div class="tuthead" id="tut8"><span class="no">TUTORIAL 8</span><h2>AMAT、地址划分与映射手算</h2></div>
+    <p class="tutnote">对应 Lesson 8。块数 = 容量 ÷ 块大小；组数 = 块数 ÷ 相联度；Offset = log₂块大小，Index = log₂组数，Tag = 地址位 − 两者。比较器个数 = 相联度，每个比较器宽 Tag 位。</p>
+
+    <article class="q" data-l="8" id="t8-1">
+      <div class="qhead"><span class="qid">T8.1</span><span class="qtopic">缺失时间与 AMAT</span><span class="qtag">AMAT</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">命中时间 2 周期，缺失率 4%，缺失代价 80 周期。求缺失时间和 AMAT。</div>
+        <div class="checks"><label>缺失时间<input data-ans="82"></label><label>AMAT<input data-ans="5.2"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">缺失时间 = HT + MP = 2 + 80 = <b>82 周期</b></span><span class="l">AMAT = HT + MR × MP = 2 + 0.04 × 80 = <b>5.2 周期</b></span><span class="l">验算：0.96 × 2 + 0.04 × 82 = 1.92 + 3.28 = 5.2 ✓</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-2">
+      <div class="qhead"><span class="qid">T8.2</span><span class="qtopic">两种缓存的完整参数</span><span class="qtag">地址划分</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">4 GB 按字节编址主存，32 位地址，1 字 = 4 字节。对下面两种缓存，分别求块数、组数、Offset/Index/Tag 位数、全部标签的总位数、标签比较需要的 XOR 门数。
+          <ol type="i"><li>直接映射，数据容量 512 KB，块 8 字。</li><li>2 路组相联，数据容量 256 KB，块 2 字。</li></ol></div>
+        <div class="checks"><label>(i) Tag<input data-ans="13"></label><label>(i) Index<input data-ans="14"></label><label>(i) 标签总位<input data-ans="212992"></label><label>(i) XOR<input data-ans="13"></label><label>(ii) Tag<input data-ans="15"></label><label>(ii) 组数<input data-ans="16384"></label><label>(ii) 标签总位<input data-ans="491520"></label><label>(ii) XOR<input data-ans="30"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>块大小先换成字节：8 字 = 32 B，2 字 = 8 B。XOR 门数 = 比较器个数 × 每个比较器的位数。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th></th><th>(i) 直接映射 512 KB, 32 B 块</th><th>(ii) 2 路 256 KB, 8 B 块</th></tr></thead><tbody>
+            <tr><td>块数</td><td class="num">2¹⁹ / 2⁵ = 2¹⁴ = 16384</td><td class="num">2¹⁸ / 2³ = 2¹⁵ = 32768</td></tr>
+            <tr><td>组数</td><td class="num">16384（每组 1 块）</td><td class="num">32768 / 2 = 16384</td></tr>
+            <tr><td>Offset</td><td class="num">log₂32 = 5</td><td class="num">log₂8 = 3</td></tr>
+            <tr><td>Index</td><td class="num">log₂16384 = 14</td><td class="num">14</td></tr>
+            <tr><td>Tag</td><td class="num">32 − 14 − 5 = <b>13</b></td><td class="num">32 − 14 − 3 = <b>15</b></td></tr>
+            <tr><td>标签总位数</td><td class="num">16384 × 13 = <b>212,992</b> 位（26 KB）</td><td class="num">32768 × 15 = <b>491,520</b> 位（60 KB）</td></tr>
+            <tr><td>XOR 门</td><td class="num">1 个 13 位比较器 = <b>13</b></td><td class="num">2 个 15 位比较器 = <b>30</b></td></tr>
+          </tbody></table></div>
+          <p>(f) 只是给出 1 字 = 4 字节的假设。每个比较器除了 XOR 还需要一个把所有 XOR 输出合并的或非（NOR）门树来判断"全为 0"，题目只问 XOR 数。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-3">
+      <div class="qhead"><span class="qid">T8.3</span><span class="qtopic">有效 CPI</span><span class="qtag">实际 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">20% 的指令是 load/store。主存访问 50 ns，时钟 500 MHz，理想 CPI 2.0，指令缓存缺失率 3%，数据缓存缺失率 10%，缺失代价等于主存访问时间。求有效 CPI。</div>
+        <div class="checks"><label>MP（周期）<input data-ans="25"></label><label>有效 CPI<input data-ans="3.25"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">时钟 2 ns → MP = 50 / 2 = <b>25 周期</b></span><span class="l">指令停顿 = 0.03 × 25 = 0.75</span><span class="l">数据停顿 = 0.2 × 0.10 × 25 = 0.5</span><span class="l">有效 CPI = 2.0 + 0.75 + 0.5 = <b>3.25</b></span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-4">
+      <div class="qhead"><span class="qid">T8.4</span><span class="qtopic">正推与反推地址位</span><span class="qtag">地址划分</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">32 位按字节编址。
+          <ol type="a"><li>1 MB、8 路组相联、128 字节块：Tag、Index、Offset 各几位？</li><li>直接映射，32 块，Tag 21 位：块大小和总容量？</li><li>容量 256 字节，Tag 28 位，块 16 字节：Index 几位？相联度是多少？</li></ol></div>
+        <div class="checks"><label>(a) Tag<input data-ans="15"></label><label>(a) Index<input data-ans="10"></label><label>(a) Offset<input data-ans="7"></label><label>(b) 块大小 B<input data-ans="64"></label><label>(b) 容量 B<input data-ans="2048"></label><label>(c) Index<input data-ans="0"></label><label>(c) 相联度<input data-ans="16"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 块数 = 2²⁰ / 2⁷ = 2¹³；组数 = 2¹³ / 8 = 2¹⁰</span><span class="l">　　Offset 7，Index 10，Tag = 32 − 10 − 7 = <b>15</b></span><span class="l">(b) 32 块 → Index 5；Offset = 32 − 21 − 5 = 6 → 块 = 2⁶ = <b>64 B</b></span><span class="l">　　容量 = 32 × 64 = <b>2 KB</b></span><span class="l">(c) Offset = log₂16 = 4；Index = 32 − 28 − 4 = <b>0</b> → 只有 1 组</span><span class="l">　　块数 = 256 / 16 = 16，全在一组 → <b>16 路，即全相联</b></span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-5">
+      <div class="qhead"><span class="qid">T8.5</span><span class="qtopic">4 路组相联全套参数</span><span class="qtag">地址划分</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">32 位地址，缓存 256 KB，块 64 字节，4 路组相联。求块数、组数、Offset、Index、Tag、标签总位数、比较器个数。</div>
+        <div class="checks"><label>块数<input data-ans="4096"></label><label>组数<input data-ans="1024"></label><label>Tag<input data-ans="16"></label><label>标签总位<input data-ans="65536"></label><label>比较器<input data-ans="4"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">块数 = 2¹⁸ / 2⁶ = <b>4096</b>；组数 = 4096 / 4 = <b>1024</b></span><span class="l">Offset = 6，Index = 10，Tag = 32 − 10 − 6 = <b>16</b></span><span class="l">标签总位数 = 4096 × 16 = <b>65,536 位</b>（8 KB）</span><span class="l">比较器 = <b>4</b> 个（每路一个），每个 16 位，共 64 个 XOR</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-6">
+      <div class="qhead"><span class="qid">T8.6</span><span class="qtopic">提高命中率还是降低代价</span><span class="qtag">AMAT 比较</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">命中时间 2 ns，缺失代价 80 ns，命中率 95%。
+          <ol type="a"><li>求缺失率、缺失时间、AMAT（用两个公式各算一次）。</li><li>命中率提高到 98%，新 AMAT？</li><li>缺失代价降到 40 ns（命中率 95%），新 AMAT？</li><li>哪个改进降得多？</li><li>另一设计：命中 1 ns、代价 120 ns、命中率 94%，AMAT？选哪个？</li></ol></div>
+        <div class="checks"><label>(a) AMAT<input data-ans="6"></label><label>(b) AMAT<input data-ans="3.6"></label><label>(c) AMAT<input data-ans="4"></label><label>(e) AMAT<input data-ans="8.2"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) MR = 5%，MT = 2 + 80 = 82 ns</span><span class="l">　　HR×HT + MR×MT = 0.95×2 + 0.05×82 = 1.9 + 4.1 = <b>6.0 ns</b></span><span class="l">　　HT + MR×MP = 2 + 0.05×80 = <b>6.0 ns</b> ✓</span><span class="l">(b) 2 + 0.02 × 80 = <b>3.6 ns</b>（降 2.4 ns）</span><span class="l">(c) 2 + 0.05 × 40 = <b>4.0 ns</b>（降 2.0 ns）</span><span class="l">(e) 1 + 0.06 × 120 = <b>8.2 ns</b></span></div>
+          <p>(d) 本题中提高命中率更有效：比较缺失项 MR × MP，(b) 为 0.02 × 80 = 1.6，(c) 为 0.05 × 40 = 2.0。(e) 第二种设计命中更快，但缺失率和代价都更高，缺失项 7.2 ns 远大于命中时间节省的 1 ns，AMAT 8.2 ns 比原设计的 6.0 ns 差，应选原设计（若可以做 (b) 的改进则更好）。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-7">
+      <div class="qhead"><span class="qid">T8.7</span><span class="qtopic">比较器与位比较数</span><span class="qtag">硬件代价</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">Tag 6 位，16 行。分别求直接映射和全相联需要的比较器个数和并行位比较总数。</div>
+        <div class="checks"><label>DM 比较器<input data-ans="1"></label><label>DM 位比较<input data-ans="6"></label><label>FA 比较器<input data-ans="16"></label><label>FA 位比较<input data-ans="96"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">直接映射：Index 直接选中 1 行 → <b>1</b> 个比较器 × 6 位 = <b>6</b> 次位比较</span><span class="l">全相联：所有行同时比 → <b>16</b> 个比较器 × 6 位 = <b>96</b> 次位比较</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="8" id="t8-8">
+      <div class="qhead"><span class="qid">T8.8</span><span class="qtopic">三种组织逐次手算</span><span class="qtag">LRU · 3C</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">主存 256 字节，缓存 8 行，块 4 字节，LRU，初始为空。访问序列：<code>20, 37, 54, 20, 70, 38</code>。分别对 (a) 全相联、(b) 直接映射、(c) 2 路组相联：求各字段位数；逐次写出块号、组/行、命中或缺失（缺失要分 compulsory / conflict）及缓存内容；统计命中、缺失、强制、冲突次数和命中率；最后比较三者。</div>
+        <div class="checks"><label>(a) 命中次数<input data-ans="2"></label><label>(b) 命中次数<input data-ans="0"></label><label>(b) 冲突缺失<input data-ans="2"></label><label>(c) 命中次数<input data-ans="0"></label><label>(c) 组号（全部落在）<input data-ans="1"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>块号 = 地址 ÷ 4：20→5，37→9，54→13，70→17，38→9。直接映射行号 = 块号 mod 8，2 路组号 = 块号 mod 4。可以在学习手册的缓存模拟器里选这三个预设逐步对照。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <h4>(i) 字段位数（地址 log₂256 = 8 位，Offset 2 位）</h4>
+          <div class="tablewrap"><table><thead><tr><th>组织</th><th>Tag</th><th>Index</th><th>Offset</th></tr></thead><tbody>
+            <tr><td>全相联</td><td class="num">6</td><td class="num">0</td><td class="num">2</td></tr>
+            <tr><td>直接映射（8 行）</td><td class="num">3</td><td class="num">3</td><td class="num">2</td></tr>
+            <tr><td>2 路（4 组）</td><td class="num">4</td><td class="num">2</td><td class="num">2</td></tr>
+          </tbody></table></div>
+          <h4>(a) 全相联</h4>
+          <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存（括号内为 TSLR）</th></tr></thead><tbody><tr><td>1</td><td>20</td><td>000101 00</td><td>20–23</td><td>–</td><td>000101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>20–23(0)</td></tr><tr><td>2</td><td>37</td><td>001001 01</td><td>36–39</td><td>–</td><td>001001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>20–23(1), 36–39(0)</td></tr><tr><td>3</td><td>54</td><td>001101 10</td><td>52–55</td><td>–</td><td>001101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>20–23(2), 36–39(1), 52–55(0)</td></tr><tr><td>4</td><td>20</td><td>000101 00</td><td>20–23</td><td>–</td><td>000101</td><td><span class="res hit">HIT</span></td><td></td><td>20–23(0), 36–39(2), 52–55(1)</td></tr><tr><td>5</td><td>70</td><td>010001 10</td><td>68–71</td><td>–</td><td>010001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>20–23(1), 36–39(3), 52–55(2), 68–71(0)</td></tr><tr><td>6</td><td>38</td><td>001001 10</td><td>36–39</td><td>–</td><td>001001</td><td><span class="res hit">HIT</span></td><td></td><td>20–23(2), 36–39(0), 52–55(3), 68–71(1)</td></tr></tbody></table></div>
+          <p>命中 2、缺失 4（全部强制）、冲突 0，命中率 2/6 = <span class="ans">33.3%</span>。</p>
+          <h4>(b) 直接映射</h4>
+          <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存</th></tr></thead><tbody><tr><td>1</td><td>20</td><td>000 101 00</td><td>20–23</td><td>5</td><td>000</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L5: 20–23</td></tr><tr><td>2</td><td>37</td><td>001 001 01</td><td>36–39</td><td>1</td><td>001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L1: 36–39<br>L5: 20–23</td></tr><tr><td>3</td><td>54</td><td>001 101 10</td><td>52–55</td><td>5</td><td>001</td><td><span class="res miss">MISS</span> compulsory</td><td>20–23</td><td>L1: 36–39<br>L5: 52–55</td></tr><tr><td>4</td><td>20</td><td>000 101 00</td><td>20–23</td><td>5</td><td>000</td><td><span class="res miss">MISS</span> conflict</td><td>52–55</td><td>L1: 36–39<br>L5: 20–23</td></tr><tr><td>5</td><td>70</td><td>010 001 10</td><td>68–71</td><td>1</td><td>010</td><td><span class="res miss">MISS</span> compulsory</td><td>36–39</td><td>L1: 68–71<br>L5: 20–23</td></tr><tr><td>6</td><td>38</td><td>001 001 10</td><td>36–39</td><td>1</td><td>001</td><td><span class="res miss">MISS</span> conflict</td><td>68–71</td><td>L1: 36–39<br>L5: 20–23</td></tr></tbody></table></div>
+          <p>块 5 与块 13 都映射到行 101，块 9 与块 17 都映射到行 001，互相踢出。命中 0、缺失 6（强制 4、冲突 2），命中率 <span class="ans">0%</span>。最终行 001 = 36–39（tag 001），行 101 = 20–23（tag 000），其余行无效。</p>
+          <h4>(c) 2 路组相联</h4>
+          <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存（括号内为 TSLR）</th></tr></thead><tbody><tr><td>1</td><td>20</td><td>0001 01 00</td><td>20–23</td><td>1</td><td>0001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S1: 20–23(0)</td></tr><tr><td>2</td><td>37</td><td>0010 01 01</td><td>36–39</td><td>1</td><td>0010</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S1: 20–23(1), 36–39(0)</td></tr><tr><td>3</td><td>54</td><td>0011 01 10</td><td>52–55</td><td>1</td><td>0011</td><td><span class="res miss">MISS</span> compulsory</td><td>20–23</td><td>S1: 52–55(0), 36–39(1)</td></tr><tr><td>4</td><td>20</td><td>0001 01 00</td><td>20–23</td><td>1</td><td>0001</td><td><span class="res miss">MISS</span> conflict</td><td>36–39</td><td>S1: 52–55(1), 20–23(0)</td></tr><tr><td>5</td><td>70</td><td>0100 01 10</td><td>68–71</td><td>1</td><td>0100</td><td><span class="res miss">MISS</span> compulsory</td><td>52–55</td><td>S1: 68–71(0), 20–23(1)</td></tr><tr><td>6</td><td>38</td><td>0010 01 10</td><td>36–39</td><td>1</td><td>0010</td><td><span class="res miss">MISS</span> conflict</td><td>20–23</td><td>S1: 68–71(1), 36–39(0)</td></tr></tbody></table></div>
+          <p>四个块号 5、9、13、17 除以 4 余数都是 1，<b>全部落进组 1</b>，而组 1 只有 2 路，三个以上的块轮流被 LRU 踢出。命中 0、缺失 6（强制 4、冲突 2），命中率 <span class="ans">0%</span>。</p>
+          <h4>(v) 比较</h4>
+          <p>全相联命中率最高（33.3%），直接映射和这里的 2 路都是 0%。一般来说提高相联度能减少冲突缺失，但前提是争同一组的块数不超过路数；本题四个块全挤在 2 路组相联的同一组里，2 路帮不上忙。相联度越高，比较器和 LRU 硬件越多。</p>
+          <div class="trap"><b>分类口径</b>：上表按定义把每个块的第一次访问都记为 compulsory，即使它引起了替换（例如 (b) 第 3、5 步）。讲义个别例题把"首次访问且发生替换"标成 conflict 或 capacity，如果按那种写法，(b)(c) 会变成强制 2、冲突 4。建议按定义答，必要时加一句 "block replaced"。</div>
+        </div></details>
+      </div>
+    </article>
+    <div class="tuthead" id="tut9"><span class="no">TUTORIAL 9</span><h2>缓存 II：写策略、多级缓存与虚拟内存</h2></div>
+    <p class="tutnote">对应 Lesson 9。CPU 时间 = IC × (CPI × 时钟周期)，比较缓存时别只看 AMAT；多级缓存：AMAT = HT₁ + MR₁ × (HT₂ + MR₂ × MP₂)；物理地址 = PPN 拼接页内偏移。</p>
+
+    <article class="q" data-l="9" id="t9-1">
+      <div class="qhead"><span class="qid">T9.1</span><span class="qtopic">十六进制地址的直接映射</span><span class="qtag">手算轨迹</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">12 位按字节编址，直接映射缓存 16 块，每块 16 字节。访问序列（十六进制）：<code>3FE, 4FE, 4FD, 4F2, 111, 111, 2F1, 4FE, 2F7, 448, 2F9, 2A2</code>。
+          <ol type="a"><li>Tag 几位？</li><li>初始为空，求最终缓存内容（只填 Tag）。</li><li>命中 5 ns、缺失 100 ns、无缓存每次 95 ns，用缓存省多少时间？</li><li>各举一个空间局部性和时间局部性的例子。</li></ol></div>
+        <div class="checks"><label>Tag 位<input data-ans="4"></label><label>命中次数<input data-ans="4"></label><label>有缓存 ns<input data-ans="820"></label><label>节省 ns<input data-ans="320"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>Offset = log₂16 = 4，Index = log₂16 = 4，Tag = 12 − 8 = 4。正好每个十六进制位是一个字段：第 1 位是 Tag，第 2 位是行号，第 3 位是偏移。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <p>(a) Offset 4 + Index 4，Tag = 12 − 4 − 4 = <span class="ans">4 位</span>。以 <code>3FE</code> 为例：Tag = 3，行 = F，偏移 = E。</p>
+          <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存</th></tr></thead><tbody><tr><td>1</td><td>3FE</td><td>0011 1111 1110</td><td>1008–1023</td><td>15</td><td>0011</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L15: 1008–1023</td></tr><tr><td>2</td><td>4FE</td><td>0100 1111 1110</td><td>1264–1279</td><td>15</td><td>0100</td><td><span class="res miss">MISS</span> compulsory</td><td>1008–1023</td><td>L15: 1264–1279</td></tr><tr><td>3</td><td>4FD</td><td>0100 1111 1101</td><td>1264–1279</td><td>15</td><td>0100</td><td><span class="res hit">HIT</span></td><td></td><td>L15: 1264–1279</td></tr><tr><td>4</td><td>4F2</td><td>0100 1111 0010</td><td>1264–1279</td><td>15</td><td>0100</td><td><span class="res hit">HIT</span></td><td></td><td>L15: 1264–1279</td></tr><tr><td>5</td><td>111</td><td>0001 0001 0001</td><td>272–287</td><td>1</td><td>0001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L1: 272–287<br>L15: 1264–1279</td></tr><tr><td>6</td><td>111</td><td>0001 0001 0001</td><td>272–287</td><td>1</td><td>0001</td><td><span class="res hit">HIT</span></td><td></td><td>L1: 272–287<br>L15: 1264–1279</td></tr><tr><td>7</td><td>2F1</td><td>0010 1111 0001</td><td>752–767</td><td>15</td><td>0010</td><td><span class="res miss">MISS</span> compulsory</td><td>1264–1279</td><td>L1: 272–287<br>L15: 752–767</td></tr><tr><td>8</td><td>4FE</td><td>0100 1111 1110</td><td>1264–1279</td><td>15</td><td>0100</td><td><span class="res miss">MISS</span> conflict</td><td>752–767</td><td>L1: 272–287<br>L15: 1264–1279</td></tr><tr><td>9</td><td>2F7</td><td>0010 1111 0111</td><td>752–767</td><td>15</td><td>0010</td><td><span class="res miss">MISS</span> conflict</td><td>1264–1279</td><td>L1: 272–287<br>L15: 752–767</td></tr><tr><td>10</td><td>448</td><td>0100 0100 1000</td><td>1088–1103</td><td>4</td><td>0100</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L1: 272–287<br>L4: 1088–1103<br>L15: 752–767</td></tr><tr><td>11</td><td>2F9</td><td>0010 1111 1001</td><td>752–767</td><td>15</td><td>0010</td><td><span class="res hit">HIT</span></td><td></td><td>L1: 272–287<br>L4: 1088–1103<br>L15: 752–767</td></tr><tr><td>12</td><td>2A2</td><td>0010 1010 0010</td><td>672–687</td><td>10</td><td>0010</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L1: 272–287<br>L4: 1088–1103<br>L10: 672–687<br>L15: 752–767</td></tr></tbody></table></div>
+          <p>(b) 最终只有 4 行有效：<b>行 1：Tag 1</b>（块 110–11F）；<b>行 4：Tag 4</b>（440–44F）；<b>行 A：Tag 2</b>（2A0–2AF）；<b>行 F：Tag 2</b>（2F0–2FF）。其余 12 行有效位为 0。画图时每行画出 Valid | Tag | Data 三栏，只填 Tag。</p>
+          <div class="calc"><span class="l">(c) 命中 4 次（4FD、4F2、第二次 111、2F9），缺失 8 次</span><span class="l">　　有缓存 = 4 × 5 + 8 × 100 = 20 + 800 = <b>820 ns</b></span><span class="l">　　无缓存 = 12 × 95 = 1140 ns</span><span class="l">　　节省 = 1140 − 820 = <b>320 ns</b></span></div>
+          <p>(d) <b>空间局部性</b>：4FE 之后访问 4FD、4F2，都在同一块 4F0–4FF 里，第一次缺失把整块搬进来，后两次就命中（2F1、2F7、2F9 同理）。<b>时间局部性</b>：111 连续被访问两次；4FE 在第 2 次和第 8 次都被访问。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-2">
+      <div class="qhead"><span class="qid">T9.2</span><span class="qtopic">直接映射 vs 2 路：AMAT 和 CPU 时间</span><span class="qtag">陷阱题</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">理想 CPI 2.0，时钟 2 ns，每条指令平均 1.3 次访存。两种 64 KB 缓存：
+          <ol><li>直接映射：缺失率 1.4%，时钟 2 ns。</li><li>2 路组相联：缺失率 1.0%，因选择 MUX 时钟变长 10%。</li></ol>
+          命中时间 1 个周期，缺失代价都是 70 ns。求 (a) 两者 AMAT；(b) 以 IC 表示的 CPU 时间；(c) 哪个整体更好？</div>
+        <div class="checks"><label>AMAT DM ns<input data-ans="2.98"></label><label>AMAT 2 路 ns<input data-ans="2.9"></label><label>CPU DM（×IC ns）<input data-ans="5.274"></label><label>CPU 2 路（×IC ns）<input data-ans="5.31" data-tol="0.01"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>2 路的时钟 = 2.2 ns，命中时间也是一个时钟 = 2.2 ns。CPU 时间 = IC × (理想 CPI × 时钟 + 访存次数 × 缺失率 × 缺失代价 ns)。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) AMAT_DM = 2 + 0.014 × 70 = 2 + 0.98 = <b>2.98 ns</b></span><span class="l">　　AMAT_2way = 2.2 + 0.010 × 70 = 2.2 + 0.7 = <b>2.90 ns</b></span><span class="l">(b) CPU_DM = IC × (2.0 × 2 + 1.3 × 0.014 × 70) = IC × (4.0 + 1.274) = <b>5.274 × IC ns</b></span><span class="l">　　CPU_2way = IC × (2.0 × 2.2 + 1.3 × 0.010 × 70) = IC × (4.4 + 0.91) = <b>5.31 × IC ns</b></span></div>
+          <p>(c) <span class="ans">直接映射更好</span>。2 路的 AMAT 更低，但它把<b>时钟周期拉长了 10%</b>，而时钟影响的是每条指令的所有周期（理想 CPI 那 2 个周期每条都变慢了 0.4 ns），访存上省下的 0.364 ns 抵不过。教训：AMAT 只衡量访存，比较整体性能要算 CPU 时间。</p>
+          <p>如果把 2 路的缺失代价换算成整数周期（70/2.2 = 31.8 → 32 周期 = 70.4 ns），CPU 时间是 5.315 × IC，结论不变。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-3">
+      <div class="qhead"><span class="qid">T9.3</span><span class="qtopic">两级数据缓存</span><span class="qtag">多级 AMAT</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">两级数据缓存：L1 块 8 B、命中 1 周期、局部缺失率 5%；L2 块 32 B、命中 19 周期、局部缺失率 2%。主存与 L2 之间传一个 32 字节块要 50 周期。
+          <ol type="a"><li>L2 的 AMAT；</li><li>L1 的 AMAT；</li><li>理想 CPI 2.0，load/store 占 25%：每条指令平均停顿和总 CPI。</li></ol></div>
+        <div class="checks"><label>AMAT L2<input data-ans="20"></label><label>AMAT L1<input data-ans="2"></label><label>停顿/条<input data-ans="0.25"></label><label>CPI<input data-ans="2.25"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) AMAT_L2 = HT₂ + MR₂ × MP₂ = 19 + 0.02 × 50 = <b>20 周期</b></span><span class="l">(b) L1 的缺失代价就是 AMAT_L2</span><span class="l">　　AMAT_L1 = 1 + 0.05 × 20 = <b>2 周期</b></span><span class="l">(c) 只有 load/store 访问这两级数据缓存，每条指令 0.25 次</span><span class="l">　　停顿 = 0.25 × (AMAT_L1 − HT₁) = 0.25 × 0.05 × 20 = <b>0.25 周期</b></span><span class="l">　　CPI = 2.0 + 0.25 = <b>2.25</b></span></div>
+          <div class="trap"><b>注意</b>：理想 CPI 已经包含命中时间（全部命中的情况），停顿只算缺失那部分，所以用 AMAT − HT₁ = 1 而不是 AMAT = 2。如果写成 0.25 × 2 = 0.5、CPI = 2.5，就把命中时间重复算了。题目说的是数据缓存，指令取指不计入。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-4">
+      <div class="qhead"><span class="qid">T9.4</span><span class="qtopic">写直达 vs 写回逐步追踪</span><span class="qtag">写策略</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">缓存里有块 100–103 = A, B, C, D（主存相同）。依次执行：Store X → 101；Store Y → 102；Store Z → 101。
+          <ol type="a"><li>写直达：每步后缓存和主存的内容；</li><li>写回：每步后缓存和主存的内容；</li><li>写回每步后的脏位；</li><li>块被替换后主存最终内容；</li><li>写回相对写直达的两个优点；</li><li>写直达相对写回的一个优点。</li></ol></div>
+        <div class="checks"><label>写直达共写主存几次<input data-ans="3"></label><label>写回共写主存几次<input data-ans="1"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>步骤</th><th>写直达：缓存</th><th>写直达：主存</th><th>写回：缓存</th><th>写回：主存</th><th>脏位</th></tr></thead><tbody>
+            <tr><td>初始</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="num">0</td></tr>
+            <tr><td>Store X → 101</td><td class="mono">A <b>X</b> C D</td><td class="mono">A <b>X</b> C D</td><td class="mono">A <b>X</b> C D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>Store Y → 102</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>Store Z → 101</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>块被替换</td><td colspan="2">主存已是最新，直接丢弃：<b>A Z Y D</b></td><td colspan="3">脏位为 1，整块写回：主存变为 <b>A Z Y D</b></td></tr>
+          </tbody></table></div>
+          <p>(d) 两种策略最终主存都是 <span class="ans">A Z Y D</span>，但写直达写了 3 次主存，写回只在替换时写 1 次。</p>
+          <p>(e) 写回的优点：① 对同一块的多次写合并成一次写回，内存流量和总线带宽占用小（这里 3 次变 1 次，X 根本没写到主存）；② 写操作以缓存速度完成，不用每次等主存，性能更高、功耗更低。</p>
+          <p>(f) 写直达的优点：主存永远是最新的，一致性简单（例如 DMA 等 I/O 直接读主存不会读到旧值）；不需要脏位，替换块时也不用先写回，控制更简单。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-5">
+      <div class="qhead"><span class="qid">T9.5</span><span class="qtopic">三种组织的位数与存储开销</span><span class="qtag">地址划分</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">32 位地址，64 KB 缓存，块 64 字节。对直接映射、4 路组相联、全相联分别求：块数、组数、Tag/Index/Offset 位数、比较器个数、每块 1 个有效位加标签时的总存储位数；并说明哪种冲突缺失最少、硬件最简单、标签开销最大。</div>
+        <div class="checks"><label>DM Tag<input data-ans="16"></label><label>4 路 Tag<input data-ans="18"></label><label>FA Tag<input data-ans="26"></label><label>FA 比较器<input data-ans="1024"></label><label>DM 总存储位<input data-ans="17408"></label><label>FA 总存储位<input data-ans="27648"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th></th><th>直接映射</th><th>4 路组相联</th><th>全相联</th></tr></thead><tbody>
+            <tr><td>块数</td><td class="num">1024</td><td class="num">1024</td><td class="num">1024</td></tr>
+            <tr><td>组数</td><td class="num">1024</td><td class="num">256</td><td class="num">1</td></tr>
+            <tr><td>Offset / Index / Tag</td><td class="num">6 / 10 / 16</td><td class="num">6 / 8 / 18</td><td class="num">6 / 0 / 26</td></tr>
+            <tr><td>比较器</td><td class="num">1</td><td class="num">4</td><td class="num">1024</td></tr>
+            <tr><td>(Tag + 有效位) × 1024</td><td class="num">17 × 1024 = 17,408</td><td class="num">19 × 1024 = 19,456</td><td class="num">27 × 1024 = 27,648</td></tr>
+          </tbody></table></div>
+          <p>(d) ① 冲突缺失最少：<b>全相联</b>，块可以放任意位置，根本没有冲突缺失。② 硬件最简单：<b>直接映射</b>，1 个比较器，不需要替换逻辑。③ 标签开销最大：<b>全相联</b>，没有 Index 位，每个标签 26 位最长。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-6">
+      <div class="qhead"><span class="qid">T9.6</span><span class="qtopic">块大小与空间局部性</span><span class="qtag">块大小</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">访问字节地址 <code>8, 12, 16, 20, 24, 28, 32, 36</code>，缓存只有一个块，初始为空。分别用 8 B、16 B、32 B 的块求每次命中/缺失和缺失率；比较并解释；说明为什么固定容量下块过大反而会提高缺失率；块从 64 B 增大到 256 B（容量不变）的一个优点和两个缺点。</div>
+        <div class="checks"><label>8 B 缺失率 %<input data-ans="50"></label><label>16 B 缺失率 %<input data-ans="37.5"></label><label>32 B 缺失率 %<input data-ans="25"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>地址</th><th class="num">8</th><th class="num">12</th><th class="num">16</th><th class="num">20</th><th class="num">24</th><th class="num">28</th><th class="num">32</th><th class="num">36</th><th>缺失率</th></tr></thead><tbody>
+            <tr><td>8 B 块</td><td>M<br><small>8–15</small></td><td>H</td><td>M<br><small>16–23</small></td><td>H</td><td>M<br><small>24–31</small></td><td>H</td><td>M<br><small>32–39</small></td><td>H</td><td class="num"><b>4/8 = 50%</b></td></tr>
+            <tr><td>16 B 块</td><td>M<br><small>0–15</small></td><td>H</td><td>M<br><small>16–31</small></td><td>H</td><td>H</td><td>H</td><td>M<br><small>32–47</small></td><td>H</td><td class="num"><b>3/8 = 37.5%</b></td></tr>
+            <tr><td>32 B 块</td><td>M<br><small>0–31</small></td><td>H</td><td>H</td><td>H</td><td>H</td><td>H</td><td>M<br><small>32–63</small></td><td>H</td><td class="num"><b>2/8 = 25%</b></td></tr>
+          </tbody></table></div>
+          <p>(d) 块越大，一次缺失搬进来的相邻字节越多；顺序访问马上用到它们，于是缺失率从 50% 降到 25%。这就是利用空间局部性。</p>
+          <p>(e) 容量固定时，块越大块数越少。程序同时活跃的不同区域放不下，块之间互相踢出，冲突和容量缺失增加；而且大块里很多字节可能根本不会被用到，却占着空间（也削弱了时间局部性）。所以缺失率随块大小先降后升。</p>
+          <p>(f) 64 B → 256 B。优点：更好地利用空间局部性，减少强制缺失（顺带减少标签存储）。缺点：① 缺失代价增大，每次缺失要传 4 倍的数据；② 块数减为 1/4，冲突/容量缺失增加，还可能搬进大量用不到的数据，浪费带宽。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-7">
+      <div class="qhead"><span class="qid">T9.7</span><span class="qtopic">虚拟地址翻译</span><span class="qtag">页表</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">32 位虚拟地址、30 位物理地址、4 KB 页。页表：VPN 0x12345 → PPN 0x1A234（有效）；0x12346 → 0x0B567（有效）；0xABCDE → 0x1F890（有效）；0x22222 → —（无效）。
+          <ol type="a"><li>页内偏移、VPN、PPN 各几位？</li><li>翻译 0x12345678、0x12346ABC、0xABCDEFFF。</li><li>访问 0x22222000 会怎样？有效位起什么作用？</li><li>为什么偏移翻译后不变？</li><li>虚拟内存的两个优点。</li><li>页缺失 5 ms、TLB 缺失 50 ns，前者是后者的多少倍？</li></ol></div>
+        <div class="checks"><label>偏移位<input data-ans="12"></label><label>VPN 位<input data-ans="20"></label><label>PPN 位<input data-ans="18"></label><label>倍数<input data-ans="100000"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 偏移 = log₂4096 = <b>12</b>；VPN = 32 − 12 = <b>20</b>；PPN = 30 − 12 = <b>18</b></span><span class="l">(b) 0x12345678 → VPN 0x12345，偏移 0x678 → PPN 0x1A234 → <b>0x1A234678</b></span><span class="l">　　0x12346ABC → VPN 0x12346，偏移 0xABC → PPN 0x0B567 → <b>0x0B567ABC</b></span><span class="l">　　0xABCDEFFF → VPN 0xABCDE，偏移 0xFFF → PPN 0x1F890 → <b>0x1F890FFF</b></span><span class="l">(f) 5 ms / 50 ns = 5×10⁻³ / 5×10⁻⁸ = <b>100,000 倍</b></span></div>
+          <p>4 KB 页的偏移正好是 12 位 = 3 个十六进制位，所以直接把最后 3 位抄下来，前面换成 PPN 即可。</p>
+          <p>(c) VPN 0x22222 的有效位 = 0，页不在物理内存里，发生<b>页缺失（page fault）</b>：硬件触发异常，操作系统从磁盘把这一页调入某个物理页框，填写 PPN、把有效位置 1，然后重新执行这条访存指令。有效位标记"这个页表项的翻译是否可用"，防止使用无效的 PPN。</p>
+          <p>(d) 页和物理页框大小相同且按页对齐，翻译只决定"哪一页"，字节在页内的位置不变，所以低 12 位原样保留。</p>
+          <p>(e) 任选两个：能运行比物理内存还大的程序；每个进程有独立地址空间，相互隔离、受保护，又能有控制地共享；程序可以装到内存任意位置（重定位方便）；避免物理内存碎片问题。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="9" id="t9-8">
+      <div class="qhead"><span class="qid">T9.8</span><span class="qtopic">判断缺失类型</span><span class="qtag">3C</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">判断缺失类型并各给一个降低缺失率的方法：1) 第一次访问块 A 缺失；2) 块 B、C 映射到同一位置反复互相替换；3) 程序反复访问 2 MB 的工作集，缓存只有 64 KB。</div>
+        <div class="checks">
+          <label>情形 1<select data-ans="compulsory"><option value="">选择</option><option>compulsory</option><option>conflict</option><option>capacity</option></select></label>
+          <label>情形 2<select data-ans="conflict"><option value="">选择</option><option>compulsory</option><option>conflict</option><option>capacity</option></select></label>
+          <label>情形 3<select data-ans="capacity"><option value="">选择</option><option>compulsory</option><option>conflict</option><option>capacity</option></select></label>
+          <button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>情形</th><th>类型</th><th>降低方法</th></tr></thead><tbody>
+            <tr><td>1 首次访问 A</td><td><b>强制缺失</b></td><td>预取；适当增大块（一次带进相邻数据）</td></tr>
+            <tr><td>2 B、C 互踢</td><td><b>冲突缺失</b></td><td>提高相联度（如 2 路、4 路）；或加大缓存</td></tr>
+            <tr><td>3 2 MB 工作集 vs 64 KB</td><td><b>容量缺失</b></td><td>加大缓存或增加一级更大的缓存（L2/L3）；也可以改程序提高局部性（分块）</td></tr>
+          </tbody></table></div>
+        </div></details>
+      </div>
+    </article>
+    <div class="tuthead" id="tut10"><span class="no">TUTORIAL 10</span><h2>流水线时间、加速比与 DLX 指令</h2></div>
+    <p class="tutnote">对应 Lesson 10。任务流水：T = ΣTᵢ + (n − 1)·maxTᵢ；时钟流水：T = (k + n − 1)·T_clk；大量指令时加速比 = 单周期时间 / 流水时钟周期；完全平衡时上限 = 级数。</p>
+
+    <article class="q" data-l="10" id="t10-1">
+      <div class="qhead"><span class="qid">T10.1</span><span class="qtopic">m + n − 1 与最少任务数</span><span class="qtag">推导</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">(i) 任务分成 m 个各需 1 周期的子任务，用 m 级流水线完成 n 个任务，证明总周期数为 m + n − 1。<br>(ii) 顺序机器依次做 A、B、C 三步（各 1 周期）；流水机器有 A、B、C 三级。至少处理多少个工件，流水机器才能比顺序机器快 2.5 倍以上？</div>
+        <div class="checks"><label>最少工件数<input data-ans="10"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <p>(i) 第 1 个任务要走完 m 级，第 m 个周期结束时完成（填充流水线）。之后流水线已满，每个周期都有一个任务从最后一级出来，剩下 n − 1 个任务再用 n − 1 个周期。总计 <span class="ans">m + (n − 1) = m + n − 1</span> 个周期。</p>
+          <div class="calc"><span class="l">(ii) 顺序：3n 周期；流水：3 + n − 1 = n + 2 周期</span><span class="l">　　3n / (n + 2) ≥ 2.5 → 3n ≥ 2.5n + 5 → n ≥ 10</span><span class="l">　　n = 10：30 / 12 = 2.5 ✓；n = 9：27 / 11 ≈ 2.45 ✗</span></div>
+          <p>至少 <span class="ans">10 个</span>工件。n 越大加速比越接近 3（级数），但永远到不了 3，因为有 2 个周期的填充开销。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-2">
+      <div class="qhead"><span class="qid">T10.2</span><span class="qtopic">停顿与级数对加速比的影响</span><span class="qtag">CPI × 时钟</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">单级（非流水）处理器时钟 5 ns；5 级流水线时钟 1 ns。指令足够多，忽略填充排空。(a) 无停顿时的加速比；(b) 40% 的指令停顿 1 周期时的平均 CPI 和加速比；(c) 另有 4 级流水线时钟 1.1 ns、无停顿：两者每条指令执行时间，哪个更好？</div>
+        <div class="checks"><label>(a) 加速比<input data-ans="5"></label><label>(b) CPI<input data-ans="1.4"></label><label>(b) 加速比<input data-ans="3.571" data-tol="0.01"></label><label>(c) 4 级每条 ns<input data-ans="1.1"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 非流水每条 5 ns，流水每条 1 ns → 加速比 = <b>5</b></span><span class="l">(b) CPI = 1 + 0.4 × 1 = <b>1.4</b> → 每条 1.4 ns → 加速比 = 5 / 1.4 = <b>3.57</b></span><span class="l">(c) 5 级：1 × 1 ns = 1.0 ns；4 级：1 × 1.1 ns = 1.1 ns</span></div>
+          <p>(c) <span class="ans">5 级更好</span>，快 10%。两者 CPI 都是 1，执行时间只由时钟周期决定，5 级把工作切得更细，时钟更短。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-3">
+      <div class="qhead"><span class="qid">T10.3</span><span class="qtopic">改 ALU 延迟对加速比的影响</span><span class="qtag">瓶颈</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">各部件延迟：取指 200 ps，读寄存器 100，ALU 200，访存 200，写寄存器 100。单周期处理器的时钟由 LW（最长路径，五部件都用）决定；流水时钟由最慢一级决定，无停顿。(a) ALU 延迟减少 25%；(b) ALU 延迟增加 25%。分别求新 ALU 延迟、LW 单周期时间、流水时钟、加速比，并与原加速比比较。</div>
+        <div class="checks"><label>原加速比<input data-ans="4"></label><label>(a) 加速比<input data-ans="3.75"></label><label>(b) LW 时间 ps<input data-ans="850"></label><label>(b) 加速比<input data-ans="3.4"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th></th><th>ALU</th><th>LW 单周期</th><th>流水时钟</th><th>加速比</th></tr></thead><tbody>
+            <tr><td>原设计</td><td class="num">200</td><td class="num">800 ps</td><td class="num">200 ps</td><td class="num">4</td></tr>
+            <tr><td>(a) −25%</td><td class="num">150</td><td class="num">750 ps</td><td class="num">200 ps</td><td class="num"><b>3.75</b></td></tr>
+            <tr><td>(b) +25%</td><td class="num">250</td><td class="num">850 ps</td><td class="num">250 ps</td><td class="num"><b>3.4</b></td></tr>
+          </tbody></table></div>
+          <p>(a) ALU 不是瓶颈，缩短它对流水线没用（时钟仍是 200 ps，由取指和访存决定），但单周期机器变快了，所以相对加速比从 4 降到 3.75。(b) ALU 变成唯一的瓶颈，流水时钟升到 250 ps（流水线慢了 25%），单周期只慢了 6.25%，加速比降到 3.4。结论：流水线的性能由最慢一级决定，优化要针对瓶颈级，各级越均衡越好。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-4">
+      <div class="qhead"><span class="qid">T10.4</span><span class="qtopic">图像处理流水线</span><span class="qtag">ΣT + (n−1)·max</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">四级：读块 10 ns、滤波 20 ns、算特征 15 ns、写回 5 ns，每级一次只处理一个块。求 (a) 流水周期；(b) 第一个块完成时间；(c) 8 个块总时间；(d) 顺序处理 8 块的时间；(e) 加速比；(f) 为什么加速比小于级数？</div>
+        <div class="checks"><label>(a) 周期 ns<input data-ans="20"></label><label>(c) 8 块 ns<input data-ans="190"></label><label>(d) 顺序 ns<input data-ans="400"></label><label>(e) 加速比<input data-ans="2.105" data-tol="0.01"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 周期 = 最慢一级 = <b>20 ns</b></span><span class="l">(b) 第一块 = 10 + 20 + 15 + 5 = <b>50 ns</b></span><span class="l">(c) 50 + (8 − 1) × 20 = <b>190 ns</b></span><span class="l">(d) 8 × 50 = <b>400 ns</b></span><span class="l">(e) 400 / 190 ≈ <b>2.11</b></span></div>
+          <p>(f) ① 各级不均衡：最慢一级 20 ns，平均只有 12.5 ns，其他级大部分时间在等滤波级；② 填充流水线的开销（第一块要 50 ns），块数只有 8，这部分占比不小。即使 n 很大，加速比也只能趋近 50/20 = 2.5，而不是 4。</p>
+          <div class="trap"><b>另一种口径</b>：如果把它当作时钟流水线（每级都拉长到 20 ns），第一块 = 4 × 20 = 80 ns，8 块 = (4 + 7) × 20 = 220 ns，加速比 400/220 ≈ 1.82。题目没有提时钟和流水线寄存器，按讲义洗衣房公式答 190 ns；如果老师按处理器的口径讲，可以把两种都写出来并说明假设。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-5">
+      <div class="qhead"><span class="qid">T10.5</span><span class="qtopic">三级批处理流水线</span><span class="qtag">吞吐</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">X 读输入 10 s → Y 处理 25 s → Z 写输出 15 s。一级做完马上接下一个任务，各级可同时处理不同任务，无冲突，周期由最慢一级决定，忽略寄存器开销，一批 1000 个独立任务。（原题没有列出要求的量，下面算全套常考指标。）</div>
+        <div class="checks"><label>流水周期 s<input data-ans="25"></label><label>总时间 s<input data-ans="25025"></label><label>顺序时间 s<input data-ans="50000"></label><label>加速比<input data-ans="1.998" data-tol="0.005"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">流水周期 = max(10, 25, 15) = <b>25 s</b>，瓶颈是 Y</span><span class="l">单个任务延迟 = 10 + 25 + 15 = 50 s</span><span class="l">总时间 = 50 + 999 × 25 = <b>25,025 s</b>（约 6.95 小时）</span><span class="l">顺序 = 1000 × 50 = <b>50,000 s</b></span><span class="l">加速比 = 50,000 / 25,025 ≈ <b>2.0</b></span><span class="l">稳态吞吐 = 1 个 / 25 s = 144 个 / 小时</span></div>
+          <p>三级流水理想加速比是 3，这里只有 2，原因是 Y 太慢（25 s，而平均 16.7 s）。要提速就得把 Y 拆开或加速 Y，见 T10.6。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-6">
+      <div class="qhead"><span class="qid">T10.6</span><span class="qtopic">怎么分配优化预算</span><span class="qtag">平衡各级</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">四级：A 22 s、B 38 s、C 34 s、D 30 s，1000 个任务，理想流水，周期由最慢一级决定。工程师可以把各级时间总共减少 24 s（可以分给多级）。求 (i) 原周期和总时间；(ii) 怎么分配才能吞吐最大；(iii) 新周期和总时间；(iv) 吞吐提升百分比。（原题第 ii 问写成 20 s，下面两种都算。）</div>
+        <div class="checks"><label>原总时间 s<input data-ans="38086"></label><label>新周期 s（24 s 预算）<input data-ans="26"></label><label>新总时间 s<input data-ans="26074"></label><label>吞吐提升 %<input data-ans="46.15" data-tol="0.1"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>吞吐只看最慢一级。把预算全花在"削峰"上：从最高的一级开始往下削，直到几级一样高（"注水法"的反向）。削 A 没有任何用处。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(i) 周期 = 38 s；总时间 = 124 + 999 × 38 = <b>38,086 s</b></span><span class="l">(ii) 设目标周期为 L，需要的预算 = Σ max(0, Tᵢ − L)</span><span class="l">　　L = 26：(38 − 26) + (34 − 26) + (30 − 26) = 12 + 8 + 4 = 24 ✓</span><span class="l">　　→ B 减 12 s，C 减 8 s，D 减 4 s，A 不动：22 / 26 / 26 / 26</span><span class="l">(iii) 周期 = <b>26 s</b>；总时间 = 100 + 999 × 26 = <b>26,074 s</b></span><span class="l">(iv) 吞吐 1/38 → 1/26，提升 38/26 − 1 = <b>46.2%</b></span></div>
+          <p>为什么这样最优：吞吐 = 1/最慢级。如果只削 B，削到 34 以下 C 就成了新瓶颈；把 B、C、D 一起削到同一高度，24 s 预算换来的最大级时间最低。A 本来就比别人快，削它完全浪费。</p>
+          <div class="calc"><span class="l">若预算是 20 s：102 − 3L = 20 → L = 27.33 s</span><span class="l">　　B −10.67、C −6.67、D −2.67 → 22 / 27.33 / 27.33 / 27.33</span><span class="l">　　总时间 = 104 + 999 × 27.33 ≈ 27,410 s；吞吐提升 38/27.33 − 1 ≈ 39.0%</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-7">
+      <div class="qhead"><span class="qid">T10.7</span><span class="qtopic">延迟 vs 吞吐</span><span class="qtag">概念</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">5 级 DLX：IF 220、ID 180、EX 250、MEM 200、WB 150 ps。(a) 时钟周期；(b) 单条指令延迟；(c) 填满后的吞吐；(d) 有同学说"流水线单条延迟比单周期更长，所以流水线更慢"，对吗？(e) 各级完全平衡时的理论最大加速比。</div>
+        <div class="checks"><label>(a) 时钟 ps<input data-ans="250"></label><label>(b) 延迟 ps<input data-ans="1250"></label><label>(c) 吞吐（×10⁹/s）<input data-ans="4"></label><label>(e) 最大加速比<input data-ans="5"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 时钟 = max = <b>250 ps</b></span><span class="l">(b) 延迟 = 5 × 250 = <b>1250 ps</b>（单周期是 1000 ps）</span><span class="l">(c) 吞吐 = 1 / 250 ps = <b>4 × 10⁹ 条/秒</b></span><span class="l">(e) 总和 1000 ps，平衡后每级 200 ps → 1000 / 200 = <b>5</b></span></div>
+          <p>(d) <b>不对</b>。延迟描述的是一条指令从进到出要多久，流水线确实让它从 1000 ps 变成 1250 ps（每级都被拉长到 250 ps）。但程序有成千上万条指令，决定程序运行时间的是吞吐量：单周期每 1000 ps 完成 1 条（10⁹ 条/秒），流水线每 250 ps 完成 1 条（4 × 10⁹ 条/秒），大程序快 4 倍。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="10" id="t10-8">
+      <div class="qhead"><span class="qid">T10.8</span><span class="qtopic">DLX 格式、寻址与执行</span><span class="qtag">指令集</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">R1 = 100，R2 = 20，R3 = 5，R4 = 200；Mem[120] = 50，Mem[208] = 80。指令：<code>LW R5, 20(R1)</code>、<code>ADD R6, R2, R3</code>、<code>ADDI R7, R2, #10</code>、<code>BEQZ R3, LOOP</code>、<code>J EXIT</code>。(a) 每条的格式和寻址模式；(b) 各自独立执行的结果；(c) LW 的 Opcode、RS1、RD、立即数分别是什么；(d) 为什么 <code>ADD R8, R2, 20(R1)</code> 非法？改写。</div>
+        <div class="checks"><label>R5<input data-ans="50"></label><label>R6<input data-ans="25"></label><label>R7<input data-ans="30"></label><label>BEQZ 跳吗<select data-ans="不跳"><option value="">选择</option><option>跳</option><option>不跳</option></select></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>指令</th><th>格式</th><th>寻址模式</th><th>结果</th></tr></thead><tbody>
+            <tr><td class="mono">LW R5, 20(R1)</td><td>I 型</td><td>偏移（基址）寻址</td><td>EA = 100 + 20 = 120 → R5 ← Mem[120] = <b>50</b></td></tr>
+            <tr><td class="mono">ADD R6, R2, R3</td><td>R 型</td><td>寄存器寻址</td><td>R6 ← 20 + 5 = <b>25</b></td></tr>
+            <tr><td class="mono">ADDI R7, R2, #10</td><td>I 型</td><td>立即数寻址</td><td>R7 ← 20 + 10 = <b>30</b></td></tr>
+            <tr><td class="mono">BEQZ R3, LOOP</td><td>I 型</td><td>PC 相对（立即数作位移）；条件看寄存器</td><td>R3 = 5 ≠ 0 → <b>不跳转</b>，PC ← PC + 4</td></tr>
+            <tr><td class="mono">J EXIT</td><td>J 型</td><td>PC 相对（26 位偏移加到 PC）</td><td>无条件跳到 EXIT，不读写寄存器</td></tr>
+          </tbody></table></div>
+          <p>(c) Opcode = LW（取字）；RS1 = R1，基址寄存器；RD = R5，接收数据的目的寄存器（在 I 型编码里放在 Rt 字段）；立即数 = 20，地址偏移。</p>
+          <p>(d) DLX 是 load-store 架构，ALU 指令的操作数只能是寄存器（或立即数），不能直接用内存操作数。改写为：</p>
+          <div class="calc"><span class="l">LW  R9, 20(R1)　　; R9 ← Mem[120] = 50</span><span class="l">ADD R8, R2, R9　　; R8 ← 20 + 50 = 70</span></div>
+        </div></details>
+      </div>
+    </article>
+    <div class="tuthead" id="tut11"><span class="no">TUTORIAL 11</span><h2>五级 DLX 流水线填表</h2></div>
+    <p class="tutnote">对应 Lesson 11。IF：IR ← Mem[PC]，NPC ← PC + 4；ID：A、B、Imm、b；EX：ALUOut；MEM：LMD 或写存储器或更新 PC；WB：写 Rd/Rt。学习手册的"DLX 数据通路步进器"里有本 Tutorial 的预设，可以逐拍对照。</p>
+
+    <article class="q" data-l="11" id="t11-1">
+      <div class="qhead"><span class="qid">T11.1</span><span class="qtopic">ADD 的五级</span><span class="qtag">填表</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>ADD R7, R3, R4</code>，R3 = 25，R4 = 17，PC = 200。对每一级写出所做操作、关键输出、是否访问数据存储器。</div>
+        <div class="checks"><label>NPC<input data-ans="204"></label><label>ALUOut<input data-ans="42"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>级</th><th>操作</th><th>关键输出</th><th>数据存储器</th></tr></thead><tbody>
+            <tr><td><b>IF</b></td><td>IR ← Mem[200]；NPC ← PC + 4</td><td>IR = ADD R7,R3,R4；NPC = <b>204</b></td><td>否（读的是指令存储器）</td></tr>
+            <tr><td><b>ID</b></td><td>译码；A ← Regs[R3]，B ← Regs[R4]；目的号 b ← Rd = R7</td><td>A = 25，B = 17，b = R7</td><td>否</td></tr>
+            <tr><td><b>EX</b></td><td>ALUOut ← A + B（MUX 选 B）</td><td>ALUOut = <b>42</b></td><td>否</td></tr>
+            <tr><td><b>MEM</b></td><td>不访存，ALUOut 直接传到 M/W</td><td>ALUOut = 42</td><td>否</td></tr>
+            <tr><td><b>WB</b></td><td>Regs[R7] ← ALUOut</td><td>R7 = 42</td><td>否</td></tr>
+          </tbody></table></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-2">
+      <div class="qhead"><span class="qid">T11.2</span><span class="qtopic">负立即数与符号扩展</span><span class="qtag">补码</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>ADDI R5, R2, #-12</code>，R2 = 40。求 −12 的 16 位补码、32 位符号扩展值、ID 后的 A、符号扩展后的 Imm、EX 后的 ALUOut、WB 写入 R5 的值。</div>
+        <div class="checks"><label>16 位补码（hex）<input data-ans="FFF4" data-type="hex"></label><label>32 位（hex）<input data-ans="FFFFFFF4" data-type="hex"></label><label>ALUOut<input data-ans="28"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">+12 = 0000 0000 0000 1100</span><span class="l">取反 = 1111 1111 1111 0011</span><span class="l">加 1 = <b>1111 1111 1111 0100</b> = 0xFFF4（16 位 −12）</span><span class="l">符号扩展：符号位为 1，高 16 位补 1</span><span class="l">　= 1111 1111 1111 1111 1111 1111 1111 0100 = <b>0xFFFFFFF4</b></span><span class="l">A = Regs[R2] = <b>40</b>；Imm = <b>−12</b></span><span class="l">ALUOut = 40 + (−12) = <b>28</b>（二进制相加后丢掉第 33 位进位）</span><span class="l">WB：R5 ← <b>28</b></span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-3">
+      <div class="qhead"><span class="qid">T11.3</span><span class="qtopic">LW 与 SW 的有效地址</span><span class="qtag">load/store</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">R2 = 500，R3 = 88，Mem[520] = 123。对 <code>LW R1, 20(R2)</code> 和 <code>SW 20(R2), R3</code> 分别写出有效地址、ALUOut、读还是写存储器、LMD、最终存入存储器或寄存器的值。</div>
+        <div class="checks"><label>有效地址<input data-ans="520"></label><label>LW 的 LMD<input data-ans="123"></label><label>SW 后 Mem[520]<input data-ans="88"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th></th><th>LW R1, 20(R2)</th><th>SW 20(R2), R3</th></tr></thead><tbody>
+            <tr><td>有效地址</td><td class="num">500 + 20 = 520</td><td class="num">500 + 20 = 520</td></tr>
+            <tr><td>ALUOut</td><td class="num">520</td><td class="num">520</td></tr>
+            <tr><td>存储器</td><td>读</td><td>写</td></tr>
+            <tr><td>LMD</td><td class="num">123</td><td>无（store 不用 LMD）</td></tr>
+            <tr><td>最终结果</td><td>R1 ← <b>123</b>（WB）</td><td>Mem[520] ← R3 = <b>88</b>（MEM），不写回寄存器</td></tr>
+          </tbody></table></div>
+          <p>SW 的 B 来自 R3（要存的数据），经 D/A、A/M 一路传到 MEM 级。如果两条按顺序执行，SW 会把 123 覆盖成 88。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-4">
+      <div class="qhead"><span class="qid">T11.4</span><span class="qtopic">LW 的四个流水线寄存器</span><span class="qtag">级间缓冲</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>LW R8, 40(R4)</code>，R4 = 1000，Mem[1040] = 250。写出每个级间缓冲 F/D、D/A、A/M、M/W 在对应级结束后存了什么。</div>
+        <div class="checks"><label>A/M 的 ALUOut<input data-ans="1040"></label><label>M/W 的 LMD<input data-ans="250"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>缓冲</th><th>存的内容</th></tr></thead><tbody>
+            <tr><td class="mono"><b>F/D</b></td><td>IR = <code>LW R8, 40(R4)</code>；NPC = PC + 4</td></tr>
+            <tr><td class="mono"><b>D/A</b></td><td>A = Regs[R4] = 1000；Imm = 40（符号扩展后）；b = R8（目的寄存器号）；OP = LW；B = R8 的旧值（读了但不用）；NPC</td></tr>
+            <tr><td class="mono"><b>A/M</b></td><td>ALUOut = 1000 + 40 = <b>1040</b>（有效地址）；b = R8；OP = LW</td></tr>
+            <tr><td class="mono"><b>M/W</b></td><td>LMD = Mem[1040] = <b>250</b>；b = R8；OP = LW（ALUOut 也一并传下）</td></tr>
+          </tbody></table></div>
+          <p>WB 级：WB MUX 选 LMD，R8 ← 250。讲义的缓冲清单里 D/A 还列了 Cond 和 NPC，A/M 有 NPC、cond，这些对 LW 没有意义，写上也不扣分。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-5">
+      <div class="qhead"><span class="qid">T11.5</span><span class="qtopic">理想流水时序图</span><span class="qtag">时序图</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">指令 I1–I5：<code>LW R1,0(R2)</code>、<code>ADD R3,R4,R5</code>、<code>ADDI R6,R7,#10</code>、<code>SW 20(R8),R9</code>、<code>BEQZ R10,LOOP</code>。理想流水、无冒险，画出每个周期每条指令所在的级。</div>
+        <div class="checks"><label>总周期数<input data-ans="9"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>周期</th><th>I1 LW</th><th>I2 ADD</th><th>I3 ADDI</th><th>I4 SW</th><th>I5 BEQZ</th></tr></thead><tbody>
+            <tr><td class="num">1</td><td>IF</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="num">2</td><td>ID</td><td>IF</td><td></td><td></td><td></td></tr>
+            <tr><td class="num">3</td><td>EX</td><td>ID</td><td>IF</td><td></td><td></td></tr>
+            <tr><td class="num">4</td><td>MEM</td><td>EX</td><td>ID</td><td>IF</td><td></td></tr>
+            <tr><td class="num">5</td><td>WB</td><td>MEM</td><td>EX</td><td>ID</td><td>IF</td></tr>
+            <tr><td class="num">6</td><td></td><td>WB</td><td>MEM</td><td>EX</td><td>ID</td></tr>
+            <tr><td class="num">7</td><td></td><td></td><td>WB</td><td>MEM</td><td>EX</td></tr>
+            <tr><td class="num">8</td><td></td><td></td><td></td><td>WB</td><td>MEM</td></tr>
+            <tr><td class="num">9</td><td></td><td></td><td></td><td></td><td>WB</td></tr>
+          </tbody></table></div>
+          <p>共 5 + 5 − 1 = <span class="ans">9 个周期</span>。第 5 周期五级全满。SW 和 BEQZ 的 WB 级什么也不写，但仍占一个周期（固定五级结构）。这五条指令之间没有寄存器依赖，所以理想流水成立。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-6">
+      <div class="qhead"><span class="qid">T11.6</span><span class="qtopic">不均衡的五级</span><span class="qtag">加速比</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">IF 250、ID 350、EX 150、MEM 300、WB 200 ns。非流水一次执行一条，流水用同样五级，忽略冒险和寄存器开销。求 (a) 非流水平均每条时间；(b) 流水平均每条时间；(c) 加速比；(d) 各级完全平衡时的理论最大加速比。</div>
+        <div class="checks"><label>(a) ns<input data-ans="1250"></label><label>(b) ns<input data-ans="350"></label><label>(c) 加速比<input data-ans="3.571" data-tol="0.01"></label><label>(d)<input data-ans="5"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 250 + 350 + 150 + 300 + 200 = <b>1250 ns</b></span><span class="l">(b) 稳态每个周期完成一条，周期 = 最慢级 = <b>350 ns</b></span><span class="l">(c) 1250 / 350 ≈ <b>3.57</b></span><span class="l">(d) 平衡后每级 250 ns → 1250 / 250 = <b>5</b>（= 级数）</span></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-7">
+      <div class="qhead"><span class="qid">T11.7</span><span class="qtopic">又一个 LW 的缓冲内容</span><span class="qtag">级间缓冲</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>LW R1, 20(R2)</code>，R2 = 100，Mem[120] = 55。写出每个流水线寄存器在该周期结束时的内容。</div>
+        <div class="checks"><label>D/A 的 A<input data-ans="100"></label><label>A/M 的 ALUOut<input data-ans="120"></label><label>M/W 的 LMD<input data-ans="55"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>寄存器</th><th>内容</th></tr></thead><tbody>
+            <tr><td class="mono"><b>F/D</b></td><td>IR = LW R1, 20(R2)；NPC = PC + 4</td></tr>
+            <tr><td class="mono"><b>D/A</b></td><td>A = 100；Imm = 20；b = R1；OP = LW（B = R1 旧值，不用）</td></tr>
+            <tr><td class="mono"><b>A/M</b></td><td>ALUOut = 120；b = R1；OP = LW</td></tr>
+            <tr><td class="mono"><b>M/W</b></td><td>LMD = 55；b = R1；OP = LW</td></tr>
+          </tbody></table></div>
+          <p>WB：R1 ← 55。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="11" id="t11-8">
+      <div class="qhead"><span class="qid">T11.8</span><span class="qtopic">CPI × 时钟</span><span class="qtag">加速比</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">非流水：CPI 4.6，时钟 0.8 ns。流水：CPI 1.2，时钟 1.0 ns。求两者平均每条时间和加速比。</div>
+        <div class="checks"><label>非流水 ns<input data-ans="3.68"></label><label>流水 ns<input data-ans="1.2"></label><label>加速比<input data-ans="3.067" data-tol="0.01"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">非流水 = 4.6 × 0.8 = <b>3.68 ns</b></span><span class="l">流水 = 1.2 × 1.0 = <b>1.2 ns</b></span><span class="l">加速比 = 3.68 / 1.2 ≈ <b>3.07</b></span></div>
+          <p>流水线的时钟反而更长（1.0 vs 0.8 ns，流水线寄存器和时钟偏移带来的开销），但 CPI 从 4.6 降到 1.2，整体仍快 3 倍。</p>
+        </div></details>
+      </div>
+    </article>
+    <div class="tuthead" id="tut12"><span class="no">TUTORIAL 12</span><h2>流水线冒险与分支代价</h2></div>
+    <p class="tutnote">对应 Lesson 12。CPI = 1 + 平均停顿；分支附加 CPI = 分支频率 × 平均分支代价；转发后 ALU→ALU 无停顿，load-use 仍停 1 拍；讲义口径：EX 判定分支代价 3，ID 判定代价 1。</p>
+
+    <article class="q" data-l="12" id="t12-1">
+      <div class="qhead"><span class="qid">T12.1</span><span class="qtopic">R4000 三种分支方案</span><span class="qtag">分支 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">R4000 式流水线，代价表（周期）：冲刷流水线 2 / 3 / 3；预测跳转 2 / 3 / 2；预测不跳转 2 / 0 / 3（依次为无条件分支、条件不跳、条件跳）。频率：无条件 4%，条件不跳 6%，条件跳 10%。求每种方案由分支带来的附加 CPI。</div>
+        <div class="checks"><label>冲刷<input data-ans="0.56"></label><label>预测跳转<input data-ans="0.46"></label><label>预测不跳转<input data-ans="0.38"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">冲刷：0.04×2 + 0.06×3 + 0.10×3 = 0.08 + 0.18 + 0.30 = <b>0.56</b></span><span class="l">预测跳转：0.04×2 + 0.06×3 + 0.10×2 = 0.08 + 0.18 + 0.20 = <b>0.46</b></span><span class="l">预测不跳转：0.04×2 + 0.06×0 + 0.10×3 = 0.08 + 0 + 0.30 = <b>0.38</b></span></div>
+          <p>附加 CPI = Σ（每类分支频率 × 该类代价）。预测不跳转最好：不跳的 6% 完全没有代价。如果理想 CPI = 1，三者的 CPI 分别是 1.56、1.46、1.38。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-2">
+      <div class="qhead"><span class="qid">T12.2</span><span class="qtopic">PowerPC 601 六级流水</span><span class="qtag">分支 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">六级：Fetch → Dispatch → Decode → Execute → Cache → Write。分支/跳转在 Fetch 识别；跳转和条件分支的目标在 Decode 结束时可用；条件分支结果在 Execute 决定。条件分支占 20%，跳转/调用占 5%，条件分支 60% 跳转。(a) CPU 停到分支结果已知时的 CPI；(b) 给无条件分支加两个延迟槽，60% 的槽能填有用指令，条件分支用"预测不跳转"，新 CPI？</div>
+        <div class="checks"><label>(a) CPI<input data-ans="1.7"></label><label>(b) CPI<input data-ans="1.4"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>某个信息在第 k 级结束时可用，下一条正确指令最早在第 k + 1 个周期取指，代价 = k − 1。Decode 是第 3 级，Execute 是第 4 级。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">跳转：目标在 Decode（第 3 级）结束可用 → 第 4 周期取目标 → 代价 <b>2</b></span><span class="l">条件分支：结果在 Execute（第 4 级）结束 → 第 5 周期取指 → 代价 <b>3</b></span><span class="l">(a) CPI = 1 + 0.05 × 2 + 0.20 × 3 = 1 + 0.1 + 0.6 = <b>1.7</b></span></div>
+          <div class="calc"><span class="l">(b) 跳转：2 个延迟槽，每个槽 60% 有用 → 平均浪费 2 × 0.4 = 0.8 周期</span><span class="l">　　条件分支（预测不跳转）：不跳 0 代价；跳（60%）代价 3 → 平均 1.8</span><span class="l">　　CPI = 1 + 0.05 × 0.8 + 0.20 × 1.8 = 1 + 0.04 + 0.36 = <b>1.40</b></span></div>
+          <div class="trap"><b>题意说明</b>："预测不跳转"那句放在全题末尾。按 (a) 的字面意思（停到结果已知），条件分支不论跳不跳都等 3 拍，得 1.7；(b) 才引入预测不跳转。如果你的老师把预测不跳转也用于 (a)：1 + 0.05×2 + 0.2×0.6×3 = 1.46。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-3">
+      <div class="qhead"><span class="qid">T12.3</span><span class="qtopic">填延迟槽</span><span class="qtag">代码调度</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">延迟分支：分支后面紧跟的一条总会执行。R3 初值 8。重排下面的循环以利用延迟槽（可以稍作修改以保证正确）：
+          <div class="calc" style="margin-top:6px"><span class="l">Loop: LW   R2, 100(R3)</span><span class="l">　　　SW   200(R3), R2</span><span class="l">　　　SUBI R3, R3, #4</span><span class="l">　　　BNEZ R3, Loop</span><span class="l">　　　NOP　　　　　　　; 延迟槽</span></div></div>
+        <div class="checks"><label>槽里 SW 的新偏移<input data-ans="204"></label><label>每轮指令数<input data-ans="4"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="hint"><summary>提示</summary><div><p>SUBI 不能挪进槽，因为 BNEZ 要用它的结果。看看 SW 能不能挪到分支后面，挪过去之后 R3 已经被减了 4。</p></div></details>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">Loop: LW   R2, 100(R3)</span><span class="l">　　　SUBI R3, R3, #4</span><span class="l">　　　BNEZ R3, Loop</span><span class="l">　　　<b>SW   204(R3), R2</b>　; 延迟槽（from before，偏移 200 → 204）</span></div>
+          <p>原循环每轮把 Mem[R3+100] 复制到 Mem[R3+200]。SW 被挪到 SUBI 之后执行，此时 R3 已经少了 4，所以偏移要加 4 才能写到原来的地址：(R3 − 4) + 204 = R3 + 200。</p>
+          <div class="tablewrap"><table><thead><tr><th>轮</th><th>LW 读</th><th>R3 变为</th><th>BNEZ</th><th>槽里 SW 写</th></tr></thead><tbody>
+            <tr><td class="num">1</td><td class="num">Mem[108]</td><td class="num">4</td><td>跳回 Loop</td><td class="num">Mem[4 + 204] = Mem[208] ✓</td></tr>
+            <tr><td class="num">2</td><td class="num">Mem[104]</td><td class="num">0</td><td>不跳</td><td class="num">Mem[0 + 204] = Mem[204] ✓</td></tr>
+          </tbody></table></div>
+          <p>和原代码效果相同，每轮从 5 条（含 NOP）减到 <span class="ans">4 条</span>，延迟槽做了有用的工作。SW 不影响分支条件，所以 from-before 安全。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-4">
+      <div class="qhead"><span class="qid">T12.4</span><span class="qtopic">单端口存储器的结构冒险</span><span class="qtag">结构冒险</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">取指和取数共用一个单端口存储器，40% 的指令是 load/store，理想 CPI = 1，每条 load/store 造成 1 周期结构停顿。求平均停顿、有效 CPI、相对 CPI = 5 的非流水处理器的加速比。</div>
+        <div class="checks"><label>停顿/条<input data-ans="0.4"></label><label>CPI<input data-ans="1.4"></label><label>加速比<input data-ans="3.571" data-tol="0.01"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">停顿 = 0.4 × 1 = <b>0.4</b></span><span class="l">CPI = 1 + 0.4 = <b>1.4</b></span><span class="l">加速比 = 5 / 1.4 ≈ <b>3.57</b>（假设时钟相同）</span></div>
+          <p>改用分离的指令/数据存储器（或双端口存储器）就能消除这 0.4 的停顿，加速比回到 5。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-5">
+      <div class="qhead"><span class="qid">T12.5</span><span class="qtopic">判断冒险类型</span><span class="qtag">RAW/WAR/WAW</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">判断每对指令的冒险类型，并说明在基本 DLX 流水线里会不会发生：
+          <ol><li><code>ADD R1,R2,R3</code> / <code>SUB R4,R1,R5</code></li><li><code>ADD R1,R2,R3</code> / <code>LW R2,0(R5)</code></li><li><code>LW R1,0(R2)</code> / <code>ADD R1,R3,R4</code></li><li><code>ADD R1,R2,R3</code> / <code>OR R4,R5,R6</code></li></ol></div>
+        <div class="checks">
+          <label>1<select data-ans="RAW"><option value="">选择</option><option>RAW</option><option>WAR</option><option>WAW</option><option>None</option></select></label>
+          <label>2<select data-ans="WAR"><option value="">选择</option><option>RAW</option><option>WAR</option><option>WAW</option><option>None</option></select></label>
+          <label>3<select data-ans="WAW"><option value="">选择</option><option>RAW</option><option>WAR</option><option>WAW</option><option>None</option></select></label>
+          <label>4<select data-ans="None"><option value="">选择</option><option>RAW</option><option>WAR</option><option>WAW</option><option>None</option></select></label>
+          <button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="tablewrap"><table><thead><tr><th>#</th><th>类型</th><th>原因</th><th>DLX 会发生吗</th></tr></thead><tbody>
+            <tr><td>1</td><td><b>RAW</b>（R1）</td><td>ADD 写 R1，SUB 读 R1</td><td class="okc">会；靠转发解决，0 停顿</td></tr>
+            <tr><td>2</td><td><b>WAR</b>（R2）</td><td>ADD 读 R2，LW 写 R2</td><td class="badc">不会：读在 ID，写在 WB，读永远先发生</td></tr>
+            <tr><td>3</td><td><b>WAW</b>（R1）</td><td>两条都写 R1</td><td class="badc">不会：都在 WB 写，按程序顺序写回</td></tr>
+            <tr><td>4</td><td><b>None</b></td><td>寄存器没有交集</td><td>—</td></tr>
+          </tbody></table></div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-6">
+      <div class="qhead"><span class="qid">T12.6</span><span class="qtopic">依赖链与转发</span><span class="qtag">时序图</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>LW R1,0(R2)</code>、<code>ADD R3,R1,R4</code>、<code>SUB R5,R3,R6</code>、<code>AND R7,R5,R8</code>，DLX 有转发。(a) 找出所有 RAW；(b) 哪些能被转发消除；(c) 需要几个停顿周期；(d) 画时序图。</div>
+        <div class="checks"><label>RAW 个数<input data-ans="3"></label><label>停顿周期<input data-ans="1"></label><label>总周期<input data-ans="9"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <p>(a) 三个 RAW：LW → ADD（R1）、ADD → SUB（R3）、SUB → AND（R5）。</p>
+          <p>(b) ADD → SUB、SUB → AND 是 ALU 到 ALU，从 EX/MEM 转发即可，无停顿。LW → ADD 是 load-use：数据在 LW 的 MEM 结束才出来，ADD 的 EX 已经在同一周期开始，转发来不及。</p>
+          <p>(c) 需要 <span class="ans">1 个</span>停顿周期，硬件互锁在 ADD 的 ID 之后插入一个气泡。</p>
+          <div class="pipewrap"><table class="pipe"><thead><tr><th class="ins">指令</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead><tbody>
+            <tr><td class="ins">LW R1,0(R2)</td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="ins">ADD R3,R1,R4</td><td></td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-stall">stall</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td><td></td></tr>
+            <tr><td class="ins">SUB R5,R3,R6</td><td></td><td></td><td class="c st-IF">IF</td><td class="c st-stall">stall</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td></tr>
+            <tr><td class="ins">AND R7,R5,R8</td><td></td><td></td><td></td><td class="c st-stall">stall</td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td></tr>
+          </tbody></table></div>
+          <p>LW 的结果在第 4 周期末出来，第 5 周期转发给 ADD 的 EX（MEM/WB → EX）；ADD 的结果第 5 周期末出来，第 6 周期转发给 SUB；SUB 第 6 周期末出来，第 7 周期转发给 AND。共 4 + 4 + 1 = 9 个周期。</p>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-7">
+      <div class="qhead"><span class="qid">T12.7</span><span class="qtopic">数据冒险 + 控制冒险</span><span class="qtag">时序图</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext"><code>LW R1,0(R2)</code>、<code>ADD R3,R1,R4</code>、<code>BEQZ R3,Target</code>、<code>OR R5,R6,R7</code>。有转发；分支在 EX 级判定；没有分支预测。(a) 画时序图；(b) 所有数据冒险；(c) 所有控制冒险；(d) 总停顿周期。</div>
+        <div class="checks"><label>数据停顿<input data-ans="1"></label><label>控制停顿<input data-ans="3"></label><label>总停顿<input data-ans="4"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <p>(b) 数据冒险：LW → ADD（R1，load-use，停 1 拍）；ADD → BEQZ（R3，分支在 EX 比较，ADD 的结果从 EX/MEM 转发过来，0 停顿）。</p>
+          <p>(c) 控制冒险：BEQZ 在 EX 才知道跳不跳，没有预测就只能等。按讲义口径（原始 DLX，EX 判定）分支代价 3 周期，下一条（OR 或 Target 处的指令）要等 BEQZ 的结果出来后才取指。</p>
+          <div class="pipewrap"><table class="pipe"><thead><tr><th class="ins">指令</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead><tbody>
+            <tr><td class="ins">LW R1,0(R2)</td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="ins">ADD R3,R1,R4</td><td></td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-stall">stall</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="ins">BEQZ R3,Target</td><td></td><td></td><td class="c st-IF">IF</td><td class="c st-stall">stall</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="ins">OR R5,R6,R7</td><td></td><td></td><td></td><td class="c st-stall">stall</td><td class="c st-bub">bubble</td><td class="c st-bub">bubble</td><td class="c st-bub">bubble</td><td class="c st-IF">IF</td><td class="c st-ID">ID</td><td class="c st-EX">EX</td><td class="c st-MEM">MEM</td><td class="c st-WB">WB</td></tr>
+          </tbody></table></div>
+          <p>(d) 理想 4 + 4 = 8 个周期，实际 12 个，<span class="ans">共 4 个停顿周期</span>：1 个 load-use + 3 个分支。</p>
+          <div class="trap"><b>2 还是 3</b>：严格按"EX 结束知道结果、下一拍就取指"，分支代价是 2，总停顿 3、共 11 周期。讲义把原始 DLX 的 EX 判定记为 3 周期代价（PC 在 MEM 级才更新），这里按讲义答 4。答题时写出你的假设。</div>
+        </div></details>
+      </div>
+    </article>
+
+    <article class="q" data-l="12" id="t12-8">
+      <div class="qhead"><span class="qid">T12.8</span><span class="qtopic">预测不跳转 vs 全停顿</span><span class="qtag">分支 CPI</span><label class="mk"><input type="checkbox" class="mkbox"> 已掌握</label></div>
+      <div class="qbody">
+        <div class="qtext">15% 是分支，其中 60% 跳转、40% 不跳。预测不跳转，猜错代价 3 周期，理想 CPI = 1。求 (a) 平均分支代价；(b) 分支附加 CPI；(c) 有效 CPI；(d) 和每个分支都停 3 拍的处理器比较。</div>
+        <div class="checks"><label>(a) 平均代价<input data-ans="1.8"></label><label>(b) 附加 CPI<input data-ans="0.27"></label><label>(c) CPI<input data-ans="1.27"></label><label>(d) 全停顿 CPI<input data-ans="1.45"></label><button class="btn primary chk">核对</button><span class="verdict"></span></div>
+        <details class="sol"><summary>完整解答</summary><div>
+          <div class="calc"><span class="l">(a) 只有实际跳转（猜错）才付代价：0.6 × 3 + 0.4 × 0 = <b>1.8 周期/分支</b></span><span class="l">(b) 0.15 × 1.8 = <b>0.27</b></span><span class="l">(c) CPI = 1 + 0.27 = <b>1.27</b></span><span class="l">(d) 全停顿：1 + 0.15 × 3 = <b>1.45</b>；1.45 / 1.27 ≈ 1.14</span></div>
+          <p>预测不跳转比全停顿快约 <span class="ans">14%</span>：40% 不跳的分支省掉了全部代价。不过分支多数会跳（60%），所以预测不跳转猜错的比例较高，这也是硬件转向动态分支预测的原因。</p>
+        </div></details>
+      </div>
+    </article>
+  </section>
+  <section id="pane-ex" hidden>
+    <p class="tutnote">讲义里每个 Exercise 后面的答案页在学生版中是空白的，下面是完整解答。点题目展开。</p>
+    <div class="filters" id="exFilters">
+      <span class="lbl">筛选</span>
+      <button class="fchip on" data-l="all">全部</button>
+      <button class="fchip" data-l="7">Lesson 7</button>
+      <button class="fchip" data-l="8">Lesson 8</button>
+      <button class="fchip" data-l="9">Lesson 9</button>
+      <button class="fchip" data-l="10">Lesson 10</button>
+      <button class="fchip" data-l="11">Lesson 11</button>
+      <button class="fchip" data-l="12">Lesson 12</button>
+    </div>
+
+    <div class="exgroup" data-l="7">
+      <h3><span class="no">LESSON 7</span>体系结构基础与存储层次</h3>
+      <details class="ex"><summary><span class="eid">Ex 7.1</span><span>理想 CPI 1.2，算术 : load/store : 控制 = 4 : 3 : 1，I-缺失 2%，D-缺失 15%，代价都是 40。求每条指令总缺失代价、实际 CPI、停顿占比。</span></summary><div>
+        <div class="calc"><span class="l">load/store 比例 = 3 / (4 + 3 + 1) = 37.5%</span><span class="l">指令停顿 = 0.02 × 40 = 0.8；数据停顿 = 0.375 × 0.15 × 40 = 2.25</span><span class="l">1) 总缺失代价 = <b>3.05 周期/条</b></span><span class="l">2) 实际 CPI = 1.2 + 3.05 = <b>4.25</b></span><span class="l">3) 停顿占比 = 3.05 / 4.25 = <b>71.8%</b></span></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 7.2</span><span>i 从 0 到 4，a = [4, −2, 7, −5, 3]；a[i] &gt; 0 则 sum += a[i]，否则 sum −= a[i]。缓存 1 ms、主存 10 ms，首次缺失之后全命中。求 sum、访存次数、有无缓存时间、提升倍数。</span></summary><div>
+        <div class="calc"><span class="l">sum = 4 + 2 + 7 + 5 + 3 = <b>21</b>（负数被减掉，相当于加绝对值）</span><span class="l">每轮访问 a[i] 两次：if 判断一次，加或减一次 → 5 × 2 = <b>10 次</b></span><span class="l">无缓存 = 10 × 10 = <b>100 ms</b></span><span class="l">有缓存 = 10（搬块）+ 10 × 1 = <b>20 ms</b></span><span class="l">提升 = 100 / 20 = <b>5 倍</b></span></div>
+        <p>讲义明确说"每次引用 a[i] 都算一次访存"，所以 if 里那次也要算。若只数 5 次：50 ms vs 15 ms，3.33 倍。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 7.3</span><span>理想 CPI 1.5，IC = 2×10⁶，load/store 30%，缺失率 4%，代价 20。求访存次数、每条停顿、总停顿、实际 CPI、总周期。</span></summary><div>
+        <div class="calc"><span class="l">1) 访存/条 = 1 + 0.3 = <b>1.3</b></span><span class="l">2) 停顿/条 = 1.3 × 0.04 × 20 = <b>1.04</b></span><span class="l">3) 总停顿 = 1.04 × 2×10⁶ = <b>2.08×10⁶ 周期</b></span><span class="l">4) 实际 CPI = 1.5 + 1.04 = <b>2.54</b></span><span class="l">5) 总周期 = 2.54 × 2×10⁶ = <b>5.08×10⁶</b></span></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 7.4</span><span>理想 CPI 1.5；50% 算术、30% load/store、20% 分支；I-缺失 1%、代价 30；D-缺失 4%、代价 50。</span></summary><div>
+        <div class="calc"><span class="l">指令停顿 = 0.01 × 30 = <b>0.3</b></span><span class="l">数据停顿 = 0.3 × 0.04 × 50 = <b>0.6</b></span><span class="l">总停顿 = <b>0.9</b>；实际 CPI = <b>2.4</b>；停顿占比 = 0.9 / 2.4 = <b>37.5%</b></span></div>
+      </div></details>
+    </div>
+
+    <div class="exgroup" data-l="8">
+      <h3><span class="no">LESSON 8</span>缓存映射 I</h3>
+      <details class="ex"><summary><span class="eid">Ex 8.1</span><span>全相联，主存 256 B，4 行，块 4 B，LRU。序列 08, 124, 77, 45, 09, 126, 44, 211, 08, 212, 77, 241。</span></summary><div>
+        <p>1) 地址 8 位；Offset 2 位；Tag 6 位（全相联无 Index）。</p>
+        <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存（括号内为 TSLR）</th></tr></thead><tbody><tr><td>1</td><td>8</td><td>000010 00</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(0)</td></tr><tr><td>2</td><td>124</td><td>011111 00</td><td>124–127</td><td>–</td><td>011111</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(1), 124–127(0)</td></tr><tr><td>3</td><td>77</td><td>010011 01</td><td>76–79</td><td>–</td><td>010011</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(2), 124–127(1), 76–79(0)</td></tr><tr><td>4</td><td>45</td><td>001011 01</td><td>44–47</td><td>–</td><td>001011</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(3), 124–127(2), 76–79(1), 44–47(0)</td></tr><tr><td>5</td><td>9</td><td>000010 01</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(0), 124–127(3), 76–79(2), 44–47(1)</td></tr><tr><td>6</td><td>126</td><td>011111 10</td><td>124–127</td><td>–</td><td>011111</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(1), 124–127(0), 76–79(3), 44–47(2)</td></tr><tr><td>7</td><td>44</td><td>001011 00</td><td>44–47</td><td>–</td><td>001011</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(2), 124–127(1), 76–79(4), 44–47(0)</td></tr><tr><td>8</td><td>211</td><td>110100 11</td><td>208–211</td><td>–</td><td>110100</td><td><span class="res miss">MISS</span> compulsory</td><td>76–79</td><td>8–11(3), 124–127(2), 208–211(0), 44–47(1)</td></tr><tr><td>9</td><td>8</td><td>000010 00</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(0), 124–127(3), 208–211(1), 44–47(2)</td></tr><tr><td>10</td><td>212</td><td>110101 00</td><td>212–215</td><td>–</td><td>110101</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>8–11(1), 212–215(0), 208–211(2), 44–47(3)</td></tr><tr><td>11</td><td>77</td><td>010011 01</td><td>76–79</td><td>–</td><td>010011</td><td><span class="res miss">MISS</span> capacity</td><td>44–47</td><td>8–11(2), 212–215(1), 208–211(3), 76–79(0)</td></tr><tr><td>12</td><td>241</td><td>111100 01</td><td>240–243</td><td>–</td><td>111100</td><td><span class="res miss">MISS</span> compulsory</td><td>208–211</td><td>8–11(3), 212–215(2), 240–243(0), 76–79(1)</td></tr></tbody></table></div>
+        <p>4) 命中 <b>4</b>（09、126、44、08），缺失 <b>8</b>（强制 7、容量 1：第二次访问 77），命中率 4/12 = <b>33.3%</b>。注意 09 和 08 与 08 同块（8–11），126 与 124 同块，44 与 45 同块，这是空间局部性带来的命中。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 8.2</span><span>同一序列，直接映射，4 行。</span></summary><div>
+        <p>1) 地址 8 位；Offset 2；Index 2；Tag 4。行号 = 块号 mod 4。</p>
+        <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存</th></tr></thead><tbody><tr><td>1</td><td>8</td><td>0000 10 00</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L2: 8–11</td></tr><tr><td>2</td><td>124</td><td>0111 11 00</td><td>124–127</td><td>3</td><td>0111</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L2: 8–11<br>L3: 124–127</td></tr><tr><td>3</td><td>77</td><td>0100 11 01</td><td>76–79</td><td>3</td><td>0100</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>L2: 8–11<br>L3: 76–79</td></tr><tr><td>4</td><td>45</td><td>0010 11 01</td><td>44–47</td><td>3</td><td>0010</td><td><span class="res miss">MISS</span> compulsory</td><td>76–79</td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>5</td><td>9</td><td>0000 10 01</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res hit">HIT</span></td><td></td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>6</td><td>126</td><td>0111 11 10</td><td>124–127</td><td>3</td><td>0111</td><td><span class="res miss">MISS</span> conflict</td><td>44–47</td><td>L2: 8–11<br>L3: 124–127</td></tr><tr><td>7</td><td>44</td><td>0010 11 00</td><td>44–47</td><td>3</td><td>0010</td><td><span class="res miss">MISS</span> conflict</td><td>124–127</td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>8</td><td>211</td><td>1101 00 11</td><td>208–211</td><td>0</td><td>1101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L0: 208–211<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>9</td><td>8</td><td>0000 10 00</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res hit">HIT</span></td><td></td><td>L0: 208–211<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>10</td><td>212</td><td>1101 01 00</td><td>212–215</td><td>1</td><td>1101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L0: 208–211<br>L1: 212–215<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>11</td><td>77</td><td>0100 11 01</td><td>76–79</td><td>3</td><td>0100</td><td><span class="res miss">MISS</span> conflict *</td><td>44–47</td><td>L0: 208–211<br>L1: 212–215<br>L2: 8–11<br>L3: 76–79</td></tr><tr><td>12</td><td>241</td><td>1111 00 01</td><td>240–243</td><td>0</td><td>1111</td><td><span class="res miss">MISS</span> compulsory</td><td>208–211</td><td>L0: 240–243<br>L1: 212–215<br>L2: 8–11<br>L3: 76–79</td></tr></tbody></table></div>
+        <p>4) 命中 <b>2</b>（09、08），缺失 <b>10</b>，命中率 2/12 = <b>16.7%</b>。块 31（124–127）、19（76–79）、11（44–47）全挤在行 3，反复互踢。最后一次 77 标 *：按严格 3C，同样大小的全相联缓存也会缺失（Ex 8.1 里它就是容量缺失）；本题只区分强制与冲突，记作 conflict。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 8.3</span><span>同一序列，2 路组相联，4 行，LRU。</span></summary><div>
+        <p>1) 地址 8 位；2 组 → Index 1；Offset 2；Tag 5。组号 = 块号 mod 2。</p>
+        <div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>地址</th><th>Tag Index Offset</th><th>块</th><th>组/行</th><th>Tag</th><th>结果</th><th>被替换</th><th>访问后缓存（括号内为 TSLR）</th></tr></thead><tbody><tr><td>1</td><td>8</td><td>00001 0 00</td><td>8–11</td><td>0</td><td>00001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S0: 8–11(0)</td></tr><tr><td>2</td><td>124</td><td>01111 1 00</td><td>124–127</td><td>1</td><td>01111</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S0: 8–11(1)<br>S1: 124–127(0)</td></tr><tr><td>3</td><td>77</td><td>01001 1 01</td><td>76–79</td><td>1</td><td>01001</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S0: 8–11(2)<br>S1: 124–127(1), 76–79(0)</td></tr><tr><td>4</td><td>45</td><td>00101 1 01</td><td>44–47</td><td>1</td><td>00101</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>S0: 8–11(3)<br>S1: 44–47(0), 76–79(1)</td></tr><tr><td>5</td><td>9</td><td>00001 0 01</td><td>8–11</td><td>0</td><td>00001</td><td><span class="res hit">HIT</span></td><td></td><td>S0: 8–11(0)<br>S1: 44–47(1), 76–79(2)</td></tr><tr><td>6</td><td>126</td><td>01111 1 10</td><td>124–127</td><td>1</td><td>01111</td><td><span class="res miss">MISS</span> conflict</td><td>76–79</td><td>S0: 8–11(1)<br>S1: 44–47(2), 124–127(0)</td></tr><tr><td>7</td><td>44</td><td>00101 1 00</td><td>44–47</td><td>1</td><td>00101</td><td><span class="res hit">HIT</span></td><td></td><td>S0: 8–11(2)<br>S1: 44–47(0), 124–127(1)</td></tr><tr><td>8</td><td>211</td><td>11010 0 11</td><td>208–211</td><td>0</td><td>11010</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>S0: 8–11(3), 208–211(0)<br>S1: 44–47(1), 124–127(2)</td></tr><tr><td>9</td><td>8</td><td>00001 0 00</td><td>8–11</td><td>0</td><td>00001</td><td><span class="res hit">HIT</span></td><td></td><td>S0: 8–11(0), 208–211(1)<br>S1: 44–47(2), 124–127(3)</td></tr><tr><td>10</td><td>212</td><td>11010 1 00</td><td>212–215</td><td>1</td><td>11010</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>S0: 8–11(1), 208–211(2)<br>S1: 44–47(3), 212–215(0)</td></tr><tr><td>11</td><td>77</td><td>01001 1 01</td><td>76–79</td><td>1</td><td>01001</td><td><span class="res miss">MISS</span> conflict *</td><td>44–47</td><td>S0: 8–11(2), 208–211(3)<br>S1: 76–79(0), 212–215(1)</td></tr><tr><td>12</td><td>241</td><td>11110 0 01</td><td>240–243</td><td>0</td><td>11110</td><td><span class="res miss">MISS</span> compulsory</td><td>208–211</td><td>S0: 8–11(3), 240–243(0)<br>S1: 76–79(1), 212–215(2)</td></tr></tbody></table></div>
+        <p>4) 命中 <b>3</b>（09、44、08），缺失 <b>9</b>，命中率 3/12 = <b>25%</b>。三种组织对比：全相联 33.3% &gt; 2 路 25% &gt; 直接映射 16.7%，相联度越高冲突越少。</p>
+      </div></details>
+    </div>
+
+    <div class="exgroup" data-l="9">
+      <h3><span class="no">LESSON 9</span>缓存映射 II</h3>
+      <details class="ex"><summary><span class="eid">Ex 9.1</span><span>32 KB 缓存，256 B 块，32 位地址。直接映射、4 路、全相联的 Tag / Index / Offset。</span></summary><div>
+        <div class="calc"><span class="l">块数 = 2¹⁵ / 2⁸ = 128；Offset = 8</span><span class="l">直接映射：128 组 → Index 7，Tag = 32 − 7 − 8 = <b>17</b></span><span class="l">4 路：32 组 → Index 5，Tag = <b>19</b></span><span class="l">全相联：1 组 → Index 0，Tag = <b>24</b></span></div>
+      </div></details>
+    </div>
+
+    <div class="exgroup" data-l="10">
+      <h3><span class="no">LESSON 10</span>流水线入门与 DLX</h3>
+      <details class="ex"><summary><span class="eid">Ex 10.1</span><span>门电路：NOT 9、AND 13、OR 11、XOR 23。求关键路径、延迟和吞吐量。</span></summary><div>
+        <p>电路结构（按讲义图）：B 与 D 进一个 XOR；B 与 C 进一个 AND；C 与 D 进一个 OR 后接 NOT。第一个 OR 的输入是 A 和 NOT 的输出；第二个 OR 的输入是 XOR 和 AND 的输出；两个 OR 的输出进最后的 XOR 得到 Z。</p>
+        <div class="tablewrap"><table><thead><tr><th>路径</th><th>延迟</th></tr></thead><tbody>
+          <tr><td>A → OR → XOR</td><td class="num">11 + 23 = 34</td></tr>
+          <tr><td>C/D → OR → NOT → OR → XOR</td><td class="num">11 + 9 + 11 + 23 = 54</td></tr>
+          <tr><td>B/C → AND → OR → XOR</td><td class="num">13 + 11 + 23 = 47</td></tr>
+          <tr><td><b>B/D → XOR → OR → XOR</b></td><td class="num"><b>23 + 11 + 23 = 57</b></td></tr>
+        </tbody></table></div>
+        <p>关键路径：<b>B（或 D）→ XOR → OR → XOR → Z</b>，延迟 <span class="ans">57</span> 个时间单位；吞吐量 = 每 57 个单位完成一次 = <span class="ans">1/57</span>。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.2</span><span>门电路（小圆圈 = 非门）：NOT 10、AND 15、OR 17。求关键路径、延迟和吞吐量。</span></summary><div>
+        <p>结构：第一层 4 个与门接 a、b（部分输入带非门），两两进两个或门；第二层 3 个与门：上面的接第一个或门输出和 c̄，中间的接 c̄ 和 d̄，下面的接 d̄ 和第二个或门输出；最后 3 输入或门输出 f。</p>
+        <div class="calc"><span class="l">a/b → NOT → AND → OR → AND → OR → f</span><span class="l">= 10 + 15 + 17 + 15 + 17 = <b>74</b></span><span class="l">c/d → NOT → AND → OR = 10 + 15 + 17 = 42（短）</span></div>
+        <p>延迟 <span class="ans">74</span>，吞吐量 <span class="ans">1/74</span>。别漏掉输入端小圆圈代表的非门延迟。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.3</span><span>IF 180、ID 220、EX 250、MEM 300、WB 150 ps：单周期与流水线的延迟、吞吐量、加速比。</span></summary><div>
+        <div class="calc"><span class="l">(a) 单周期：延迟 = 1100 ps；吞吐 = 1/1100 ps ≈ <b>9.09×10⁸ 条/秒</b></span><span class="l">(b) 流水：时钟 = <b>300 ps</b>；延迟 = 5 × 300 = <b>1500 ps</b>；吞吐 = 1/300 ps ≈ <b>3.33×10⁹ 条/秒</b></span><span class="l">(c) 加速比 = 1100 / 300 ≈ <b>3.67</b></span></div>
+        <p>(d) 各级不均衡：时钟被最慢的 MEM（300 ps）决定，其他级都在空等；平均每级只有 220 ps。此外流水线寄存器开销、冒险停顿也会降低加速比。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.4</span><span>R1 = 10、R2 = 20、R3 = 5、R4 = 100：ADD R5,R1,R2；SUB R6,R2,R3；ADDI R7,R1,15。</span></summary><div>
+        <p>R5 = 10 + 20 = <b>30</b>；R6 = 20 − 5 = <b>15</b>；R7 = 10 + 15 = <b>25</b>。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.5</span><span>LW R1,0(R2)；ADD R3,R1,R4；SW R3,8(R2)；BEQZ R3,LOOP：类型、用到的级、是否写寄存器、操作。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>指令</th><th>类型</th><th>用到的级</th><th>写寄存器</th><th>操作</th></tr></thead><tbody>
+          <tr><td class="mono">LW R1,0(R2)</td><td>I</td><td>IF ID EX MEM WB</td><td>是（R1）</td><td>R1 ← Mem[R2 + 0]</td></tr>
+          <tr><td class="mono">ADD R3,R1,R4</td><td>R</td><td>IF ID EX WB（MEM 空过）</td><td>是（R3）</td><td>R3 ← R1 + R4</td></tr>
+          <tr><td class="mono">SW R3,8(R2)</td><td>I</td><td>IF ID EX MEM</td><td>否</td><td>Mem[R2 + 8] ← R3</td></tr>
+          <tr><td class="mono">BEQZ R3,LOOP</td><td>I</td><td>IF ID EX MEM（完成分支）</td><td>否</td><td>R3 = 0 则跳到 LOOP</td></tr>
+        </tbody></table></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.6</span><span>R1 = 10、R2 = 100、R3 = 20、R4 = 5，Mem[104] = 30：LW R5,4(R2)；ADD R6,R5,R1；SUB R7,R6,R4；SW R7,8(R2)。</span></summary><div>
+        <div class="calc"><span class="l">(a) LW 有效地址 = 100 + 4 = <b>104</b></span><span class="l">(b) R5 = Mem[104] = <b>30</b></span><span class="l">(c) R6 = 30 + 10 = <b>40</b>；R7 = 40 − 5 = <b>35</b></span><span class="l">(d) SW 写 Mem[100 + 8] = Mem[<b>108</b>] ← <b>35</b></span></div>
+        <p>(e) LW：IF ID EX MEM WB；ADD、SUB：IF ID EX WB（MEM 空过）；SW：IF ID EX MEM。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.7</span><span>判断格式：ADD、LW、J、ADDI、SUB、BEQZ、JAL、SW。</span></summary><div>
+        <p>R 型：ADD R1,R2,R3；SUB R8,R9,R10。I 型：LW R4,8(R5)；ADDI R6,R7,#10；BEQZ R1,EXIT；SW R3,16(R4)。J 型：J LOOP；JAL FUNCTION。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.8</span><span>填字段：ADDI R1,R2,#12；LW R3,40(R4)；ADD R5,R6,R7；J LOOP（以及 SUB、BEQZ）。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>指令</th><th>Opcode</th><th>Rs</th><th>Rt</th><th>Rd</th><th>立即数 / 目标</th></tr></thead><tbody>
+          <tr><td class="mono">ADDI R1,R2,#12</td><td>ADDI</td><td>R2</td><td>R1</td><td>—</td><td>12</td></tr>
+          <tr><td class="mono">LW R3,40(R4)</td><td>LW</td><td>R4</td><td>R3</td><td>—</td><td>40</td></tr>
+          <tr><td class="mono">ADD R5,R6,R7</td><td>ALU（Function = ADD）</td><td>R6</td><td>R7</td><td>R5</td><td>—</td></tr>
+          <tr><td class="mono">SUB R8,R9,R10</td><td>ALU（Function = SUB）</td><td>R9</td><td>R10</td><td>R8</td><td>—</td></tr>
+          <tr><td class="mono">BEQZ R1,EXIT</td><td>BEQZ</td><td>R1</td><td>—</td><td>—</td><td>到 EXIT 的位移</td></tr>
+          <tr><td class="mono">J LOOP</td><td>J</td><td>—</td><td>—</td><td>—</td><td>LOOP（26 位偏移）</td></tr>
+        </tbody></table></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 10.9</span><span>LW、ADD、SW、J：格式、读存储器、写存储器、写寄存器。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>指令</th><th>格式</th><th>读存储器</th><th>写存储器</th><th>写寄存器</th></tr></thead><tbody>
+          <tr><td class="mono">LW R1,0(R2)</td><td>I</td><td>是</td><td>否</td><td>是</td></tr>
+          <tr><td class="mono">ADD R3,R1,R4</td><td>R</td><td>否</td><td>否</td><td>是</td></tr>
+          <tr><td class="mono">SW R3,8(R2)</td><td>I</td><td>否</td><td>是</td><td>否</td></tr>
+          <tr><td class="mono">J DONE</td><td>J</td><td>否</td><td>否</td><td>否</td></tr>
+        </tbody></table></div>
+        <p>这里"读存储器"指数据存储器；每条指令在 IF 都会读指令存储器。</p>
+      </div></details>
+    </div>
+
+    <div class="exgroup" data-l="11">
+      <h3><span class="no">LESSON 11</span>五级 DLX 流水线</h3>
+      <details class="ex"><summary><span class="eid">Ex 11.1</span><span>ADDI R5, R2, #12，R2 = 20：每级操作、关键值、是否访存。</span></summary><div>
+        <p>IF：IR ← Mem[PC]，NPC ← PC + 4（访问指令存储器）。ID：A = 20，Imm = 12，b = R5。EX：ALUOut = 20 + 12 = <b>32</b>。MEM：无数据访存，直接传递。WB：R5 ← 32。数据存储器全程未访问。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.2</span><span>LW R1, 30(R2)，R2 = 1000，Mem[1030] = 500。</span></summary><div>
+        <p>1) A = <b>1000</b>；2) Imm = <b>30</b>；3) ALUOut = <b>1030</b>；4) MEM 访问地址 <b>1030</b>；5) LMD = <b>500</b>；6) WB 写 R1 = <b>500</b>。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.3</span><span>LW R1, 30(R2) 的四个流水线寄存器内容。</span></summary><div>
+        <p>F/D：IR、NPC。D/A：A = R2 的值、Imm = 30、b = R1、OP = LW（还有 B、NPC）。A/M：ALUOut = R2 + 30、b、OP。M/W：LMD = Mem[R2 + 30]、b、OP。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.4</span><span>ADD R1,R2,R3 与 LW R1,40(R2)：ALU 输入、ALU 操作、是否用数据存储器、写回值、EX 的 MUX 选择。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th></th><th>ADD R1,R2,R3</th><th>LW R1,40(R2)</th></tr></thead><tbody>
+          <tr><td>用到的级</td><td>IF ID EX (MEM) WB</td><td>IF ID EX MEM WB</td></tr>
+          <tr><td>ALU 输入</td><td>A = R2，B = R3（MUX 选 B）</td><td>A = R2，Imm = 40（MUX 选 Imm）</td></tr>
+          <tr><td>ALU 操作</td><td>加法，算结果</td><td>加法，算有效地址</td></tr>
+          <tr><td>数据存储器</td><td>不用</td><td>读</td></tr>
+          <tr><td>写回值</td><td>ALUOut = R2 + R3</td><td>LMD = Mem[R2 + 40]</td></tr>
+        </tbody></table></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.5</span><span>PC = 1000，BEQZ R3, +40（题目给的是 R2 = 0）。</span></summary><div>
+        <p>题目给了 R2 = 0，但指令测试的是 R3，应该是笔误，按 R3 = 0 理解：</p>
+        <div class="calc"><span class="l">1) NPC = 1000 + 4 = <b>1004</b></span><span class="l">2) ALU 输入：NPC = 1004 和 Imm = 40</span><span class="l">3) 目标地址 = 1004 + 40 = <b>1044</b></span><span class="l">4) Zero? 输出 = 1（R3 = 0）</span><span class="l">5) 跳转</span><span class="l">6) 新 PC = <b>1044</b></span></div>
+        <p>若 R3 ≠ 0：Zero? = 0，不跳转，新 PC = NPC = 1004。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.6</span><span>R1 = 10、R2 = 100、R3 = 20，Mem[104] = 50：LW R4,4(R2)；ADDI R5,R4,#10；ADD R6,R5,R1。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>指令</th><th>A / B / Imm</th><th>ALUOut</th><th>写回</th><th>主要部件</th></tr></thead><tbody>
+          <tr><td class="mono">LW R4,4(R2)</td><td>A = 100，Imm = 4</td><td class="num">104</td><td>R4 ← 50</td><td>指令存储器、寄存器堆、符号扩展、ALU、数据存储器、LMD、WB MUX</td></tr>
+          <tr><td class="mono">ADDI R5,R4,#10</td><td>A = 50，Imm = 10</td><td class="num">60</td><td>R5 ← 60</td><td>指令存储器、寄存器堆、符号扩展、ALU（MUX 选 Imm）、WB</td></tr>
+          <tr><td class="mono">ADD R6,R5,R1</td><td>A = 60，B = 10</td><td class="num">70</td><td>R6 ← 70</td><td>指令存储器、寄存器堆、ALU（MUX 选 B）、WB</td></tr>
+        </tbody></table></div>
+        <p>这里按顺序、无冒险计算数值。真正流水起来，LW → ADDI 是 load-use，ADDI → ADD 也是 RAW，要靠转发和停顿（Lesson 12）。</p>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.7</span><span>LW、ADD、ADDI、BEQZ 四条理想流水的时序图。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>周期</th><th>I1 LW</th><th>I2 ADD</th><th>I3 ADDI</th><th>I4 BEQZ</th></tr></thead><tbody>
+          <tr><td>1</td><td>IF</td><td></td><td></td><td></td></tr>
+          <tr><td>2</td><td>ID</td><td>IF</td><td></td><td></td></tr>
+          <tr><td>3</td><td>EX</td><td>ID</td><td>IF</td><td></td></tr>
+          <tr><td>4</td><td>MEM</td><td>EX</td><td>ID</td><td>IF</td></tr>
+          <tr><td>5</td><td>WB</td><td>MEM</td><td>EX</td><td>ID</td></tr>
+          <tr><td>6</td><td></td><td>WB</td><td>MEM</td><td>EX</td></tr>
+          <tr><td>7</td><td></td><td></td><td>WB</td><td>MEM</td></tr>
+          <tr><td>8</td><td></td><td></td><td></td><td>WB</td></tr>
+        </tbody></table></div>
+      </div></details>
+      <details class="ex"><summary><span class="eid">Ex 11.8</span><span>R2 = 1000，Mem[1030] = 300，R3 = 25，PC = 4000：LW R1,30(R2)；ADDI R4,R1,#5；BEQZ R3,+20。</span></summary><div>
+        <div class="tablewrap"><table><thead><tr><th>指令</th><th>ALU 输入</th><th>ALUOut</th><th>数据存储器</th><th>写回 / 结果</th></tr></thead><tbody>
+          <tr><td class="mono">LW R1,30(R2)（PC 4000）</td><td>A = 1000，Imm = 30</td><td class="num">1030</td><td>读</td><td>R1 ← 300</td></tr>
+          <tr><td class="mono">ADDI R4,R1,#5（PC 4004）</td><td>A = 300，Imm = 5</td><td class="num">305</td><td>否</td><td>R4 ← 305</td></tr>
+          <tr><td class="mono">BEQZ R3,+20（PC 4008）</td><td>NPC = 4012，Imm = 20</td><td class="num">4032</td><td>否</td><td>R3 = 25 ≠ 0，不跳转，PC = 4012；不写回</td></tr>
+        </tbody></table></div>
+      </div></details>
+    </div>
+
+    <div class="exgroup" data-l="12">
+      <h3><span class="no">LESSON 12</span>流水线冒险</h3>
+      <details class="ex"><summary><span class="eid">Ex 12.1</span><span>判断冒险类型：① load 与取指争同一存储器；② 在前一条写之前读寄存器；③ 还不知道分支跳不跳。</span></summary><div><p>① 结构冒险；② 数据冒险（RAW）；③ 控制冒险。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.2</span><span>理想 CPI 1，平均停顿 0.25：流水 CPI 和相对非流水（CPI 5）的加速比。</span></summary><div><p>CPI = 1.25；加速比 = 5 / 1.25 = <b>4</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.3</span><span>单端口存储器，LW 在 MEM 时 ADD 在 IF，会有结构冒险吗？</span></summary><div><p>会。LW 要读数据、ADD 要取指，两者在同一周期都要用唯一的存储器端口，只能让取指推迟一拍（插入停顿）。用分离的指令/数据存储器或双端口存储器可以消除。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.4</span><span>25% 是 load/store，每条造成 1 个结构停顿：平均停顿和 CPI。</span></summary><div><p>停顿 = 0.25 × 1 = <b>0.25</b>；CPI = <b>1.25</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.5</span><span>ADD R1,R2,R3；SUB R4,R1,R5；AND R6,R1,R7；OR R8,R9,R10：哪些有 RAW？</span></summary><div><p><b>SUB</b> 和 <b>AND</b>（都读 ADD 写的 R1）。OR 不用 R1，没有冒险。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.6</span><span>寄存器前半周期写、后半周期读，ADD 在 CC5 写 R1。谁能在 CC5 安全读 R1？</span></summary><div><p>在 CC5 处于 ID 级的那条，也就是 ADD 之后的<b>第三条</b>指令（讲义例子里的 <code>OR R8,R1,R9</code>）：ADD 前半周期写入，它后半周期读出，拿到的是新值。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.7</span><span>分类：① ADD R1… / SUB …R1…；② ADD …R2… / LW R2…；③ LW R1… / ADD R1…</span></summary><div><p>① RAW；② WAR；③ WAW。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.8</span><span>RAW、WAR、WAW 哪些会出现在基本 DLX 五级流水线里？</span></summary><div><p>只有 <b>RAW</b>。WAR 不会：所有读都在 ID（第 2 级），所有写都在 WB（第 5 级），前面的指令一定先读。WAW 不会：所有指令都在 WB 写、长度相同，按程序顺序写回。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.9</span><span>转发能否消除：① ADD R1… / SUB …R1…；② SUB R1… / AND …R1…</span></summary><div><p>两个都能。都是 ALU 结果给下一条 ALU 用，从 EX/MEM 转发到 ALU 输入，0 停顿。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.10</span><span>ADD R1,R2,R3 后紧跟 SUB R4,R1,R5，转发值来自哪里？A. IF/ID　B. EX/MEM　C. 寄存器堆</span></summary><div><p><b>B. EX/MEM</b>。SUB 在 EX 时，ADD 刚好在 MEM，结果在 EX/MEM（讲义叫 A/M）流水线寄存器里。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.11</span><span>有转发时，LW R1,0(R2) 紧跟 SUB R4,R1,R5 需要停顿吗？</span></summary><div><p>需要，<b>1 拍</b>。load 的数据在 MEM 结束才出来，转发也赶不上紧跟的那条的 EX。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.12</span><span>20% 是 load，其中一半紧跟依赖它的指令，每次停 1 拍：CPI。</span></summary><div><p>CPI = 1 + 0.2 × 0.5 × 1 = <b>1.1</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.13</span><span>分支 30%，代价 3：CPI。</span></summary><div><p>1 + 0.3 × 3 = <b>1.9</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.14</span><span>改进 DLX 把代价从 3 降到 1，分支 30%：CPI。</span></summary><div><p>1 + 0.3 × 1 = <b>1.3</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.15</span><span>分支 30%，预测不跳转准确率 47%：CPI。</span></summary><div><p>猜错（实际跳转）53%，代价 1：1 + 0.3 × 0.53 × 1 = <b>1.159</b>。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.16</span><span>ADD R10,R11,R12；BEQZ R1,Label；NOP；SUB R4,R5,R6：哪条可以挪进延迟槽？</span></summary><div><p><b>A. ADD R10,R11,R12</b>（from before）：它本来就要执行，又和分支条件 R1 无关，放进槽里无论跳不跳都正确。SUB 是不跳转时才执行的下一条，挪进槽里会在跳转时也被执行，不安全。</p></div></details>
+      <details class="ex"><summary><span class="eid">Ex 12.17</span><span>LW R1,0(R2)；ADD R3,R1,R4；BEQZ R3,Label；SUB R5,R6,R7：结构、数据、控制冒险，以及有转发、分支代价 1 时的停顿数。</span></summary><div>
+        <p>1) 结构冒险：指令和数据存储器分离时没有；若是单端口存储器，LW 的 MEM 会和后面某条的 IF 冲突。</p>
+        <p>2) 数据冒险：LW → ADD（R1，load-use，停 1 拍）；ADD → BEQZ（R3，按讲义口径靠转发解决）。</p>
+        <p>3) 控制冒险：BEQZ 之后的 SUB 要等分支结果，代价 1 拍。</p>
+        <p>4) 共 <b>2</b> 个停顿周期（1 + 1）。补充：如果分支真在 ID 级比较（改进 DLX），R3 必须在 ID 就拿到，而 ADD 的结果要到 EX 结束才有，还要再停 1 拍，共 3 拍；讲义没有讨论这一点，按 2 拍答即可。</p>
+      </div></details>
+    </div>
+  </section>
+  <section id="pane-drill" hidden>
+    <p class="tutnote">每点一次"换一题"就随机生成一道新题。先填答案再核对，核对后可以看完整推导。得分只记在这个浏览器里。</p>
+    <div class="drillbar" id="drillTypes"></div>
+    <div class="score" id="drillScore"></div>
+    <div class="drillcard">
+      <div class="lab-cap" id="dTitle"></div>
+      <div class="dq" id="dQ"></div>
+      <div class="checks" id="dChecks"></div>
+      <div class="btnrow"><button class="btn primary" id="dCheck">核对</button><button class="btn" id="dNext">换一题 ↻</button><button class="btn" id="dShow">直接看解答</button><button class="btn" id="dReset" style="margin-left:auto">清零得分</button></div>
+      <div class="workings" id="dSol" hidden></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">EE6156 Part 2 习题小程序 · Tutorial 7–12 与讲义 Exercise 解答为个人整理，非 NTU 官方答案；有疑问以课堂讲解为准 · <a href="part2-learn.html">学习手册</a> · <a href="index.html">复习站首页</a></footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  function load(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function store(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+  function fmt(x, d){ if (!isFinite(x)) return '–'; if (d === undefined) d = 4; var s = (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d); if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, ''); return s; }
+
+  /* 主题（与其他页面共用） */
+  var root = document.documentElement, tb = $('themeToggleBtn');
+  function applyTheme(v){ if (v === 'light' || v === 'dark') root.setAttribute('data-theme', v); else root.removeAttribute('data-theme'); tb.textContent = v === 'light' ? '主题·亮' : (v === 'dark' ? '主题·暗' : '主题·系统'); }
+  var theme = load('cpu-theme') || 'system'; applyTheme(theme);
+  tb.addEventListener('click', function(){ theme = theme === 'system' ? 'light' : (theme === 'light' ? 'dark' : 'system'); store('cpu-theme', theme); applyTheme(theme); });
+
+  /* 分区切换 */
+  var panes = { tut: $('pane-tut'), ex: $('pane-ex'), drill: $('pane-drill') };
+  function setTab(t){
+    Object.keys(panes).forEach(function(k){ panes[k].hidden = k !== t; });
+    $('tabs').querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-tab') === t); });
+    store('p2-tab', t);
+  }
+  $('tabs').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) setTab(b.getAttribute('data-tab')); });
+  var initTab = location.hash === '#drill' ? 'drill' : (location.hash === '#ex' ? 'ex' : (load('p2-tab') || 'tut'));
+  if (/^#t\d/.test(location.hash)) initTab = 'tut';
+  setTab(panes[initTab] ? initTab : 'tut');
+
+  /* 已掌握 */
+  var qs = Array.prototype.slice.call(document.querySelectorAll('article.q'));
+  var mastered = {}; try{ mastered = JSON.parse(load('p2-mastered') || '{}') || {}; }catch(e){ mastered = {}; }
+  function refresh(){
+    var n = 0;
+    qs.forEach(function(q){ var m = !!mastered[q.id]; q.classList.toggle('mastered', m); q.querySelector('.mkbox').checked = m; if (m) n++; });
+    $('progressLabel').textContent = '已掌握 ' + n + ' / ' + qs.length;
+    $('progressBar').style.width = (n / qs.length * 100) + '%';
+    document.querySelectorAll('#tutToc a').forEach(function(a){ a.classList.toggle('m', !!mastered[a.getAttribute('href').slice(1)]); });
+    applyFilter();
+  }
+  var toc = $('tutToc');
+  qs.forEach(function(q){ var a = document.createElement('a'); a.href = '#' + q.id; a.textContent = q.querySelector('.qid').textContent; toc.appendChild(a); });
+  document.addEventListener('change', function(e){
+    if (!e.target.classList.contains('mkbox')) return;
+    var q = e.target.closest('article.q'); mastered[q.id] = e.target.checked; store('p2-mastered', JSON.stringify(mastered)); refresh();
+  });
+
+  /* 筛选 */
+  var curL = 'all';
+  function applyFilter(){
+    var todo = $('onlyTodo').checked;
+    qs.forEach(function(q){ var l = q.getAttribute('data-l'); q.hidden = (curL !== 'all' && l !== curL) || (todo && mastered[q.id]); });
+    document.querySelectorAll('#pane-tut .tuthead').forEach(function(h){
+      var l = h.id.replace('tut', ''); var vis = curL === 'all' || curL === l;
+      h.hidden = !vis; if (h.nextElementSibling && h.nextElementSibling.classList.contains('tutnote')) h.nextElementSibling.hidden = !vis;
+    });
+    document.querySelectorAll('#tutToc a').forEach(function(a){ var q = $(a.getAttribute('href').slice(1)); a.hidden = q.hidden; });
+  }
+  $('tutFilters').addEventListener('click', function(e){
+    var b = e.target.closest('.fchip'); if (!b) return;
+    curL = b.getAttribute('data-l');
+    $('tutFilters').querySelectorAll('.fchip').forEach(function(x){ x.classList.toggle('on', x === b); });
+    applyFilter();
+  });
+  $('onlyTodo').addEventListener('change', applyFilter);
+  $('exFilters').addEventListener('click', function(e){
+    var b = e.target.closest('.fchip'); if (!b) return;
+    var l = b.getAttribute('data-l');
+    $('exFilters').querySelectorAll('.fchip').forEach(function(x){ x.classList.toggle('on', x === b); });
+    document.querySelectorAll('#pane-ex .exgroup').forEach(function(g){ g.hidden = l !== 'all' && g.getAttribute('data-l') !== l; });
+  });
+  refresh();
+
+  /* 核对答案 */
+  function parseNum(s){ s = String(s).trim().replace(/,/g, '').replace(/%$/, '').replace(/[×x]\s*10\^?\s*(-?\d+)$/i, 'e$1'); var v = Number(s); return s === '' ? NaN : v; }
+  function checkField(el){
+    var ans = el.getAttribute('data-ans'), type = el.getAttribute('data-type'), v = el.value, ok;
+    if (el.tagName === 'SELECT') ok = v === ans;
+    else if (type === 'hex'){ var t = v.trim().replace(/^0x/i, '').replace(/^0+(?=.)/, '').toUpperCase(); ok = t === ans.replace(/^0+(?=.)/, '').toUpperCase(); }
+    else {
+      var x = parseNum(v), a = Number(ans), tol = el.hasAttribute('data-tol') ? Number(el.getAttribute('data-tol')) : Math.max(0.01, Math.abs(a) * 0.005);
+      ok = isFinite(x) && Math.abs(x - a) <= tol + 1e-9;
+    }
+    el.classList.toggle('right', ok); el.classList.toggle('wrong', !ok);
+    return ok;
+  }
+  function checkBox(box){
+    var fs = box.querySelectorAll('input[data-ans], select[data-ans]'), n = 0;
+    fs.forEach(function(f){ if (checkField(f)) n++; });
+    var vd = box.querySelector('.verdict');
+    vd.textContent = n === fs.length ? '全部正确 ✓' : (n + ' / ' + fs.length + ' 正确');
+    vd.className = 'verdict ' + (n === fs.length ? 'good' : 'bad');
+    return n === fs.length;
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('.chk'); if (!b) return;
+    var box = b.closest('.checks'); var all = checkBox(box);
+    if (!all){ var h = box.parentElement.querySelector('details.hint'); if (h && !h.open) h.open = true; }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    var box = e.target.closest && e.target.closest('.checks'); if (!box || box.id === 'dChecks') return;
+    var b = box.querySelector('.chk'); if (b){ e.preventDefault(); b.click(); }
+  });
+
+  /* ================= 随机刷题 ================= */
+  function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  function log2(n){ return Math.round(Math.log(n) / Math.LN2); }
+  function hb(b){ return b >= 1048576 ? (b / 1048576) + ' MB' : (b >= 1024 ? (b / 1024) + ' KB' : b + ' B'); }
+  function hex(v, w){ var s = v.toString(16).toUpperCase(); while (s.length < (w || 0)) s = '0' + s; return s; }
+  var G = {
+    amat: { name: 'AMAT', gen: function(){
+      var HT = pick([1, 2, 3, 4]), MR = pick([2, 3, 4, 5, 6, 8, 10]), MP = pick([20, 40, 50, 60, 80, 100, 120]);
+      var a = HT + MR / 100 * MP;
+      return { q: '命中时间 ' + HT + ' 周期，缺失率 ' + MR + '%，缺失代价 ' + MP + ' 周期。求缺失时间和 AMAT。',
+        f: [['缺失时间', HT + MP], ['AMAT', a]],
+        s: '缺失时间 = HT + MP = ' + HT + ' + ' + MP + ' = <b>' + (HT + MP) + '</b>\nAMAT = HT + MR × MP = ' + HT + ' + ' + fmt(MR / 100) + ' × ' + MP + ' = <b>' + fmt(a) + '</b>\n验算：' + fmt(1 - MR / 100) + ' × ' + HT + ' + ' + fmt(MR / 100) + ' × ' + (HT + MP) + ' = ' + fmt((1 - MR / 100) * HT + MR / 100 * (HT + MP)) };
+    }},
+    cpi: { name: '实际 CPI', gen: function(){
+      var ideal = pick([1, 1.2, 1.5, 1.8, 2]), ls = pick([20, 25, 30, 35, 40]), im = pick([1, 2, 3]), dm = pick([2, 4, 5, 8, 10]);
+      var useNs = Math.random() < 0.5, clk = pick([[500, 2], [1000, 1], [250, 4]]), MP = pick([20, 25, 30, 40, 50]);
+      var q = '理想 CPI ' + ideal + '，load/store 占 ' + ls + '%，指令缓存缺失率 ' + im + '%，数据缓存缺失率 ' + dm + '%，';
+      var s = '';
+      if (useNs){ q += '时钟 ' + clk[0] + ' MHz，主存访问 ' + (MP * clk[1]) + ' ns（= 缺失代价）。'; s = '时钟周期 ' + clk[1] + ' ns → MP = ' + (MP * clk[1]) + ' / ' + clk[1] + ' = <b>' + MP + ' 周期</b>\n'; }
+      else q += '缺失代价 ' + MP + ' 周期。';
+      q += '求实际 CPI 和停顿占执行时间的百分比。';
+      var I = im / 100 * MP, D = ls / 100 * dm / 100 * MP, c = ideal + I + D;
+      s += '指令停顿 = ' + fmt(im / 100) + ' × ' + MP + ' = ' + fmt(I) + '\n数据停顿 = ' + fmt(ls / 100) + ' × ' + fmt(dm / 100) + ' × ' + MP + ' = ' + fmt(D) + '\n实际 CPI = ' + ideal + ' + ' + fmt(I + D) + ' = <b>' + fmt(c) + '</b>\n停顿占比 = ' + fmt(I + D) + ' / ' + fmt(c) + ' = <b>' + fmt((I + D) / c * 100, 2) + '%</b>';
+      return { q: q, f: [['实际 CPI', c], ['停顿占比 %', (I + D) / c * 100, 0.1]], s: s };
+    }},
+    bits: { name: '地址划分', gen: function(){
+      var A = pick([16, 20, 24, 32]), bk = ri(2, 7), ck = ri(Math.max(bk + 2, 8), Math.min(A - 2, 20)), w = pick([1, 1, 2, 4, 8, 0]);
+      var size = Math.pow(2, ck), block = Math.pow(2, bk), blocks = size / block, ways = w === 0 ? blocks : Math.min(w, blocks), sets = blocks / ways;
+      var off = bk, idx = log2(sets), tag = A - idx - off;
+      var org = w === 0 ? '全相联' : (ways === 1 ? '直接映射' : ways + ' 路组相联');
+      return { q: A + ' 位按字节编址，' + hb(size) + ' ' + org + '缓存，块 ' + block + ' 字节。求 Tag、Index、Offset 位数。',
+        f: [['Tag', tag], ['Index', idx], ['Offset', off]],
+        s: '块数 = ' + hb(size) + ' ÷ ' + block + ' = ' + blocks + '\n组数 = ' + blocks + ' ÷ ' + ways + ' = ' + sets + '\nOffset = log₂' + block + ' = <b>' + off + '</b>　Index = log₂' + sets + ' = <b>' + idx + '</b>　Tag = ' + A + ' − ' + idx + ' − ' + off + ' = <b>' + tag + '</b>' };
+    }},
+    dm: { name: '直接映射数命中', gen: function(){
+      var lines = pick([4, 8]), block = 4, blocksAll = 64;
+      var base = [], k;
+      var line0 = ri(0, lines - 1);
+      base.push(line0 + lines * ri(0, 3));
+      var other = line0 + lines * ri(4, 7); base.push(other);
+      base.push(ri(0, blocksAll - 1)); base.push(ri(0, blocksAll - 1));
+      var seqB = [base[0], base[2], base[1], base[0], base[3], base[2]];
+      if (Math.random() < 0.5) seqB[3] = base[2];
+      var addrs = seqB.map(function(b){ return b * block + ri(0, 3); });
+      var cache = {}, seen = {}, hits = 0, rows = [];
+      addrs.forEach(function(a, i){
+        var b = Math.floor(a / block), l = b % lines, t = Math.floor(b / lines), r;
+        if (cache[l] === b){ hits++; r = 'HIT'; }
+        else { r = 'MISS ' + (seen[b] ? 'conflict' : 'compulsory') + (cache[l] !== undefined ? '（替换块 ' + cache[l] + '）' : ''); cache[l] = b; }
+        seen[b] = 1;
+        rows.push((i + 1) + ') 地址 ' + a + ' → 块 ' + b + ' → 行 ' + l + '，tag ' + t + '：' + r);
+      });
+      return { q: '主存 256 字节，直接映射缓存 ' + lines + ' 行，块 4 字节，初始为空。访问序列：<code>' + addrs.join(', ') + '</code>。一共命中几次？',
+        f: [['命中次数', hits]], s: '块号 = 地址 ÷ 4，行号 = 块号 mod ' + lines + '，tag = 块号 ÷ ' + lines + '\n' + rows.join('\n') + '\n命中 <b>' + hits + '</b> 次，命中率 ' + fmt(hits / 6 * 100, 1) + '%' };
+    }},
+    pipe: { name: '流水线时间', gen: function(){
+      var k = ri(3, 5), st = [], i; for (i = 0; i < k; i++) st.push(ri(2, 12) * 5);
+      var n = pick([4, 5, 8, 10, 100, 1000]), sum = st.reduce(function(a, b){ return a + b; }, 0), mx = Math.max.apply(null, st);
+      var tot = sum + (n - 1) * mx, seq = n * sum;
+      return { q: k + ' 级任务流水线，各级 ' + st.join(' / ') + ' ns（一级做完立刻接下一个任务），处理 ' + n + ' 个任务。求流水周期、总时间、相对顺序执行的加速比。',
+        f: [['周期 ns', mx], ['总时间 ns', tot], ['加速比', seq / tot, 0.01]],
+        s: '周期 = max = <b>' + mx + '</b> ns\n总时间 = ΣT + (n − 1)·max = ' + sum + ' + ' + (n - 1) + ' × ' + mx + ' = <b>' + tot + '</b> ns\n顺序 = ' + n + ' × ' + sum + ' = ' + seq + ' ns\n加速比 = ' + seq + ' / ' + tot + ' = <b>' + fmt(seq / tot, 3) + '</b>（n→∞ 时趋近 ' + fmt(sum / mx, 3) + '）' };
+    }},
+    branch: { name: '分支 CPI', gen: function(){
+      var f = pick([15, 20, 25, 30]), t = pick([40, 50, 55, 60, 65, 70]), P = pick([1, 2, 3]), sc = pick(['stall', 'pnt']);
+      var pen = sc === 'stall' ? P : t / 100 * P, cpi = 1 + f / 100 * pen;
+      return { q: '分支占 ' + f + '%，其中 ' + t + '% 跳转。理想 CPI 1，' + (sc === 'stall' ? '每个分支都停顿 ' + P + ' 周期' : '采用预测不跳转，猜错代价 ' + P + ' 周期') + '。求平均分支代价和 CPI。',
+        f: [['平均分支代价', pen], ['CPI', cpi]],
+        s: (sc === 'stall' ? '每个分支都停：平均代价 = <b>' + P + '</b>' : '只有实际跳转（猜错）才付代价：' + fmt(t / 100) + ' × ' + P + ' = <b>' + fmt(pen) + '</b>') + '\nCPI = 1 + ' + fmt(f / 100) + ' × ' + fmt(pen) + ' = <b>' + fmt(cpi) + '</b>' };
+    }},
+    haz: { name: '冒险类型', gen: function(){
+      var kind = pick(['RAW', 'WAR', 'WAW', 'None']), r = function(){ return ri(1, 15); };
+      var a = r(), b = r(), c = r(), d, e, f2, i1, i2;
+      while (b === a) b = r(); while (c === a || c === b) c = r();
+      var ops = ['ADD', 'SUB', 'AND', 'OR'];
+      if (kind === 'RAW'){ d = r(); while (d === a || d === b || d === c) d = r(); i1 = pick(ops) + ' R' + a + ',R' + b + ',R' + c; i2 = Math.random() < 0.5 ? pick(ops) + ' R' + d + ',R' + a + ',R' + b : 'SW 0(R' + c + '),R' + a; }
+      else if (kind === 'WAR'){ i1 = pick(ops) + ' R' + a + ',R' + b + ',R' + c; i2 = Math.random() < 0.5 ? 'LW R' + b + ',0(R' + ri(16, 20) + ')' : pick(ops) + ' R' + b + ',R' + ri(16, 20) + ',R' + ri(21, 25); }
+      else if (kind === 'WAW'){ i1 = 'LW R' + a + ',0(R' + b + ')'; i2 = pick(ops) + ' R' + a + ',R' + c + ',R' + ri(16, 20); }
+      else { i1 = pick(ops) + ' R' + a + ',R' + b + ',R' + c; i2 = pick(ops) + ' R' + ri(16, 20) + ',R' + ri(21, 25) + ',R' + ri(26, 30); }
+      var expl = { RAW: '前一条的<b>目的</b>寄存器是后一条的<b>源</b> → RAW（写后读）。DLX 中会发生，靠转发/停顿解决', WAR: '前一条<b>读</b>的寄存器被后一条<b>写</b> → WAR（读后写）。DLX 五级流水线里读在 ID、写在 WB，不会出问题', WAW: '两条写<b>同一个目的</b>寄存器 → WAW（写后写）。DLX 里按顺序在 WB 写，不会出问题', None: '寄存器没有交集 → 无冒险' };
+      return { q: '下面两条指令（前后相邻）之间是什么数据相关？<br><code>' + i1 + '</code><br><code>' + i2 + '</code>', choice: ['RAW', 'WAR', 'WAW', 'None'], ans: kind, s: expl[kind] };
+    }},
+    stall: { name: '停顿拍数', gen: function(){
+      var load = Math.random() < 0.6, d = pick([1, 1, 2, 3]), fw = Math.random() < 0.65;
+      var p = load ? 'LW R1,0(R2)' : 'ADD R1,R2,R3', fill = ['OR R7,R8,R9', 'AND R10,R11,R12'];
+      var code = [p]; for (var i = 1; i < d; i++) code.push(fill[i - 1]); code.push('SUB R4,R1,R5');
+      var s = fw ? ((load && d === 1) ? 1 : 0) : Math.max(0, 3 - d);
+      var why = fw ? (load ? (d === 1 ? 'load-use：数据在 MEM 末才出来，紧跟的 SUB 在下一拍 EX 就要用，转发也要停 1 拍' : 'LW 和 SUB 之间隔了 ' + (d - 1) + ' 条，MEM/WB 转发及时，不停') : 'ALU 结果从 EX/MEM 转发，不停') : '无转发：SUB 必须在生产者 WB 的同一周期（前写后读）或之后读寄存器，距离 ' + d + ' 时要停 max(0, 3 − ' + d + ') = ' + s + ' 拍';
+      return { q: (fw ? '有转发' : '<b>没有转发</b>（寄存器前半写、后半读）') + '的 DLX 五级流水线，下面代码需要几个停顿周期？<br><code>' + code.join('</code><br><code>') + '</code>', f: [['停顿周期', s]], s: why + '\n答案：<b>' + s + '</b>' };
+    }},
+    vm: { name: '虚拟地址', gen: function(){
+      var pg = pick([1024, 2048, 4096, 8192, 16384]), off = log2(pg), vpnB = 32 - off, ppnB = 30 - off;
+      var vpn = ri(1, Math.pow(2, Math.min(vpnB, 20)) - 1), ppn = ri(1, Math.pow(2, Math.min(ppnB, 18)) - 1), o = ri(0, pg - 1);
+      var va = vpn * pg + o, pa = ppn * pg + o;
+      return { q: '32 位虚拟地址、30 位物理地址、页大小 ' + hb(pg) + '。页表把 VPN 0x' + hex(vpn) + ' 映射到 PPN 0x' + hex(ppn) + '。求页内偏移位数、VPN 位数，以及虚拟地址 0x' + hex(va, 8) + ' 对应的物理地址（十六进制）。',
+        f: [['偏移位', off], ['VPN 位', vpnB], ['物理地址 hex', hex(pa), 0, 'hex']],
+        s: '偏移 = log₂' + pg + ' = <b>' + off + '</b>，VPN = 32 − ' + off + ' = <b>' + vpnB + '</b>，PPN = 30 − ' + off + ' = ' + ppnB + '\n虚拟地址 0x' + hex(va, 8) + '：VPN = 0x' + hex(vpn) + '，偏移 = 0x' + hex(o) + '\n物理地址 = PPN × 页大小 + 偏移 = 0x' + hex(ppn) + ' × ' + pg + ' + 0x' + hex(o) + ' = <b>0x' + hex(pa) + '</b>' };
+    }},
+    sext: { name: '符号扩展', gen: function(){
+      var imm = -ri(1, 300), rv = ri(50, 900), h16 = hex(imm & 0xFFFF, 4), h32 = hex((imm >>> 0), 8);
+      var b = (imm & 0xFFFF).toString(2); while (b.length < 16) b = '0' + b;
+      return { q: '<code>ADDI R5, R2, #' + imm + '</code>，R2 = ' + rv + '。求立即数的 16 位补码（hex）、符号扩展后的 32 位值（hex）、ALUOut。',
+        f: [['16 位 hex', h16, 0, 'hex'], ['32 位 hex', h32, 0, 'hex'], ['ALUOut', rv + imm]],
+        s: '|' + imm + '| = ' + (-imm) + '，取反加 1 → ' + b.replace(/(\d{4})(?=\d)/g, '$1 ') + ' = <b>0x' + h16 + '</b>\n符号位为 1，高 16 位补 1 → <b>0x' + h32 + '</b>\nALUOut = ' + rv + ' + (' + imm + ') = <b>' + (rv + imm) + '</b>' };
+    }}
+  };
+  var cur = null, curType = load('p2-drill-type') || 'amat', answered = false;
+  if (!G[curType]) curType = 'amat';
+  var score = { r: 0, t: 0 }; try{ score = JSON.parse(load('p2-drill') || '{"r":0,"t":0}'); }catch(e){}
+  var bar = $('drillTypes');
+  Object.keys(G).forEach(function(k){ var b = document.createElement('button'); b.className = 'fchip'; b.textContent = G[k].name; b.setAttribute('data-k', k); bar.appendChild(b); });
+  function showScore(){ $('drillScore').innerHTML = '<div class="kpi"><div class="k">做对</div><div class="v">' + score.r + '</div></div><div class="kpi"><div class="k">做过</div><div class="v">' + score.t + '</div></div><div class="kpi em"><div class="k">正确率</div><div class="v">' + (score.t ? fmt(score.r / score.t * 100, 1) + '%' : '–') + '</div></div>'; }
+  function next(){
+    bar.querySelectorAll('.fchip').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-k') === curType); });
+    cur = G[curType].gen(); answered = false;
+    $('dTitle').textContent = G[curType].name;
+    $('dQ').innerHTML = cur.q;
+    var c = $('dChecks'); c.innerHTML = '';
+    if (cur.choice){
+      var w = document.createElement('div'); w.className = 'choice';
+      cur.choice.forEach(function(o){ var b = document.createElement('button'); b.type = 'button'; b.textContent = o; b.setAttribute('data-o', o); w.appendChild(b); });
+      c.appendChild(w); $('dCheck').hidden = true;
+    } else {
+      cur.f.forEach(function(f){
+        var l = document.createElement('label'); l.textContent = f[0];
+        var i = document.createElement('input');
+        if (f[3] === 'hex'){ i.setAttribute('data-type', 'hex'); i.setAttribute('data-ans', f[1]); }
+        else { i.setAttribute('data-ans', String(Math.round(f[1] * 1e6) / 1e6)); if (f[2]) i.setAttribute('data-tol', f[2]); }
+        l.appendChild(i); c.appendChild(l);
+      });
+      var vd = document.createElement('span'); vd.className = 'verdict'; c.appendChild(vd);
+      $('dCheck').hidden = false;
+    }
+    $('dSol').hidden = true; $('dSol').innerHTML = cur.s;
+    var first = c.querySelector('input'); if (first && window.innerWidth > 700) first.focus({ preventScroll: true });
+  }
+  function record(ok){ if (answered) return; answered = true; score.t++; if (ok) score.r++; store('p2-drill', JSON.stringify(score)); showScore(); }
+  $('dCheck').addEventListener('click', function(){
+    var c = $('dChecks'), fs = c.querySelectorAll('input'), n = 0;
+    fs.forEach(function(f){ if (checkField(f)) n++; });
+    var ok = n === fs.length, vd = c.querySelector('.verdict');
+    vd.textContent = ok ? '全部正确 ✓' : (n + ' / ' + fs.length + ' 正确'); vd.className = 'verdict ' + (ok ? 'good' : 'bad');
+    record(ok); $('dSol').hidden = false;
+  });
+  $('dChecks').addEventListener('click', function(e){
+    var b = e.target.closest('[data-o]'); if (!b || !cur.choice) return;
+    var ok = b.getAttribute('data-o') === cur.ans;
+    b.classList.add(ok ? 'right' : 'wrong');
+    if (!ok) $('dChecks').querySelector('[data-o="' + cur.ans + '"]').classList.add('right');
+    record(ok); $('dSol').hidden = false;
+  });
+  $('dChecks').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); if (answered) next(); else $('dCheck').click(); } });
+  $('dNext').addEventListener('click', next);
+  $('dShow').addEventListener('click', function(){ $('dSol').hidden = false; });
+  $('dReset').addEventListener('click', function(){ score = { r: 0, t: 0 }; store('p2-drill', JSON.stringify(score)); showScore(); });
+  bar.addEventListener('click', function(e){ var b = e.target.closest('.fchip'); if (!b) return; curType = b.getAttribute('data-k'); store('p2-drill-type', curType); next(); });
+  showScore(); next();
+})();
+</script>
+</body>
+</html>
