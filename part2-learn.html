@@ -440,6 +440,11 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
 .langseg button{padding:5px 10px;}
 @media print{ details.exans > div{display:block;} }
 
+/* 讲解补充段落的目录入口 */
+.navsub li a.deep{padding-left:22px; font-size:12.5px;}
+.navsub li a.deep::before{content:"· "; color:var(--line-strong);}
+.sub h4[id]{scroll-margin-top:70px;}
+
 </style>
 </head>
 <body>
@@ -461,8 +466,12 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
       <ul class="navsub">
         <li><a href="#m7-s1">冯·诺依曼结构与瓶颈</a></li>
         <li><a href="#m7-s2">存储层次与局部性</a></li>
+        <li><a class="deep" href="#m7-vram">显存在哪一层</a></li>
         <li><a href="#m7-s3">命中、缺失与 AMAT</a></li>
+        <li><a class="deep" href="#m7-speedup">加速比是什么</a></li>
         <li><a href="#m7-s4">存储停顿与实际 CPI</a></li>
+        <li><a class="deep" href="#m7-fetch">取指 vs 取数</a></li>
+        <li><a class="deep" href="#m7-mix">load/store 占比的含义</a></li>
         <li><a class="lablink" href="#m7-lab">实验：CPI 停顿计算器</a></li>
         <li><a href="#m7-s5">循环访存计时题</a></li>
         <li><a class="exlink" href="#m7-ex">课堂练习 Exercise 7.1–7.4</a></li>
@@ -473,9 +482,14 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <li><a href="#m8-s1">性能指标与 AMAT 公式</a></li>
         <li><a href="#m8-s2">设计四问与三种映射</a></li>
         <li><a href="#m8-s3">全相联 + LRU</a></li>
+        <li><a class="deep" href="#m8-hitmiss">判断 HIT / MISS</a></li>
+        <li><a class="deep" href="#m8-inspect">怎么看在不在缓存里</a></li>
         <li><a href="#m8-s4">直接映射</a></li>
         <li><a href="#m8-s5">组相联</a></li>
+        <li><a class="deep" href="#m8-2way">2 路组相联逐步走</a></li>
+        <li><a class="deep" href="#m8-perset">每组放几块</a></li>
         <li><a href="#m8-s6">3C 缺失分类</a></li>
+        <li><a class="deep" href="#m8-conflict">冲突缺失是什么意思</a></li>
         <li><a href="#m8-s7">比较器的硬件代价</a></li>
         <li><a class="lablink" href="#m8-lab">实验：缓存模拟器</a></li>
         <li><a class="exlink" href="#m8-ex">课堂练习 Exercise 8.1–8.3</a></li>
@@ -622,6 +636,24 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
           </tbody>
         </table></div>
         <div class="callout teal"><div class="lbl">一眼识别两种局部性</div><p>序列 <code>100, 101, 102, 103, 100, 101, 102, 200, 200</code> 同时有两种局部性：100→103 依次递增是空间局部性；100 又出现、200 连续两次是时间局部性。Tutorial 9.1(d) 就是这样考的。</p></div>
+        <h4 id="m7-vram">补充：显存（GPU 内存）在哪一层</h4>
+        <p>显存在层次图上和<strong>主存是同一层</strong>：它本身就是 DRAM，只是不属于 CPU 这座金字塔，而是 GPU 自己那座金字塔里"主存"的位置。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>层次</th><th>CPU 这一侧</th><th>GPU 这一侧</th></tr></thead>
+          <tbody>
+            <tr><td>最快、最小</td><td>寄存器</td><td>寄存器（每个 SM 有几万个）</td></tr>
+            <tr><td>片上缓存</td><td>L1 / L2 / L3（SRAM）</td><td>共享内存（shared memory）、L1 / L2（SRAM）</td></tr>
+            <tr><td>片外 DRAM</td><td><b>主存</b>：DDR4 / DDR5</td><td><b>显存</b>：GDDR6 / GDDR7，数据中心卡用 HBM</td></tr>
+            <tr><td>更下面</td><td>SSD / 硬盘</td><td>经 PCIe 访问 CPU 的主存，再往下是硬盘</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="speclist">
+          <li><strong>技术上它就是 DRAM。</strong>它和主存一样处在"片外、大、比 SRAM 慢"那一层，区别是为带宽设计：数据位宽更宽、频率更高。例如一块 8 GB GDDR7 的笔记本显卡，带宽有几百 GB/s；CPU 的双通道 DDR5 约 80–100 GB/s。单次访问的延迟并不比主存短，GPU 靠几千个线程同时访存把延迟藏起来。</li>
+          <li><strong>两座金字塔之间隔着 PCIe。</strong>CPU 不能像用自己的主存那样透明地用显存，数据要显式拷过去（例如 <code>cudaMemcpy</code>）。PCIe 只有几十 GB/s，远低于显存带宽。这条通路就是 7.1 节冯·诺依曼瓶颈在 CPU 和 GPU 之间的翻版，所以跑深度学习时要尽量让数据一直留在显存里。</li>
+          <li><strong>集成显卡没有独立显存。</strong>核显（以及苹果 M 系列的统一内存）的"显存"就是从主存里划出来的一块，和 CPU 共用同一层 DRAM。</li>
+          <li><strong>和讲义的联系。</strong>7.1 节"怎么缓解瓶颈"里的"GPU 等并行加速器"和"3D 堆叠的 HBM"指的就是这一套：HBM 是贴在 GPU 旁边堆叠起来的显存。</li>
+        </ul>
+        <div class="callout"><div class="lbl">考试提示</div><p>课程默认只有"缓存 + 主存"两级，显存不在考试范围里，算题时不要把它算进去。</p></div>
       </div>
 
       <div class="sub" id="m7-s3">
@@ -635,6 +667,34 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         </div>
         <p>讲义例子：缓存 1 周期，主存 50 周期，命中率 80%。命中时间 1，缺失代价 50，缺失时间 51，缺失率 0.2，所以 AMAT = 0.8×1 + 0.2×51 = <b>11 周期</b>。</p>
         <div class="callout warn"><div class="lbl">易错：缺失代价 ≠ 缺失时间</div><p>缺失代价（penalty）只是"多出来"的那部分时间；缺失时间（miss time）= 查缓存的时间 + 缺失代价。题目说"缓存比主存快 10 倍"时，按课程约定一次缺失要花 C + M = 1 + 10 = 11 个单位，而不是 10。Tutorial 7.1 用这个约定算出加速比正好是 5：不用缓存每次 10，用缓存 AMAT = 0.9×1 + 0.1×11 = 2。</p></div>
+        <h4 id="m7-speedup">加速比（speedup）是什么</h4>
+        <p>加速比衡量一项改进让<b>同一件事</b>快了多少倍：</p>
+        <div class="formula">
+          <span class="fl"><b>加速比 = T<sub>旧</sub> / T<sub>新</sub> = 性能<sub>新</sub> / 性能<sub>旧</sub></b></span>
+        </div>
+        <ul class="speclist">
+          <li>大于 1 表示变快了：加速比 4 就是快了 4 倍，时间变成原来的 1/4；小于 1 表示反而变慢了。</li>
+          <li>前后必须是同一个任务（同一个程序、同一批数据），否则比较没有意义。</li>
+        </ul>
+        <div class="tablewrap"><table>
+          <caption>Part 2 里的几种写法，本质都是"旧时间 / 新时间"</caption>
+          <thead><tr><th>场景</th><th>公式</th><th>课程里的例子</th></tr></thead>
+          <tbody>
+            <tr><td>加缓存</td><td>无缓存每次访问时间 / AMAT</td><td>T7.1：10 → AMAT 2，加速比 5</td></tr>
+            <tr><td>流水线（指令很多）</td><td>单周期时间 / 流水线时钟周期</td><td>10.4 节：950 ps / 250 ps = 3.8</td></tr>
+            <tr><td>流水线（n 个任务）</td><td>顺序总时间 / 流水总时间</td><td>10.3 节洗衣房：360 / 210 ≈ 1.71</td></tr>
+            <tr><td>时钟相同，只比 CPI</td><td>CPI<sub>旧</sub> / CPI<sub>新</sub></td><td>12.1 节：5 / 1.25 = 4</td></tr>
+            <tr><td>时钟也变了（最通用）</td><td>(CPI<sub>旧</sub> × T<sub>旧</sub>) / (CPI<sub>新</sub> × T<sub>新</sub>)</td><td>T11.8：(4.6 × 0.8) / (1.2 × 1.0) ≈ 3.07</td></tr>
+          </tbody>
+        </table></div>
+        <p>最后一行是通式：每条指令的平均时间 = CPI × 时钟周期，CPU 时间之比就是这两项乘积之比，前面几行都是它的特殊情况。</p>
+        <div class="callout warn"><div class="lbl">加速比的常见坑</div><ul class="speclist" style="margin:0">
+          <li><b>分子分母别放反</b>：慢的放上面、快的放下面，结果才大于 1。</li>
+          <li><b>"快 3 倍"和"快 300%"不是一回事</b>：加速比 3 是时间变成 1/3；"快了 35%"对应加速比 1.35。T7.3 问"慢多少"，2.7 / 2.0 = 1.35 倍，即多花 35% 的时间。</li>
+          <li><b>流水线加速比有上限</b>：各级完全平衡、指令无限多、没有停顿时，最大加速比 = 级数；不均衡、填充排空、冒险停顿都会让它更小。</li>
+          <li><b>只看 AMAT 会出错</b>：T9.2 里 2 路组相联的 AMAT 更小，但时钟周期变长，算 CPU 时间之比反而是直接映射更快。比较要比"整个程序的总时间"。</li>
+          <li>Part 1 的 <b>Amdahl 定律</b>也是加速比：只有比例 f 的部分被加速 s 倍时，整体加速比 = 1 / ((1 − f) + f / s)。T7.1 若按"缺失只花主存时间"的口径算，就是这个公式，得 5.26；按课程口径是 5。</li>
+        </ul></div>
       </div>
 
       <div class="sub" id="m7-s4">
@@ -645,6 +705,38 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
           <span class="fl"><b>实际 CPI = 理想 CPI + 每条指令的存储停顿周期</b></span>
           <span class="fl">每条指令的存储停顿 = 每条指令的平均缺失代价</span>
         </div>
+        <h4 id="m7-fetch">先分清：取指 vs 取数</h4>
+        <p><strong>取指（instruction fetch）</strong>：把<b>指令本身</b>从存储器读出来。CPU 按 PC 里的地址读出那 32 位指令编码，放进指令寄存器 IR，然后 PC 加 4。<strong>取数（data access）</strong>：指令执行时，去存储器里读或写它要处理的<b>数据</b>。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>取指</th><th>取数</th></tr></thead>
+          <tbody>
+            <tr><td>读的是什么</td><td>指令本身（操作码、寄存器号、立即数）</td><td>程序的数据（数组元素、变量）</td></tr>
+            <tr><td>地址从哪来</td><td>PC</td><td>指令算出来的有效地址，如 R2 + 8</td></tr>
+            <tr><td>哪些指令有</td><td><b>每一条</b>都有，课程默认恰好 1 次</td><td>只有 <b>load / store</b>（DLX 是 load-store 架构）</td></tr>
+            <tr><td>读还是写</td><td>只读</td><td>load 读，store 写</td></tr>
+            <tr><td>流水线哪一级</td><td>IF（第 1 级）</td><td>MEM（第 4 级）</td></tr>
+            <tr><td>走哪个缓存</td><td>指令缓存 I-cache</td><td>数据缓存 D-cache</td></tr>
+          </tbody>
+        </table></div>
+        <p>例：<code>LW R1, 8(R2)</code> 存在地址 1000，R2 = 500。<b>取指</b>：读 Mem[1000]，得到这条指令的编码；<b>取数</b>：读 Mem[500 + 8] = Mem[508]，把值放进 R1。这一条指令访问了两次存储器。<code>ADD R1, R2, R3</code> 只有取指（操作数都在寄存器里）；<code>SW R3, 8(R2)</code> 是取指加一次写数据。</p>
+        <ul class="speclist">
+          <li><strong>访存次数</strong> = 1（取指）+ load/store 比例（取数）。</li>
+          <li><strong>缺失率要分别乘</strong>：指令停顿 = 1 × I-缺失率 × 代价；数据停顿 = load/store 比例 × D-缺失率 × 代价。</li>
+          <li><strong>结构冒险</strong>：指令和数据共用一个单端口存储器时，一条指令在 IF 取指、另一条在 MEM 取数，同一周期抢同一个存储器（Lesson 12）。分开的指令/数据缓存（哈佛结构的思路）可以解决。</li>
+        </ul>
+        <h4 id="m7-mix">"load/store 占 40%"是什么意思</h4>
+        <p>这叫<strong>指令构成（instruction mix）</strong>：程序运行时执行的所有指令里，有 40% 是 load 或 store（两者合起来算，比如 25% load + 15% store），其余 60% 是算术逻辑、分支这类不访问数据存储器的指令。</p>
+        <div class="formula">
+          <span class="fl">设程序执行 1000 条指令：400 条 LW/SW，600 条 ADD、SUB、BEQZ……</span>
+          <span class="fl">取指：每条都取一次 → 1000 次；取数：只有 400 条 load/store → 400 次</span>
+          <span class="fl">合计 1400 次 → 平均<b>每条指令 1 + 0.4 = 1.4 次访存</b></span>
+          <span class="fl">数据停顿 = <b>0.4</b> × D-缺失率 × 缺失代价　<span class="cm">（例：0.4 × 0.05 × 30 = 0.6 周期/条）</span></span>
+        </div>
+        <div class="callout warn"><div class="lbl">要注意</div><ul class="speclist" style="margin:0">
+          <li><b>数的是执行次数，不是代码行数</b>：循环里的一条 LW 跑 100 遍就算 100 条，题目给的比例都是运行时的统计。</li>
+          <li><b>40% 只用在数据访问上</b>：取指那一项每条指令都有，前面乘 1，不要再乘 40%。</li>
+          <li><b>给比例时先换成百分比</b>：Exercise 7.1 给的是 4 : 3 : 1，load/store 占 3 / 8 = 37.5%。</li>
+        </ul></div>
         <h4>情形 1：取指和取数的缺失率、缺失代价相同</h4>
         <div class="formula">
           <span class="fl">每条指令的访存次数 = 取指次数 I + 取数次数 D = <b>1 + load/store 比例</b></span>
@@ -787,19 +879,63 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <p><strong>全相联（fully associative）</strong>：任何内存块都可以放进任何一行。地址只分两段：</p>
         <div class="addrbits"><span class="ft">Tag · 4 位（第 5–2 位）</span><span class="fo">Offset · 2 位</span></div>
         <p>偏移位数 = log₂(块大小) = log₂4 = 2；标签位数 = 地址位数 − 偏移位数 = 6 − 2 = 4（也等于 log₂(主存块数) = log₂16）。每行除了数据，还要存标签和替换用的 LRU 信息。讲义用 <strong>TSLR（time since last referenced，距上次访问的次数）</strong>记录 LRU：每访问一次，所有有效行的 TSLR 加 1，被访问的行清零；要替换时踢 TSLR 最大的那行。</p>
-        <h4>讲义例题：序列 24, 20, 04, 12, 20, 44, 04, 24, 44</h4>
+        <h4 id="m8-hitmiss">判断 HIT 还是 MISS：每一步问三个问题</h4>
+        <p>判断命中只看一件事：<strong>这个地址所在的"块"，此刻是不是在缓存里</strong>。和这个地址本身以前有没有被访问过无关。</p>
+        <ol class="steps">
+          <li><strong>它属于哪个块？</strong>块大小 4 字节，块从 4 的倍数开始：块起点 = 地址 ÷ 4 取整再 × 4。例如 24 → 24–27，20 → 20–23，04 → 4–7，45 → 44–47。</li>
+          <li><strong>这个块现在在缓存里吗？</strong>全相联时，4 行里任何一行有它都算。</li>
+          <li><strong>在 → HIT</strong>，记下它刚被用过。<strong>不在 → MISS</strong>，把整块搬进来：有空行放空行；4 行都满了，踢掉<strong>最久没被用过</strong>的那一块（LRU）。</li>
+        </ol>
+        <h4>讲义例题逐步走：序列 24, 20, 04, 12, 20, 44, 04, 24, 44</h4>
+        <p>表中括号里记的是这一块<b>最后一次被用到是第几步</b>，要踢的时候踢括号里数字最小的。</p>
         <div class="tablewrap"><table>
-          <thead><tr><th>#</th><th>地址</th><th>块（地址范围）</th><th>结果</th><th>说明</th></tr></thead>
+          <thead><tr><th>步</th><th>地址 → 块</th><th>块此刻在缓存里吗？</th><th>结果</th><th>访问后缓存里的块</th></tr></thead>
           <tbody>
-            <tr><td class="num">1–4</td><td class="num">24, 20, 04, 12</td><td class="num">24–27, 20–23, 4–7, 12–15</td><td><span class="res miss">MISS</span></td><td>依次装入 4 行，都是首次访问 → 强制缺失</td></tr>
-            <tr><td class="num">5</td><td class="num">20</td><td class="num">20–23</td><td><span class="res hit">HIT</span></td><td>命中，TSLR 清零</td></tr>
-            <tr><td class="num">6</td><td class="num">44</td><td class="num">44–47</td><td><span class="res miss">MISS</span></td><td>缓存已满，踢掉 TSLR 最大的 24–27</td></tr>
-            <tr><td class="num">7</td><td class="num">04</td><td class="num">4–7</td><td><span class="res hit">HIT</span></td><td></td></tr>
-            <tr><td class="num">8</td><td class="num">24</td><td class="num">24–27</td><td><span class="res miss">MISS</span></td><td>之前被踢出 → 容量缺失；踢掉此时最久未用的 12–15</td></tr>
-            <tr><td class="num">9</td><td class="num">44</td><td class="num">44–47</td><td><span class="res hit">HIT</span></td><td>共 3 次命中、6 次缺失</td></tr>
+            <tr><td class="num">1</td><td class="mono">24 → 24–27</td><td>缓存是空的，不在</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)</td></tr>
+            <tr><td class="num">2</td><td class="mono">20 → 20–23</td><td>不在</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)、20–23(2)</td></tr>
+            <tr><td class="num">3</td><td class="mono">04 → 4–7</td><td>不在</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)、20–23(2)、4–7(3)</td></tr>
+            <tr><td class="num">4</td><td class="mono">12 → 12–15</td><td>不在</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)、20–23(2)、4–7(3)、12–15(4)　← 满了</td></tr>
+            <tr><td class="num">5</td><td class="mono">20 → 20–23</td><td><b>在</b>（第 2 步搬进来的）</td><td><span class="res hit">HIT</span></td><td class="mono">20–23 更新为 (5)</td></tr>
+            <tr><td class="num">6</td><td class="mono">44 → 44–47</td><td>不在，而且满了</td><td><span class="res miss">MISS</span></td><td>踢掉数字最小的 24–27(1)，换成 44–47(6)</td></tr>
+            <tr><td class="num">7</td><td class="mono">04 → 4–7</td><td><b>在</b></td><td><span class="res hit">HIT</span></td><td class="mono">4–7 更新为 (7)</td></tr>
+            <tr><td class="num">8</td><td class="mono">24 → 24–27</td><td><b>不在了</b>（第 6 步被踢掉）</td><td><span class="res miss">MISS</span></td><td>此时 12–15(4) 最久没用，踢掉它，换成 24–27(8)</td></tr>
+            <tr><td class="num">9</td><td class="mono">44 → 44–47</td><td><b>在</b>（第 6 步搬进来的）</td><td><span class="res hit">HIT</span></td><td>共 3 次命中、6 次缺失</td></tr>
           </tbody>
         </table></div>
+        <p>讲义里的 TSLR 记的是"距上次使用过了几次访问"，数字<b>最大</b>的就是最久没用的；上表记"最后使用在第几步"、取<b>最小</b>的。两种记法说的是同一件事，方向相反而已。</p>
         <div class="callout warn"><div class="lbl">注意第 6 步的分类</div><p>讲义把第 6 步（44 第一次被访问，同时引起替换）标成 <b>capacity miss</b>，理由是缓存装不下序列需要的所有块。但按讲义自己第 24 页的定义（"块第一次被访问"就是 compulsory），以及教科书的标准 3C 模型，第一次访问一律算 <b>compulsory</b>。下面的模拟器按标准定义分类。考试遇到"首次访问且发生替换"时，建议写 compulsory，并注明"cache full, LRU block replaced"；如果拿不准老师的口径，Quiz 前问一下助教。</p></div>
+        <div class="callout teal"><div class="lbl">最容易想错的两点</div><ul class="speclist" style="margin:0">
+          <li><b>以前访问过 ≠ 一定命中。</b>第 8 步的 24 第 1 步就访问过，但第 6 步被踢出去了，所以还是 MISS。</li>
+          <li><b>没访问过 ≠ 一定缺失。</b>命中按"块"算。Exercise 8.1 先访问 08，块 8–11 整块进了缓存；之后访问 09，虽然 09 是第一次出现，但它也在 8–11 里，所以是 HIT。这就是空间局部性。</li>
+        </ul></div>
+        <h4 id="m8-inspect">"在不在缓存里"到底怎么看</h4>
+        <p><strong>手算时，看你自己记下的缓存内容。</strong>缓存里有什么完全由前面的步骤决定，所以手算时每一步都要把当前缓存里的块记下来（上表最右一栏）。判断第 n 步时，只看第 n − 1 步那一行：要找的块在里面就是 HIT。例如第 8 步访问 24（块 24–27），第 7 步后缓存里是 44–47、20–23、4–7、12–15，没有 24–27，所以 MISS。</p>
+        <p><strong>硬件上，比较标签（tag）。</strong>硬件不存"24–27"这种范围，而是在每一行存一个<b>标签</b>，再加一个<b>有效位</b>（这一行有没有装东西）：</p>
+        <ol class="steps">
+          <li>把地址拆开：本例地址 6 位，最低 2 位是偏移；全相联没有索引，高 4 位全是标签，标签其实就是块号。</li>
+          <li>拿地址的标签和缓存里存的标签逐个比较。</li>
+          <li>某一行标签相同且有效位为 1 → HIT；一个都不同 → MISS。空行有效位是 0，永远不会命中。</li>
+        </ol>
+        <div class="tablewrap"><table>
+          <caption>第 4 步后缓存里存的标签：0110、0101、0001、0011</caption>
+          <thead><tr><th>步</th><th>地址</th><th>二进制（标签 | 偏移）</th><th>当时缓存里的标签</th><th>比较结果</th></tr></thead>
+          <tbody>
+            <tr><td class="num">5</td><td class="num">20</td><td class="mono"><b>0101</b> | 00</td><td class="mono">0110、<b>0101</b>、0001、0011</td><td>与第 2 行相同 → <span class="res hit">HIT</span></td></tr>
+            <tr><td class="num">6</td><td class="num">44</td><td class="mono"><b>1011</b> | 00</td><td class="mono">0110、0101、0001、0011</td><td>都不同 → <span class="res miss">MISS</span>，踢掉 0110</td></tr>
+            <tr><td class="num">8</td><td class="num">24</td><td class="mono"><b>0110</b> | 00</td><td class="mono">1011、0101、0001、0011</td><td>都不同 → <span class="res miss">MISS</span>（0110 第 6 步已被踢）</td></tr>
+          </tbody>
+        </table></div>
+        <p>这也解释了 09 为什么在 08 之后命中：08 = 0010|00，09 = 0010|01，标签都是 0010，只是偏移不同。偏移只决定从块里取哪个字节，不影响命中判断。</p>
+        <div class="tablewrap"><table>
+          <caption>三种组织方式各自要比较哪些行</caption>
+          <thead><tr><th>组织</th><th>和哪些行比较标签</th><th>比较器</th></tr></thead>
+          <tbody>
+            <tr><td>全相联</td><td>所有行（4 行同时比）</td><td class="num">4 个，硬件最贵</td></tr>
+            <tr><td>直接映射</td><td>先用索引位直接选出唯一一行，只和这一行比。例如 04 = 00|<b>01</b>|00 只看第 01 行，它存的标签 01（块 20–23）≠ 00 → MISS</td><td class="num">1 个</td></tr>
+            <tr><td>组相联</td><td>先用索引选出一组，再和组内几行比</td><td class="num">k 个（k 路）</td></tr>
+          </tbody>
+        </table></div>
+        <p>缓存模拟器每一格里显示的就是存的标签（"tag 0101"），下方表格的"二进制拆分"一栏给出地址的标签，对照着看就能看清每一步在比什么。</p>
       <div class="exgroup2"><div class="exgh">课堂练习 · In-class exercise</div><div class="excard" id="ex8-1"><div class="exhead"><span class="exid">Exercise 8.1</span><span class="extopic">全相联 + LRU 手算<span class="ent"> · Fully associative cache with LRU</span></span></div><div class="exbody"><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>Fully associative cache: main memory 256 bytes, 4 cache lines, 4-byte blocks, LRU replacement, initially empty. Reference sequence: <code>08, 124, 77, 45, 09, 126, 44, 211, 08, 212, 77, 241</code>. (1) Number of bits for the address, offset and tag. (2) For each reference, update the cache and show the tag and time since last referenced. (3) Hit or miss; for a miss, compulsory or capacity. (4) Total hits, misses and hit rate.</p></div><div class="zh"><span class="lg">中</span><p>全相联缓存：主存 256 字节，4 行，块 4 字节，LRU 替换，初始为空。访问序列：<code>08, 124, 77, 45, 09, 126, 44, 211, 08, 212, 77, 241</code>。(1) 地址、偏移、标签各几位；(2) 每次访问后的缓存内容（标签与距上次访问次数 TSLR）；(3) 命中还是缺失，缺失是强制还是容量；(4) 总命中、总缺失和命中率。</p></div></div><details class="exans"><summary>解答 · Solution</summary><div class="exansbody"><div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>Addr 地址</th><th>Tag Index Offset</th><th>Block 块</th><th>Set/Line 组/行</th><th>Tag</th><th>Result 结果</th><th>Evicted 被替换</th><th>Cache after 访问后缓存 (TSLR)</th></tr></thead><tbody><tr><td>1</td><td>8</td><td>000010 00</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(0)</td></tr><tr><td>2</td><td>124</td><td>011111 00</td><td>124–127</td><td>–</td><td>011111</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(1), 124–127(0)</td></tr><tr><td>3</td><td>77</td><td>010011 01</td><td>76–79</td><td>–</td><td>010011</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(2), 124–127(1), 76–79(0)</td></tr><tr><td>4</td><td>45</td><td>001011 01</td><td>44–47</td><td>–</td><td>001011</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>8–11(3), 124–127(2), 76–79(1), 44–47(0)</td></tr><tr><td>5</td><td>9</td><td>000010 01</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(0), 124–127(3), 76–79(2), 44–47(1)</td></tr><tr><td>6</td><td>126</td><td>011111 10</td><td>124–127</td><td>–</td><td>011111</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(1), 124–127(0), 76–79(3), 44–47(2)</td></tr><tr><td>7</td><td>44</td><td>001011 00</td><td>44–47</td><td>–</td><td>001011</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(2), 124–127(1), 76–79(4), 44–47(0)</td></tr><tr><td>8</td><td>211</td><td>110100 11</td><td>208–211</td><td>–</td><td>110100</td><td><span class="res miss">MISS</span> compulsory</td><td>76–79</td><td>8–11(3), 124–127(2), 208–211(0), 44–47(1)</td></tr><tr><td>9</td><td>8</td><td>000010 00</td><td>8–11</td><td>–</td><td>000010</td><td><span class="res hit">HIT</span></td><td></td><td>8–11(0), 124–127(3), 208–211(1), 44–47(2)</td></tr><tr><td>10</td><td>212</td><td>110101 00</td><td>212–215</td><td>–</td><td>110101</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>8–11(1), 212–215(0), 208–211(2), 44–47(3)</td></tr><tr><td>11</td><td>77</td><td>010011 01</td><td>76–79</td><td>–</td><td>010011</td><td><span class="res miss">MISS</span> capacity</td><td>44–47</td><td>8–11(2), 212–215(1), 208–211(3), 76–79(0)</td></tr><tr><td>12</td><td>241</td><td>111100 01</td><td>240–243</td><td>–</td><td>111100</td><td><span class="res miss">MISS</span> compulsory</td><td>208–211</td><td>8–11(3), 212–215(2), 240–243(0), 76–79(1)</td></tr></tbody></table></div><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>(1) Address = log₂256 = <b>8</b> bits, offset = log₂4 = <b>2</b> bits, no index in a fully associative cache, tag = 8 − 2 = <b>6</b> bits.</p><p>(4) <b>4</b> hits (09, 126, 44, 08) and <b>8</b> misses (7 compulsory, 1 capacity: the second access to 77). Hit rate = 4/12 = <b>33.3%</b>. 09 shares block 8–11 with 08, 126 shares block 124–127 with 124, and 44 shares block 44–47 with 45: these hits come from spatial locality.</p></div><div class="zh"><span class="lg">中</span><p>(1) 地址 log₂256 = <b>8</b> 位，偏移 log₂4 = <b>2</b> 位，全相联没有索引，标签 = 8 − 2 = <b>6</b> 位。</p><p>(4) 命中 <b>4</b> 次（09、126、44、08），缺失 <b>8</b> 次（强制 7、容量 1：最后一次访问 77），命中率 4/12 = <b>33.3%</b>。09 与 08 同在块 8–11，126 与 124 同在块 124–127，44 与 45 同在块 44–47，这些命中来自空间局部性。</p></div></div></div></details></div></div></div>
 </div>
 
@@ -828,7 +964,73 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
           <span class="fl"><b>组号 = 块号 mod 组数</b></span>
           <span class="fl">k = 1 → 直接映射；k = 行数 → 全相联</span>
         </div>
-        <p>4 行的 2 路组相联：2 组，索引 1 位，标签 6 − 1 − 2 = 3 位。同一序列下 20、04、12、44 全都落在组 1，组 1 只有 2 行，于是不断互相替换；24 独占组 0。结果仍是 2 次命中（最后的 24、44）。</p>
+        <h4 id="m8-2way">讲义例题：4 行的 2 路组相联</h4>
+        <p>把 4 行缓存两两分成一组：组 0 两行、组 1 两行。规则只有两条：每个块<b>只能进一个固定的组</b>（像直接映射）；进组之后<b>组里两行随便放</b>，组满了踢组里最久没用的那块（像全相联）。所以说它是两者的折中。</p>
+        <div class="tablewrap"><table>
+          <caption>地址拆分（6 位地址，从高位到低位）</caption>
+          <thead><tr><th>字段</th><th>位数</th><th>怎么来的</th><th>作用</th></tr></thead>
+          <tbody>
+            <tr><td>Tag</td><td class="num">3 位（第 5–3 位）</td><td class="mono">6 − 1 − 2</td><td>认出是哪个块</td></tr>
+            <tr><td>Index</td><td class="num">1 位（第 2 位）</td><td class="mono">log₂(组数 2)</td><td>去哪个组</td></tr>
+            <tr><td>Offset</td><td class="num">2 位（第 1–0 位）</td><td class="mono">log₂(块大小 4)</td><td>块里第几个字节</td></tr>
+          </tbody>
+        </table></div>
+        <p>换个算法也一样：块号 = 地址 ÷ 4，<b>组号 = 块号 mod 2</b>，标签 = 块号 ÷ 2。所以有个好用的结论：<b>块号是偶数进组 0，是奇数进组 1</b>。Index 恰好就是块号的最低位。</p>
+        <div class="tablewrap"><table>
+          <caption>序列里每个地址去哪个组</caption>
+          <thead><tr><th>地址</th><th>Tag | Index | Offset</th><th>块</th><th>块号</th><th>组</th></tr></thead>
+          <tbody>
+            <tr><td class="num">24</td><td class="mono">011 | <b>0</b> | 00</td><td class="mono">24–27</td><td class="num">6（偶）</td><td><b>组 0</b></td></tr>
+            <tr><td class="num">20</td><td class="mono">010 | <b>1</b> | 00</td><td class="mono">20–23</td><td class="num">5（奇）</td><td>组 1</td></tr>
+            <tr><td class="num">04</td><td class="mono">000 | <b>1</b> | 00</td><td class="mono">4–7</td><td class="num">1（奇）</td><td>组 1</td></tr>
+            <tr><td class="num">12</td><td class="mono">001 | <b>1</b> | 00</td><td class="mono">12–15</td><td class="num">3（奇）</td><td>组 1</td></tr>
+            <tr><td class="num">44</td><td class="mono">101 | <b>1</b> | 00</td><td class="mono">44–47</td><td class="num">11（奇）</td><td>组 1</td></tr>
+          </tbody>
+        </table></div>
+        <p>20、04、12、44 四个块全挤进组 1，而组 1 只有 2 行；只有 24 进组 0。逐步走时，每一步先算组号，<b>只在那个组里找</b>。括号里是"最后一次被用到是第几步"，要踢时踢数字小的：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>步</th><th>地址 → 块</th><th>去哪组</th><th>那组里有它吗？</th><th>结果</th><th>访问后组 0</th><th>访问后组 1</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="mono">24 → 24–27</td><td>组 0</td><td>空</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)</td><td>—</td></tr>
+            <tr><td class="num">2</td><td class="mono">20 → 20–23</td><td>组 1</td><td>空</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)</td><td class="mono">20–23(2)</td></tr>
+            <tr><td class="num">3</td><td class="mono">04 → 4–7</td><td>组 1</td><td>没有，还有一行空</td><td><span class="res miss">MISS</span></td><td class="mono">24–27(1)</td><td class="mono">20–23(2)、4–7(3)</td></tr>
+            <tr><td class="num">4</td><td class="mono">12 → 12–15</td><td>组 1</td><td>没有，组 1 满了</td><td><span class="res miss">MISS</span>，踢 20–23</td><td class="mono">24–27(1)</td><td class="mono">12–15(4)、4–7(3)</td></tr>
+            <tr><td class="num">5</td><td class="mono">20 → 20–23</td><td>组 1</td><td>没有（第 4 步被踢）</td><td><span class="res miss">MISS</span>，踢 4–7</td><td class="mono">24–27(1)</td><td class="mono">12–15(4)、20–23(5)</td></tr>
+            <tr><td class="num">6</td><td class="mono">44 → 44–47</td><td>组 1</td><td>没有</td><td><span class="res miss">MISS</span>，踢 12–15</td><td class="mono">24–27(1)</td><td class="mono">44–47(6)、20–23(5)</td></tr>
+            <tr><td class="num">7</td><td class="mono">04 → 4–7</td><td>组 1</td><td>没有（第 5 步被踢）</td><td><span class="res miss">MISS</span>，踢 20–23</td><td class="mono">24–27(1)</td><td class="mono">44–47(6)、4–7(7)</td></tr>
+            <tr><td class="num">8</td><td class="mono">24 → 24–27</td><td>组 0</td><td><b>有</b></td><td><span class="res hit">HIT</span></td><td class="mono">24–27(8)</td><td>不变</td></tr>
+            <tr><td class="num">9</td><td class="mono">44 → 44–47</td><td>组 1</td><td><b>有</b></td><td><span class="res hit">HIT</span></td><td>不变</td><td class="mono">44–47(9)、4–7(7)</td></tr>
+          </tbody>
+        </table></div>
+        <p>结果 2 次命中、7 次缺失：5 次是第一次访问（强制缺失），第 5、7 步是冲突缺失。讲义第 64 页把第 4 步（12 第一次被访问）标成 conflict，按定义应算 compulsory，口径问题同 8.3 节。</p>
+        <div class="callout teal"><div class="lbl">为什么这么惨：组 0 一直空着一行</div><p>组 0 从头到尾只用了一行，另一行一直空着；组 1 那边四个块抢两个座位，不停互相踢。它们不能去组 0 坐，因为组号由地址决定，没得选。这正是<b>冲突缺失</b>：缓存其实还有空位，只是映射规则不让用（8.6 节详细讲）。同一序列下全相联命中 3 次（第 7 步的 04 还在缓存里），2 路和直接映射都只有 2 次。这个序列恰好不利于 2 路；一般情况下提高相联度能减少冲突缺失。</p></div>
+        <p><strong>硬件上怎么判断命中</strong>：用 Index 位选出一组（例如 20 的 Index = 1，选组 1）；把地址的 Tag 和<b>组内两行</b>存的 Tag 同时比较，需要 2 个比较器（直接映射 1 个，全相联 4 个）；有一行相同且有效位为 1 就命中。缺失时每组用 1 个 LRU 位记住哪一路最近用过，决定踢谁。</p>
+
+        <h4 id="m8-perset">一般来说，每组放几块？</h4>
+        <p>要分清两件事：<b>每组最多同时装几块</b>是硬件定死的；<b>主存里哪些块会被分到这一组</b>由地址决定。</p>
+        <ul class="speclist">
+          <li><strong>每组最多同时装 k 块，固定不变。</strong>k 路组相联每组有 k 行。本例 4 行 2 路：组数 = 4 ÷ 2 = 2，组 0、组 1 各 2 行，各自最多同时装 2 块。组与组之间不能互相借位。</li>
+          <li><strong>主存的块平均分给各组，而且交替排列。</strong>组号 = 块号 mod 组数。主存 64 字节共 16 块，偶数块归组 0，奇数块归组 1，每组"负责" 8 个块，但同一时刻只有 2 个座位。</li>
+          <li><strong>某次运行里各组实际装了几块，看访问序列。</strong>本例 1 块去组 0、4 块去组 1，所以组 1 挤得不停踢；如果顺序访问 0, 4, 8, 12, 16…，块号奇偶交替，两组会用得差不多平均。</li>
+        </ul>
+        <div class="tablewrap"><table>
+          <caption>本例：每组负责哪些主存块</caption>
+          <thead><tr><th>组</th><th>归它的块号</th><th>对应地址</th></tr></thead>
+          <tbody>
+            <tr><td>组 0</td><td class="mono">0, 2, 4, 6, 8, 10, 12, 14（偶数）</td><td class="mono">0–3、8–11、16–19、24–27、32–35、40–43、48–51、56–59</td></tr>
+            <tr><td>组 1</td><td class="mono">1, 3, 5, 7, 9, 11, 13, 15（奇数）</td><td class="mono">4–7、12–15、20–23、28–31、36–39、44–47、52–55、60–63</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tablewrap"><table>
+          <caption>换成别的参数，同样的算法</caption>
+          <thead><tr><th>参数</th><th>组数 = 行数 ÷ k</th><th>每组行数 = k</th><th>每组负责的主存块数</th></tr></thead>
+          <tbody>
+            <tr><td>讲义：64 B 主存，4 行，2 路，4 B 块</td><td class="num">2</td><td class="num">2</td><td class="num">16 ÷ 2 = 8</td></tr>
+            <tr><td>Tutorial 8.8：256 B 主存，8 行，2 路，4 B 块</td><td class="num">4</td><td class="num">2</td><td class="num">64 ÷ 4 = 16</td></tr>
+            <tr><td>Exercise 8.3：256 B 主存，4 行，2 路，4 B 块</td><td class="num">2</td><td class="num">2</td><td class="num">64 ÷ 2 = 32</td></tr>
+          </tbody>
+        </table></div>
+        <p>Tutorial 8.8 有 4 组，组号是块号除以 4 的余数，不再是看奇偶。那题的块号 5、9、13、17 除以 4 都余 1，全进了组 1，和本例是同一种"挤在一组"的情况。</p>
         <div class="tablewrap"><table>
           <caption>三种组织方式对比（同为 4 行缓存）</caption>
           <thead><tr><th>方式</th><th>组数 × 每组行数</th><th>地址划分</th><th>块能去哪</th></tr></thead>
@@ -851,7 +1053,17 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
             <tr><td><b>容量缺失</b><br><small>Capacity</small></td><td>工作集比缓存大，全相联也装不下</td><td>1 MB 缓存反复访问 10 MB 数据</td><td>增大缓存；加一级缓存</td></tr>
           </tbody>
         </table></div>
-        <p>判断顺序：<strong>先问是不是第一次访问</strong>（是 → 强制）；不是的话，<strong>再问换成同样大小的全相联缓存会不会命中</strong>（会命中 → 冲突，因为是映射方式造成的；也缺失 → 容量）。标准 3C 模型里每次缺失只归入一类。</p>
+        <h4 id="m8-conflict">冲突缺失到底是什么意思</h4>
+        <p><strong>缓存其实装得下，但映射规则规定这个块只能去某一行（或某一组），偏偏那里被别的块占了，只好把它踢出去；后来再访问被踢掉的块，就缺失了。</strong>一句话：不是缓存太小，是座位分配规则太死。</p>
+        <div class="callout teal"><div class="lbl">打个比方</div><p>停车场 4 个车位，规定单号车只能停 A 区（2 个位），双号车只能停 B 区（2 个位）。连续来了 4 辆单号车：A 区两个位被反复争夺，后来的把先停的赶走；B 区一直空着一个位，但单号车不准停过去。被赶走的车再回来又找不到位，这就是冲突。如果改成"随便停"（全相联），4 辆车都停得下，就不会互相赶。</p></div>
+        <p>8.5 节的 2 路组相联例子里，第 5、7 步就是冲突缺失：第 4 步 12 进组 1 时把 20–23 踢掉，第 5 步再访问 20 就 MISS；第 5 步又把 4–7 踢掉，第 7 步访问 04 也 MISS。这两次缺失时<b>组 0 都还空着一行</b>，总容量是够的。</p>
+        <p><strong>判断方法</strong>，按顺序问两步：</p>
+        <ol class="steps">
+          <li><strong>这个块是第一次被访问吗？</strong>是 → <b>强制缺失</b>，不管它有没有引起替换。</li>
+          <li><strong>不是第一次的话，换成同样行数的全相联缓存（也用 LRU）跑同一个序列，这一步会命中吗？</strong>会命中 → <b>冲突缺失</b>（全相联装得下，是映射规则害的）；也缺失 → <b>容量缺失</b>（缓存本身太小，怎么放都装不下）。</li>
+        </ol>
+        <p>验证：全相联在第 4 步后装着 24–27、20–23、4–7、12–15，第 5 步访问 20 会命中，所以 2 路这里的缺失是冲突缺失。反过来，全相联自己第 8 步访问 24 缺失，它没有映射限制，只能怪 4 行装不下，所以是容量缺失。标准 3C 模型里每次缺失只归入一类。冲突缺失<b>只出现在直接映射和组相联里</b>，全相联没有冲突缺失；这也是提高相联度能降低缺失率的原因。</p>
+        <div class="callout warn"><div class="lbl">答题口径</div><p>讲义的直接映射/组相联练习（Exercise 8.2、8.3，Tutorial 8.8）只让你在 compulsory 和 conflict 之间选：凡是"以前访问过、后来被同一行/同一组的别的块踢掉"的缺失，都写 conflict。缓存模拟器里标 * 的少数几次，严格按上面第 2 步算是容量缺失，答题时按题目给的两个选项写即可。</p></div>
         <div class="tablewrap"><table>
           <caption>冲突缺失 vs 容量缺失</caption>
           <thead><tr><th>问题</th><th>冲突缺失</th><th>容量缺失</th></tr></thead>
