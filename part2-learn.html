@@ -515,6 +515,10 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <li><a class="deep" href="#m9-localglobal">局部 vs 全局缺失率</a></li>
         <li><a class="deep" href="#m9-l2cpi">CPI 例子逐项拆开</a></li>
         <li><a href="#m9-s7">虚拟内存与 TLB</a></li>
+        <li><a class="deep" href="#m9-paging">分页与地址翻译</a></li>
+        <li><a class="deep" href="#m9-pagefault">页缺失</a></li>
+        <li><a class="deep" href="#m9-tlb">TLB 与三种情况</a></li>
+        <li><a class="deep" href="#m9-vmexample">例题：TLB + 页缺失</a></li>
         <li><a class="exlink" href="#m9-ex">课堂练习 Exercise 9.1</a></li>
       </ul>
     </div>
@@ -1324,6 +1328,7 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
 12346 0B567 1
 ABCDE 1F890 1
 22222 - 0</textarea></label>
+            <div class="presets" id="vmPresets"><button data-p="t97" class="on">Tutorial 9.7</button><button data-p="ex97">9.7 节例题</button></div>
             <div class="presets" id="vmTry"><button>12345678</button><button>12346ABC</button><button>ABCDEFFF</button><button>22222000</button></div>
             <div class="kpis" id="vmOut"></div>
             <div class="addrbits" id="vmBits"></div>
@@ -1531,25 +1536,151 @@ ABCDE 1F890 1
 
       <div class="sub" id="m9-s7">
         <h3><span class="num">9.7</span> 虚拟内存与 TLB</h3>
-        <p>虚拟内存是一层<strong>间接映射</strong>：程序使用虚拟地址，由硬件和操作系统翻译成物理地址。它解决三个问题：</p>
-        <ol class="steps">
-          <li><strong>程序比物理内存大</strong>：大部分代码和数据实际放在磁盘上，造成"内存无限大"的假象。</li>
-          <li><strong>主存空闲空间碎片化</strong>：程序的各块可以分散放在主存的不同位置。</li>
-          <li><strong>安全与共享</strong>：每个程序有自己的地址空间，互相看不到私有数据，同时又能有控制地共享。</li>
-        </ol>
-        <p>本质上，<strong>主存被当作磁盘的"缓存"</strong>，靠的仍然是局部性原理。地址翻译时，虚拟地址分成<strong>虚拟页号 VPN</strong>和<strong>页内偏移</strong>：VPN 查页表换成<strong>物理页号 PPN</strong>，偏移原样保留。</p>
+        <p>先抓住一句话：<strong>程序用的地址是"假的"（虚拟地址），每次访存前都要翻译成"真的"（物理地址）</strong>。TLB 是为了让这个翻译变快而加的小缓存。</p>
+
+        <h4 id="m9-whyvm">为什么需要虚拟内存</h4>
+        <p>电脑里同时跑着几十个程序，共用一块物理内存。如果每个程序直接用物理地址：程序得知道自己被放在内存哪里，两个程序都想用地址 1000 就打架；程序比内存大就没法运行；一个程序写错地址，可能改坏别的程序甚至操作系统。</p>
+        <p>虚拟内存是一层<strong>间接映射</strong>：<b>每个程序都以为自己独占一整片从 0 开始的地址空间</b>（32 位就是 4 GB），程序里写的都是虚拟地址，由硬件和操作系统偷偷翻译成物理地址。讲义列的三个问题就这样解决了：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>问题</th><th>怎么解决</th></tr></thead>
+          <tbody>
+            <tr><td><b>程序比物理内存大</b></td><td>暂时不用的部分放在磁盘上，用到时再调进内存，造成"内存无限大"的假象。<b>主存相当于磁盘的缓存</b>，靠的仍是局部性</td></tr>
+            <tr><td><b>空闲内存碎片化</b></td><td>每个程序各有一套翻译表，程序的各块可以分散放在主存的不同位置，零散的空闲内存也能用上</td></tr>
+            <tr><td><b>安全与共享</b></td><td>程序只能访问自己翻译表里有的地址，看不到别人的私有数据；需要共享时让两张表指向同一块物理内存</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4 id="m9-paging">分页：按"页"来翻译</h4>
+        <p>一个字节一个字节地翻译太费，所以把内存切成固定大小的<strong>页（page）</strong>，常见是 4 KB。翻译只管"哪一页"，页内第几个字节原样保留：</p>
         <div class="formula">
-          <span class="fl">页内偏移位 = log₂(页大小)　（4 KB → 12 位）</span>
-          <span class="fl">VPN 位 = 虚拟地址位 − 偏移位　　PPN 位 = 物理地址位 − 偏移位</span>
-          <span class="fl"><b>物理地址 = PPN 拼接 页内偏移</b></span>
+          <span class="fl">虚拟地址 = | 虚拟页号 VPN | 页内偏移 offset |</span>
+          <span class="fl">　　　　　　　　↓ 查页表</span>
+          <span class="fl">物理地址 = | 物理页号 PPN | 页内偏移 offset |　<span class="cm">← 偏移原样抄下来</span></span>
+          <span class="fl">偏移位 = log₂(页大小)　VPN 位 = 虚拟地址位 − 偏移位　PPN 位 = 物理地址位 − 偏移位</span>
         </div>
+        <p>Tutorial 9.7：32 位虚拟地址、30 位物理地址、4 KB 页 → 偏移 log₂4096 = <b>12 位</b>，VPN = 32 − 12 = <b>20 位</b>，PPN = 30 − 12 = <b>18 位</b>。</p>
+
+        <h4 id="m9-pagetable">页表与地址翻译</h4>
+        <p><strong>页表（page table）</strong>存放在主存里，每个程序一张，每一项记录一个虚拟页。真实的页表项还有脏位、引用位（用来近似 LRU）和访问权限（只读、可写等）。Tutorial 9.7 的页表：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>VPN</th><th>PPN</th><th>有效位</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">0x12345</td><td class="mono">0x1A234</td><td class="num">1</td><td>这一页在内存里，物理页号 0x1A234</td></tr>
+            <tr><td class="mono">0x12346</td><td class="mono">0x0B567</td><td class="num">1</td><td>在内存里</td></tr>
+            <tr><td class="mono">0xABCDE</td><td class="mono">0x1F890</td><td class="num">1</td><td>在内存里</td></tr>
+            <tr><td class="mono">0x22222</td><td>—</td><td class="num"><b>0</b></td><td>这一页<b>不在内存里</b>（在磁盘上或还没分配）</td></tr>
+          </tbody>
+        </table></div>
+        <p>翻译 <code>0x12345678</code>：</p>
+        <ol class="steps">
+          <li>4 KB 页的偏移是 12 位，正好是最后 <b>3 个十六进制位</b>：偏移 = <b>678</b>，VPN = <b>12345</b>。</li>
+          <li>查页表：VPN 0x12345 → PPN 0x1A234，有效位 1。</li>
+          <li>拼起来：物理地址 = <b>0x1A234</b> 拼接 <b>678</b> = <b>0x1A234678</b>。</li>
+        </ol>
+        <p>同理 0x12346ABC → 0x0B567ABC，0xABCDEFFF → 0x1F890FFF。<strong>偏移为什么不变</strong>：虚拟页和物理页大小一样、都按页对齐，翻译只是把"第几页"换掉，字节在页里的位置不变。</p>
+
+        <h4 id="m9-pagefault">页缺失（page fault）</h4>
+        <p>访问 <code>0x22222000</code> 时，VPN = 0x22222，页表有效位是 <b>0</b>，这一页不在内存里，就是<strong>页缺失</strong>：</p>
+        <ol class="steps">
+          <li>硬件发现有效位为 0，触发异常（精确中断），交给操作系统。</li>
+          <li>操作系统从磁盘把这一页读进某个空闲物理页（内存满了就先换出一页）。</li>
+          <li>填好页表：写上 PPN，有效位置 1。</li>
+          <li>回到那条指令<b>重新执行</b>，这次就能翻译成功。</li>
+        </ol>
+        <p>磁盘太慢，一次页缺失要几毫秒，也就是<b>几百万个周期</b>。有效位的作用：标记"这一项的翻译能不能用"，防止用到无效的 PPN。</p>
+
+        <h4 id="m9-vmcache">和缓存对比：同一套思路，换了一层</h4>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>缓存</th><th>虚拟内存</th></tr></thead>
+          <tbody>
+            <tr><td>上层 / 下层</td><td>缓存 / 主存</td><td>主存 / 磁盘</td></tr>
+            <tr><td>搬运单位</td><td>块（几十字节）</td><td>页（KB 级）</td></tr>
+            <tr><td>没找到叫</td><td>缓存缺失（几十到几百周期）</td><td>页缺失（几百万周期）</td></tr>
+            <tr><td>块/页能放哪</td><td>直接映射、组相联或全相联</td><td><b>全相联</b>：任何空闲物理页都行，用页表记位置</td></tr>
+            <tr><td>替换谁</td><td>LRU 等</td><td>近似 LRU（看引用位）</td></tr>
+            <tr><td>写策略</td><td>写直达或写回</td><td><b>一律写回</b>（脏位），因为每次写磁盘太慢</td></tr>
+          </tbody>
+        </table></div>
+        <p>块放哪、怎么找、缺失时替换谁、写怎么处理，这四个问题对缓存、TLB、虚拟内存都适用，区别只在参数。缺失代价越大，就越值得用更聪明但更贵的办法，所以虚拟内存选全相联加写回。</p>
+
+        <h4 id="m9-tlb">TLB：翻译结果的"缓存"</h4>
+        <p>问题：页表在主存里，CPU 每次读写内存都得先去主存读一次页表项才知道物理地址，<b>访存次数直接翻倍</b>。解决办法是 <strong>TLB（Translation Lookaside Buffer，快表）</strong>：CPU 里一个很小、很快的缓存，专门存<b>最近用过的几条翻译</b>（VPN → PPN）。一般不超过 128–256 项，比数据缓存还快；和普通缓存一样可以是全相联、组相联或直接映射。每项含有效位、VPN（当作标签）、PPN、脏位、引用位、访问权限。</p>
+        <div class="diagram"><div class="dcap">每次访存的翻译流程</div><pre class="mono" style="margin:0; font-size:12.5px; line-height:1.5; overflow-x:auto; color:var(--ink)">CPU 发出虚拟地址
+   │
+   ├─ 查 TLB ── 命中 ──→ 直接得到物理地址 → 去缓存/主存取数据     （最常见，几乎不花时间）
+   │
+   └─ TLB 缺失 → 去主存读页表
+                 ├─ 有效位 = 1 → 把这条翻译装进 TLB，重试       （几十个周期）
+                 └─ 有效位 = 0 → 页缺失，操作系统从磁盘调页     （几百万个周期）</pre></div>
+        <div class="tablewrap"><table>
+          <caption>三种情况一定要分清</caption>
+          <thead><tr><th>情况</th><th>原因</th><th>代价</th><th>谁处理</th></tr></thead>
+          <tbody>
+            <tr><td><b>TLB 命中</b></td><td>最近用过这一页</td><td>几乎为 0</td><td>硬件</td></tr>
+            <tr><td><b>TLB 缺失，页在内存</b></td><td>页在内存，只是 TLB 没记</td><td>几十个周期</td><td>硬件或操作系统，从页表装入 TLB</td></tr>
+            <tr><td><b>页缺失</b></td><td>页根本不在内存</td><td>几百万个周期</td><td>操作系统，从磁盘调页</td></tr>
+          </tbody>
+        </table></div>
         <ul class="speclist">
-          <li><strong>页缺失（page fault）</strong>：要访问的页不在物理内存里（页表项有效位 = 0）。触发中断，由操作系统从磁盘调页、更新页表，再重新执行指令。</li>
-          <li>为什么偏移不变：页和页框大小相同、按页对齐，翻译只改"在哪一页"，不改"页里第几个字节"。</li>
-          <li><strong>TLB（快表）</strong>：每次访存都要先查页表等于多一次访存，太贵。TLB 是缓存最近用过的翻译结果的小缓存，一般不超过 128–256 项，比缓存还快；可以是全相联、组相联或直接映射。表项含有效位、VPN（标签）、PPN、脏位、引用位、访问权限。</li>
-          <li><strong>TLB 缺失 ≠ 页缺失</strong>：页在内存里，只是 TLB 没有记录 → 从页表装入 TLB，花几十个周期；页根本不在内存 → 真正的页缺失，要几百万个周期。TLB 缺失比页缺失频繁得多。Tutorial 9.7(f)：5 ms ÷ 50 ns = 10⁵ 倍。</li>
+          <li><strong>TLB 缺失不等于页缺失。</strong>TLB 缺失经常发生，大多数时候页其实就在内存里，比页缺失频繁得多。Tutorial 9.7(f)：页缺失 5 ms、TLB 缺失 50 ns，前者是后者的 5×10⁻³ ÷ 5×10⁻⁸ = <b>100,000 倍</b>。</li>
+          <li><strong>TLB 这么小也管用，靠的还是局部性。</strong>一页 4 KB 能装 1024 个 4 字节数据，顺序访问一个数组时连续上千次访问都落在同一页，第一次查到之后全部 TLB 命中。</li>
+          <li><strong>软硬件分工</strong>（讲义）：TLB 是硬件，TLB 访问时间算在缓存命中时间里（流水线可能为它多留一级）；页缺失触发精确中断，由操作系统处理；硬件负责更新页表里的脏位和引用位。</li>
         </ul>
-        <div class="callout teal"><div class="lbl">四个问题统一看缓存、TLB 和虚拟内存</div><p>块放哪？怎么找？缺失时替换谁？写怎么处理？这四个问题对缓存、TLB 和虚拟内存都适用，区别只在参数：虚拟内存的"块"是页（KB 级），缺失代价是百万周期级，所以页放置用全相联（页表），替换用近似 LRU（引用位），写一律写回（脏位）。</p></div>
+        <div class="callout teal"><div class="lbl">打个比方</div><p>你笔记里写的"第 3 本书第 120 页"是虚拟地址，只是你自己的编号，别人的"第 3 本书"是另一本。<b>图书馆的总目录</b>是页表，告诉你"你的第 3 本书"实际在"B 区 17 号架"，目录很厚，放在服务台，要走过去查。<b>贴在桌上的便利贴</b>是 TLB，记着最近查过的几本书在哪个架子，先看便利贴，有就不用去服务台。书架上根本没这本书、要从仓库调过来，就是<b>页缺失</b>，最慢。"第 120 页"不需要翻译，就是<b>页内偏移</b>。</p></div>
+
+        <h4 id="m9-vmexample">例题：一次走完 TLB 命中、TLB 缺失和页缺失</h4>
+        <div class="excard">
+          <div class="exhead"><span class="exid">例题 9.7</span><span class="extopic">虚拟地址翻译 + TLB</span></div>
+          <div class="exbody">
+            <p>某系统虚拟地址 16 位，物理地址 15 位，页大小 4 KB。TLB 只有 <b>2 项</b>，全相联，LRU 替换；初始 TLB 里是 VPN 2 → PPN 0 和 VPN 5 → PPN 1，其中 VPN 5 最久未用。页表如下（其余 VPN 都无效）：</p>
+            <div class="tablewrap" style="max-width:420px"><table>
+              <thead><tr><th class="num">VPN</th><th class="num">PPN</th><th class="num">有效位</th></tr></thead>
+              <tbody>
+                <tr><td class="num">0</td><td class="num">4</td><td class="num">1</td></tr>
+                <tr><td class="num">1</td><td class="num">—</td><td class="num">0（在磁盘上）</td></tr>
+                <tr><td class="num">2</td><td class="num">0</td><td class="num">1</td></tr>
+                <tr><td class="num">3</td><td class="num">3</td><td class="num">1</td></tr>
+                <tr><td class="num">4</td><td class="num">—</td><td class="num">0</td></tr>
+                <tr><td class="num">5</td><td class="num">1</td><td class="num">1</td></tr>
+              </tbody>
+            </table></div>
+            <p>发生页缺失时，操作系统把那一页调入空闲的物理页 6，处理完后把这条翻译装进 TLB。依次访问虚拟地址：<code>0x2ABC, 0x3010, 0x2FFF, 0x1234, 0x3FF0, 0x5008</code>。</p>
+            <ol type="a" class="steps">
+              <li>页内偏移、VPN、PPN 各几位？</li>
+              <li>对每次访问写出 VPN、偏移、TLB 命中还是缺失、是否页缺失、物理地址，以及访问后 TLB 里的内容。</li>
+              <li>查 TLB 每次 1 周期，TLB 缺失时读页表 50 周期，页缺失 1,000,000 周期。这 6 次访问的翻译总代价是多少周期？</li>
+              <li>思考：TLB 改成 4 项，结果有什么变化？</li>
+            </ol>
+            <details class="exans"><summary>解答 · 逐步</summary><div class="exansbody">
+              <p>(a) 偏移 = log₂4096 = <b>12 位</b>；VPN = 16 − 12 = <b>4 位</b>（共 16 个虚拟页）；PPN = 15 − 12 = <b>3 位</b>（物理页 0–7）。所以虚拟地址的<b>第 1 个十六进制位就是 VPN，后 3 位是偏移</b>；物理地址的第 1 个十六进制位就是 PPN。</p>
+              <div class="tablewrap"><table>
+                <thead><tr><th>#</th><th>虚拟地址</th><th>VPN</th><th>偏移</th><th>TLB</th><th>查页表</th><th>物理地址</th><th>访问后 TLB（左边是较久未用的）</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td class="mono">0x2ABC</td><td class="num">2</td><td class="mono">ABC</td><td><span class="res hit">命中</span></td><td>不用查</td><td class="mono"><b>0x0ABC</b></td><td class="mono">5→1, 2→0</td></tr>
+                  <tr><td>2</td><td class="mono">0x3010</td><td class="num">3</td><td class="mono">010</td><td><span class="res miss">缺失</span></td><td>PPN 3，有效；装入，踢掉最久未用的 VPN 5</td><td class="mono"><b>0x3010</b></td><td class="mono">2→0, 3→3</td></tr>
+                  <tr><td>3</td><td class="mono">0x2FFF</td><td class="num">2</td><td class="mono">FFF</td><td><span class="res hit">命中</span></td><td>不用查</td><td class="mono"><b>0x0FFF</b></td><td class="mono">3→3, 2→0</td></tr>
+                  <tr><td>4</td><td class="mono">0x1234</td><td class="num">1</td><td class="mono">234</td><td><span class="res miss">缺失</span></td><td>有效位 0 → <b>页缺失</b>；调入物理页 6，页表改为 1 → 6；装入 TLB，踢掉 VPN 3</td><td class="mono"><b>0x6234</b></td><td class="mono">2→0, 1→6</td></tr>
+                  <tr><td>5</td><td class="mono">0x3FF0</td><td class="num">3</td><td class="mono">FF0</td><td><span class="res miss">缺失</span></td><td>PPN 3，有效（第 4 步 VPN 3 被踢出 TLB，但页还在内存）；踢掉 VPN 2</td><td class="mono"><b>0x3FF0</b></td><td class="mono">1→6, 3→3</td></tr>
+                  <tr><td>6</td><td class="mono">0x5008</td><td class="num">5</td><td class="mono">008</td><td><span class="res miss">缺失</span></td><td>PPN 1，有效（VPN 5 第 2 步被踢出 TLB）；踢掉 VPN 1</td><td class="mono"><b>0x1008</b></td><td class="mono">3→3, 5→1</td></tr>
+                </tbody>
+              </table></div>
+              <p>结果：TLB 命中 2 次（第 1、3 步），TLB 缺失 4 次；其中只有第 4 步是页缺失。<b>第 5、6 步是 TLB 缺失但不是页缺失</b>：页一直在内存里，只是翻译被挤出了 TLB，查一次页表就行。</p>
+              <div class="calc"><span class="l">(c) 每次都先查 TLB：6 × 1 = 6</span><span class="l">　　4 次 TLB 缺失读页表：4 × 50 = 200</span><span class="l">　　1 次页缺失：1 × 1,000,000 = 1,000,000</span><span class="l">　　总代价 = 6 + 200 + 1,000,000 = <b>1,000,206 周期</b></span></div>
+              <p>一次页缺失占了 99.98% 的时间，这就是为什么页缺失必须非常少，也是虚拟内存要用全相联和写回、尽量减少页缺失的原因。</p>
+              <p>(d) TLB 改成 4 项：初始的 2、5 加上后来的 3、1 正好 4 项，不需要踢任何一项，第 5、6 步变成命中。TLB 命中 4 次、缺失 2 次（第 2、4 步），总代价 = 6 + 2 × 50 + 1,000,000 = 1,000,106 周期。TLB 太小会把还要用的翻译挤出去，和缓存的容量缺失是同一回事。</p>
+            </div></details>
+          </div>
+        </div>
+        <p>在 9.3 节的"地址拆分器"里切到"虚拟地址"标签，点"9.7 节例题"预设，可以逐个检查这道题每个地址的拆分和翻译（模拟器只查页表，不模拟 TLB；0x1234 会显示页缺失，因为它用的是调页之前的页表）。</p>
+
+        <div class="callout"><div class="lbl">考试要点（Tutorial 9.7）</div><ol class="steps" style="margin:0">
+          <li>位数：偏移 = log₂(页大小)，VPN = 虚拟地址位 − 偏移，PPN = 物理地址位 − 偏移。</li>
+          <li>翻译：拆出 VPN 查表换成 PPN，偏移照抄；4 KB 页就是后 3 个十六进制位不动。</li>
+          <li>有效位 = 0 → 页缺失，说清操作系统做的四步。</li>
+          <li>偏移为什么不变：页和页框大小相同、按页对齐。</li>
+          <li>虚拟内存的优点任选两个：运行比内存大的程序、进程隔离与保护、可控共享、重定位方便、避免碎片。</li>
+          <li>TLB 缺失 vs 页缺失：代价差好几个数量级。</li>
+        </ol></div>
       </div>
 
       <div class="quizblock">
@@ -2580,12 +2711,22 @@ ABCDE 1F890 1
       else {
         var ppn = BigInt('0x' + hit.ppn), paddr = (ppn << BigInt(off)) | o;
         if (ppn >= (BigInt(1) << BigInt(ppnB))) s += '注意：PPN 超过 ' + ppnB + ' 位\n';
-        s += '查页表：VPN 0x' + vpn.toString(16).toUpperCase() + ' → PPN 0x' + ppn.toString(16).toUpperCase() + '（有效位 1）\n物理地址 = PPN 拼接偏移 = <b>0x' + paddr.toString(16).toUpperCase() + '</b>（偏移原样保留）';
+        s += '查页表：VPN 0x' + vpn.toString(16).toUpperCase() + ' → PPN 0x' + ppn.toString(16).toUpperCase() + '（有效位 1）\n物理地址 = PPN 拼接偏移 = <b>0x' + (function(h){ while (h.length < Math.ceil(pa / 4)) h = '0' + h; return h; })(paddr.toString(16).toUpperCase()) + '</b>（偏移原样保留）';
       }
       work.innerHTML = s;
     }
     ['vmVa','vmPa','vmPage','vmAddr','vmTable'].forEach(function(id){ $(id).addEventListener('input', vm); $(id).addEventListener('change', vm); });
     $('vmTry').addEventListener('click', function(e){ var b = e.target.closest('button'); if (!b) return; $('vmAddr').value = b.textContent; vm(); });
+    var vmP = {
+      t97: { va: 32, pa: 30, page: 4096, table: '12345 1A234 1\n12346 0B567 1\nABCDE 1F890 1\n22222 - 0', tries: ['12345678', '12346ABC', 'ABCDEFFF', '22222000'] },
+      ex97: { va: 16, pa: 15, page: 4096, table: '0 4 1\n1 - 0\n2 0 1\n3 3 1\n4 - 0\n5 1 1', tries: ['2ABC', '3010', '2FFF', '1234', '3FF0', '5008'] }
+    };
+    presetButtons('vmPresets', function(b){
+      var p = vmP[b.getAttribute('data-p')];
+      $('vmVa').value = p.va; $('vmPa').value = p.pa; $('vmPage').value = p.page; $('vmTable').value = p.table;
+      $('vmTry').innerHTML = p.tries.map(function(x){ return '<button>' + x + '</button>'; }).join('');
+      $('vmAddr').value = p.tries[0]; vm();
+    });
     vm();
     $('abSeg').addEventListener('click', function(e){
       var b = e.target.closest('button'); if (!b) return;
