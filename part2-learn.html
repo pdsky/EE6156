@@ -445,6 +445,34 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
 .navsub li a.deep::before{content:"· "; color:var(--line-strong);}
 .sub h4[id]{scroll-margin-top:70px;}
 
+/* 交互实验 09：地址翻译动画 */
+.vx .vbox{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.4;}
+.vx .vbox.mem{fill:color-mix(in srgb, var(--surface-2) 55%, var(--surface));}
+.vx .vbox.inner{fill:var(--surface);}
+.vx .vcell{stroke:var(--line-strong); stroke-width:1.4;}
+.vx .vcell.c1{fill:color-mix(in srgb, var(--s1) 22%, var(--surface));}
+.vx .vcell.c2{fill:color-mix(in srgb, var(--s2) 22%, var(--surface));}
+.vx .vcell.c3{fill:color-mix(in srgb, var(--s3) 22%, var(--surface));}
+.vx .vt{font-family:var(--font-mono); font-size:12px; fill:var(--ink);}
+.vx .vt.b{font-weight:700; font-size:13px;}
+.vx .vt.s{font-size:10.5px; fill:var(--muted);}
+.vx .vt.bad{fill:var(--warn); font-weight:700;}
+.vx .vt.lru{font-size:10px; fill:var(--warn);}
+.vx .vp{fill:none; stroke:var(--line-strong); stroke-width:1.5; opacity:.7;}
+.vx .vp.on{stroke:var(--accent-strong); stroke-width:2.8; opacity:1;}
+.vx g.on > rect{stroke:var(--accent-strong); stroke-width:2.6;}
+.vx .vrow{fill:var(--surface-2); stroke:var(--line); stroke-width:1;}
+.vx .vrow.empty{fill:none; stroke-dasharray:4 3;}
+.vx .vrow.on{fill:var(--accent-soft); stroke:var(--accent-strong); stroke-width:2;}
+.vx .vrow.warn{fill:var(--warn-soft); stroke:var(--warn); stroke-width:2;}
+.vx .vfr{fill:var(--surface); stroke:var(--line-strong); stroke-width:1.2;}
+.vx .vfr.used{fill:var(--surface-2);}
+.vx .vfr.on{fill:var(--teal-soft); stroke:var(--teal); stroke-width:2.4;}
+#vx-tok rect{fill:var(--accent-strong);}
+#vx-tok text{fill:var(--accent-ink); font-family:var(--font-mono); font-size:11px; font-weight:700;}
+#vx-tok.warn rect{fill:var(--warn);}
+.diagram .scrollx svg.vx{min-width:680px;}
+
 </style>
 </head>
 <body>
@@ -516,9 +544,13 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <li><a class="deep" href="#m9-l2cpi">CPI 例子逐项拆开</a></li>
         <li><a href="#m9-s7">虚拟内存与 TLB</a></li>
         <li><a class="deep" href="#m9-paging">分页与地址翻译</a></li>
+        <li><a class="deep" href="#m9-vpnppn">VPN 和 PPN 的作用</a></li>
+        <li><a class="deep" href="#m9-vapa">虚拟/物理位数与页</a></li>
+        <li><a class="deep" href="#m9-valid">页表的有效位</a></li>
         <li><a class="deep" href="#m9-pagefault">页缺失</a></li>
         <li><a class="deep" href="#m9-tlb">TLB 与三种情况</a></li>
         <li><a class="deep" href="#m9-vmexample">例题：TLB + 页缺失</a></li>
+        <li><a class="lablink" href="#m9-lab3">实验：地址翻译动画</a></li>
         <li><a class="exlink" href="#m9-ex">课堂练习 Exercise 9.1</a></li>
       </ul>
     </div>
@@ -570,7 +602,7 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
       <p class="lede">这是根据 EE6156 Part 2 讲义（Lesson 7–12）整理的自学手册。前半部分讲存储系统：为什么需要缓存、缓存怎么映射和替换、写操作怎么处理、虚拟内存怎么翻译地址；后半部分讲流水线：DLX 指令集、五级流水线里每一拍发生了什么，以及结构、数据、控制三类冒险怎么让 CPI 离开 1。每课都配了可以动手的实验和自测题。</p>
       <div class="meta">
         <span class="chip">6 课</span>
-        <span class="chip">8 个交互实验</span>
+        <span class="chip">9 个交互实验</span>
         <span class="chip">每课自测问答</span>
         <span class="chip">讲者 <b>Cheng Tee Hiang</b> · NTU</span>
       </div>
@@ -1560,6 +1592,53 @@ ABCDE 1F890 1
         </div>
         <p>Tutorial 9.7：32 位虚拟地址、30 位物理地址、4 KB 页 → 偏移 log₂4096 = <b>12 位</b>，VPN = 32 − 12 = <b>20 位</b>，PPN = 30 − 12 = <b>18 位</b>。</p>
 
+        <h4 id="m9-vpnppn">为什么要有 VPN 和 PPN 两个编号</h4>
+        <p>一句话：<strong>VPN 是"程序以为的页号"，PPN 是"这一页在内存条上实际的位置"，页表负责把前者换成后者。</strong></p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>VPN（虚拟页号）</th><th>PPN（物理页号）</th></tr></thead>
+          <tbody>
+            <tr><td>是谁的编号</td><td><b>程序自己</b>给自己的页编的号：0、1、2……连续排下去</td><td><b>物理内存</b>里每个页框的编号</td></tr>
+            <tr><td>从哪来</td><td>程序发出的虚拟地址的高位</td><td>查页表（或 TLB）得到</td></tr>
+            <tr><td>用来做什么</td><td>当作"查询键"：去页表找第 VPN 项（在 TLB 里当标签比较）</td><td>和偏移拼成物理地址，真正拿去访问缓存和内存</td></tr>
+            <tr><td>每个程序都一样吗</td><td>每个程序都有自己的 VPN 0、1、2……</td><td>全机器只有一套，所有程序共用</td></tr>
+          </tbody>
+        </table></div>
+        <p>为什么不能只用一个编号？因为"程序以为的位置"和"实际放的位置"本来就不一样，而且必须允许它们不一样：</p>
+        <div class="tablewrap" style="max-width:520px"><table>
+          <thead><tr><th>程序</th><th class="num">它的 VPN</th><th>实际放在 PPN</th></tr></thead>
+          <tbody>
+            <tr><td>程序 A</td><td class="num">0</td><td class="num">7</td></tr>
+            <tr><td>程序 A</td><td class="num">1</td><td class="num">2</td></tr>
+            <tr><td>程序 A</td><td class="num">2</td><td>不在内存（在磁盘，有效位 0）</td></tr>
+            <tr><td>程序 B</td><td class="num">0</td><td class="num">5</td></tr>
+            <tr><td>程序 B</td><td class="num">1</td><td class="num">3</td></tr>
+          </tbody>
+        </table></div>
+        <ol class="steps">
+          <li><strong>程序不用管自己被放在哪</strong>：A、B 都从第 0 页开始写代码，操作系统放到哪都行，A 的连续几页在内存里可以东一块西一块（7、2）。</li>
+          <li><strong>同样的 VPN 互不干扰</strong>：A 的第 0 页和 B 的第 0 页翻译到不同的 PPN（7 和 5），彼此看不到对方，这就是隔离和保护。</li>
+          <li><strong>不是每一页都要在内存里</strong>：A 的第 2 页可以暂时在磁盘上，用到时才调进来。</li>
+        </ol>
+        <p>如果程序直接用物理页号，这三点都做不到。打个比方：订酒店时确认单写"你的第 1 间房"（VPN），每个客人都从 1 开始编；前台的分配表（页表）写着"张三的第 1 间 = 512 号房"，512 是真实房号（PPN）；房间里的床位号就像页内偏移，不需要翻译。</p>
+
+        <h4 id="m9-vapa">虚拟地址位数、物理地址位数和页的关系</h4>
+        <p>关键只有一点：<strong>虚拟页和物理页一样大</strong>，所以两边的偏移位数相同，虚拟地址和物理地址的位数差全部落在页号上。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>由什么决定</th><th>Tutorial 9.7</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td><b>虚拟地址位数</b></td><td>CPU 给程序用多宽的地址</td><td class="num">32 位</td><td>每个程序"以为"自己有 2³² = 4 GB 地址空间</td></tr>
+            <tr><td><b>物理地址位数</b></td><td>机器实际能装多少内存</td><td class="num">30 位</td><td>真正的物理内存最多 2³⁰ = 1 GB</td></tr>
+            <tr><td><b>页大小</b></td><td>操作系统和硬件约定</td><td class="num">4 KB</td><td>虚拟页、物理页<b>都是</b> 4 KB</td></tr>
+          </tbody>
+        </table></div>
+        <div class="formula">
+          <span class="fl">虚拟地址 32 位 = | VPN 20 位 | 偏移 12 位 |</span>
+          <span class="fl">物理地址 30 位 = | PPN 18 位 | 偏移 12 位 |　<span class="cm">偏移相同，多出的 2 位全在页号上</span></span>
+          <span class="fl">虚拟页 2²⁰ ≈ 100 万页（4 GB ÷ 4 KB）　物理页 2¹⁸ ≈ 26 万页（1 GB ÷ 4 KB）</span>
+        </div>
+        <p>物理页只有虚拟页的 1/4：一个程序的 4 GB 空间如果全用满，最多只有 1/4 能同时待在内存里，其余只能放在磁盘上，用到时再调进来。这就是有些页表项有效位为 0、会发生页缺失的根本原因：<b>虚拟空间比物理内存大，装不下</b>。这也说明了页表为什么在主存里：每个程序的页表有 2²⁰ 项，按每项 4 字节算就要 4 MB，芯片里放不下；每次都去主存查又太慢，所以要有 TLB。</p>
+        <p>做题步骤：① 偏移 = log₂(页大小)，两边相同；② VPN = 虚拟地址位 − 偏移，PPN = 物理地址位 − 偏移；③ 翻译时把 VPN 换成 PPN、偏移照抄，结果自然是物理地址的位数。</p>
+
         <h4 id="m9-pagetable">页表与地址翻译</h4>
         <p><strong>页表（page table）</strong>存放在主存里，每个程序一张，每一项记录一个虚拟页。真实的页表项还有脏位、引用位（用来近似 LRU）和访问权限（只读、可写等）。Tutorial 9.7 的页表：</p>
         <div class="tablewrap"><table>
@@ -1578,6 +1657,31 @@ ABCDE 1F890 1
           <li>拼起来：物理地址 = <b>0x1A234</b> 拼接 <b>678</b> = <b>0x1A234678</b>。</li>
         </ol>
         <p>同理 0x12346ABC → 0x0B567ABC，0xABCDEFFF → 0x1F890FFF。<strong>偏移为什么不变</strong>：虚拟页和物理页大小一样、都按页对齐，翻译只是把"第几页"换掉，字节在页里的位置不变。</p>
+
+        <h4 id="m9-valid">页表里的有效位是什么</h4>
+        <p>有效位回答一个问题：<strong>这一个虚拟页现在在不在物理内存里</strong>，也就是这一行写的 PPN 能不能用。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>有效位</th><th>意思</th><th>CPU 访问这一页时</th></tr></thead>
+          <tbody>
+            <tr><td class="num"><b>1</b></td><td>这一页在内存里，PPN 那一栏就是它所在的物理页</td><td>正常翻译：PPN 拼接偏移得到物理地址</td></tr>
+            <tr><td class="num"><b>0</b></td><td>这一页不在内存里：被换到磁盘上了，或者还没分配</td><td>PPN 没有意义、不能用 → 触发<b>页缺失</b>，交给操作系统</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="speclist">
+          <li><strong>为什么需要它</strong>：PPN 字段里总会有某个二进制数，没有有效位的话，硬件分不清它是真的物理页号还是没用的旧值。有效位是给硬件看的开关：<b>只有它是 1，才相信这一行的 PPN</b>。</li>
+          <li><strong>什么时候变</strong>：操作系统把一页从磁盘调进内存时，填好 PPN、有效位置 1；内存不够、把某一页换出到磁盘时，有效位置 0（这一页在磁盘的位置由操作系统另外记录）。</li>
+          <li><strong>Tutorial 9.7(c)</strong>：访问 0x22222000，VPN 0x22222 的有效位是 0 → 硬件不用这一行的 PPN，触发页缺失 → 操作系统调页、填 PPN、置 1 → 重新执行指令。</li>
+        </ul>
+        <div class="tablewrap"><table>
+          <caption>几个"位"别混了</caption>
+          <thead><tr><th>位</th><th>在哪里</th><th>回答的问题</th></tr></thead>
+          <tbody>
+            <tr><td>页表的<b>有效位</b></td><td>页表每一项</td><td>这一<b>页</b>在不在物理内存里？</td></tr>
+            <tr><td>缓存的<b>有效位</b></td><td>缓存每一行</td><td>这一<b>行</b>有没有装着数据？（空行为 0，永远不会命中）</td></tr>
+            <tr><td>TLB 的有效位</td><td>TLB 每一项</td><td>这一条翻译能不能用？</td></tr>
+            <tr><td><b>脏位</b></td><td>缓存行、页表项</td><td>这一份被<b>改过</b>没有？被换出时要不要写回？</td></tr>
+          </tbody>
+        </table></div>
 
         <h4 id="m9-pagefault">页缺失（page fault）</h4>
         <p>访问 <code>0x22222000</code> 时，VPN = 0x22222，页表有效位是 <b>0</b>，这一页不在内存里，就是<strong>页缺失</strong>：</p>
@@ -1671,7 +1775,60 @@ ABCDE 1F890 1
             </div></details>
           </div>
         </div>
-        <p>在 9.3 节的"地址拆分器"里切到"虚拟地址"标签，点"9.7 节例题"预设，可以逐个检查这道题每个地址的拆分和翻译（模拟器只查页表，不模拟 TLB；0x1234 会显示页缺失，因为它用的是调页之前的页表）。</p>
+        <div class="lab" id="m9-lab3">
+          <div class="lab-head"><div><div class="lab-cap">交互实验 09</div><div class="lab-title">地址翻译全流程动画</div></div>
+            <div class="seg" id="vxTlbSeg"><button data-n="2" class="on">TLB 2 项</button><button data-n="4">TLB 4 项</button></div></div>
+          <p class="lab-desc">用上面例题的 6 次访问，一步步演示虚拟地址怎么变成物理地址：先拆出 VPN 和偏移，偏移直接抄过去；VPN 先查 TLB，命中就直接得到 PPN；缺失就去主存读页表；有效位为 0 再去磁盘调页。小方块是当前正在传递的东西，右下角累计翻译花掉的周期数。做完例题再看，可以逐步对答案。</p>
+          <div class="btnrow">
+            <button class="btn" id="vxPrev">◀ 上一步</button>
+            <button class="btn primary" id="vxPlay">▶ 播放</button>
+            <button class="btn" id="vxNext">下一步 ▶</button>
+            <button class="btn" id="vxReset">重置</button>
+            <span class="steplabel" id="vxLabel"></span>
+          </div>
+          <div class="diagram" style="margin:8px 0 12px 0; padding:12px"><div class="scrollx">
+            <svg class="vx" id="vxSvg" viewBox="0 0 900 400" aria-label="虚拟地址翻译流程">
+              <!-- 背景通路 -->
+              <path class="vp" id="vp-cpu-va" d="M130 60 H170"/>
+              <path class="vp" id="vp-va-tlb" d="M220 76 V110"/>
+              <path class="vp" id="vp-tlb-pa" d="M220 240 V295"/>
+              <path class="vp" id="vp-tlb-pt" d="M400 160 H465"/>
+              <path class="vp" id="vp-off" d="M327 76 V92 H418 V313 H382" stroke-dasharray="5 4"/>
+              <path class="vp" id="vp-disk-fr" d="M825 150 V280 H725"/>
+              <path class="vp" id="vp-pa-fr" d="M327 331 V360 H580 V302"/>
+              <!-- CPU -->
+              <g id="vb-cpu"><rect class="vbox" x="20" y="30" width="110" height="60" rx="4"/><text class="vt b" x="75" y="57" text-anchor="middle">CPU</text><text class="vt s" x="75" y="75" text-anchor="middle">发出虚拟地址</text></g>
+              <!-- 虚拟地址 -->
+              <text class="vt s" x="170" y="32">虚拟地址 VA（16 位）</text>
+              <g id="vb-vavpn"><rect class="vcell c1" x="170" y="40" width="100" height="36"/><text class="vt" id="vx-vavpn" x="220" y="63" text-anchor="middle">VPN</text></g>
+              <g id="vb-vaoff"><rect class="vcell c3" x="272" y="40" width="110" height="36"/><text class="vt" id="vx-vaoff" x="327" y="63" text-anchor="middle">偏移</text></g>
+              <!-- TLB -->
+              <g id="vb-tlb"><rect class="vbox" x="170" y="110" width="230" height="130" rx="4"/><text class="vt b" x="180" y="128">TLB（快表）</text><text class="vt s" id="vx-tlbcap" x="390" y="128" text-anchor="end">查一次 1 周期</text></g>
+              <g id="vx-tlbrows"></g>
+              <!-- 物理地址 -->
+              <text class="vt s" x="170" y="350">物理地址 PA（15 位）</text>
+              <g id="vb-pappn"><rect class="vcell c2" x="170" y="295" width="100" height="36"/><text class="vt" id="vx-pappn" x="220" y="318" text-anchor="middle">PPN</text></g>
+              <g id="vb-paoff"><rect class="vcell c3" x="272" y="295" width="110" height="36"/><text class="vt" id="vx-paoff" x="327" y="318" text-anchor="middle">偏移</text></g>
+              <!-- 主存 -->
+              <g id="vb-mem"><rect class="vbox mem" x="450" y="20" width="290" height="360" rx="4"/><text class="vt b" x="462" y="40">主存 Main memory</text></g>
+              <g id="vb-pt"><rect class="vbox inner" x="460" y="50" width="270" height="180" rx="3"/><text class="vt s" x="470" y="68">页表（查一次约 50 周期）</text>
+                <text class="vt s" x="500" y="86" text-anchor="middle">VPN</text><text class="vt s" x="595" y="86" text-anchor="middle">PPN</text><text class="vt s" x="680" y="86" text-anchor="middle">有效位</text></g>
+              <g id="vx-ptrows"></g>
+              <text class="vt s" x="470" y="252">物理页（数据所在）</text>
+              <g id="vx-frames"></g>
+              <!-- 磁盘 -->
+              <g id="vb-disk"><rect class="vbox" x="770" y="60" width="110" height="90" rx="4"/><text class="vt b" x="825" y="84" text-anchor="middle">磁盘</text><text class="vt s" id="vx-disktxt" x="825" y="104" text-anchor="middle">VPN 1、4 的页</text><text class="vt s" x="825" y="122" text-anchor="middle">调页约</text><text class="vt s" x="825" y="138" text-anchor="middle">1,000,000 周期</text></g>
+              <!-- 移动的小方块 -->
+              <g id="vx-tok" transform="translate(75,60)"><rect x="-46" y="-13" width="92" height="26" rx="13"/><text id="vx-toktxt" x="0" y="5" text-anchor="middle"></text></g>
+            </svg></div></div>
+          <div class="workings" id="vxCap" style="min-height:64px"></div>
+          <div class="kpis" id="vxKpis"></div>
+          <div class="tablewrap"><table class="simtable">
+            <thead><tr><th>#</th><th>虚拟地址</th><th>VPN</th><th>偏移</th><th>TLB</th><th>页缺失</th><th>物理地址</th></tr></thead>
+            <tbody id="vxLog"></tbody>
+          </table></div>
+        </div>
+        <p>在 9.3 节的"地址拆分器"里切到"虚拟地址"标签，点"9.7 节例题"预设，也可以逐个检查这道题每个地址的拆分和翻译（那个工具只查页表，不模拟 TLB；0x1234 会显示页缺失，因为它用的是调页之前的页表）。</p>
 
         <div class="callout"><div class="lbl">考试要点（Tutorial 9.7）</div><ol class="steps" style="margin:0">
           <li>位数：偏移 = log₂(页大小)，VPN = 虚拟地址位 − 偏移，PPN = 物理地址位 − 偏移。</li>
@@ -3191,6 +3348,171 @@ ABCDE 1F890 1
   }
   seg.addEventListener('click', function(e){ var x = e.target.closest('button'); if (x) set(x.getAttribute('data-l')); });
   set(cur);
+})();
+</script>
+<script>
+/* 交互实验 09：地址翻译全流程动画（例题 9.7 的 6 次访问） */
+(function(){
+  'use strict';
+  var svg = document.getElementById('vxSvg'); if (!svg) return;
+  var $ = function(id){ return document.getElementById(id); };
+  var NS = 'http://www.w3.org/2000/svg';
+  var SEQ = [0x2ABC, 0x3010, 0x2FFF, 0x1234, 0x3FF0, 0x5008];
+  var A = { cpu: [75, 60], vaV: [220, 58], vaO: [327, 58], tlb: [285, 190], paP: [220, 313], paO: [327, 313], disk: [825, 105] };
+  function tlbRow(i){ return [285, 148 + i * 24]; }
+  function ptRow(v){ return [595, 102 + v * 22]; }
+  function frameAt(k){ return [484 + k * 32, 281]; }
+  function hex(v, w){ var s = v.toString(16).toUpperCase(); while (s.length < w) s = '0' + s; return s; }
+  function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+
+  function build(N){
+    var tlb = [{ v: 5, p: 1 }, { v: 2, p: 0 }];            /* 左边 = 最久未用 */
+    var pt = [{ p: 4, v: 1 }, { p: null, v: 0 }, { p: 0, v: 1 }, { p: 3, v: 1 }, { p: null, v: 0 }, { p: 1, v: 1 }];
+    var frames = { 0: 2, 1: 5, 3: 3, 4: 0 };                 /* 物理页 → 占用它的 VPN */
+    var disk = [1, 4], cost = 0, hits = 0, miss = 0, faults = 0, log = [], F = [];
+    var cur = { acc: 0, va: null, pa: null };
+    function snap(o){
+      F.push({
+        acc: cur.acc, va: cur.va, pa: cur.pa, cap: o.cap, hl: o.hl || [], tok: o.tok || null,
+        tlbHl: o.tlbHl === undefined ? -1 : o.tlbHl, ptHl: o.ptHl === undefined ? -1 : o.ptHl, ptWarn: !!o.ptWarn,
+        frHl: o.frHl === undefined ? -1 : o.frHl,
+        tlb: tlb.map(function(x){ return { v: x.v, p: x.p }; }), pt: pt.map(function(x){ return { p: x.p, v: x.v }; }),
+        frames: JSON.parse(JSON.stringify(frames)), disk: disk.slice(), cost: cost, hits: hits, miss: miss, faults: faults,
+        log: log.map(function(r){ return r.slice(); })
+      });
+    }
+    snap({ cap: '初始状态：TLB 只有 ' + N + ' 项，现在装着 VPN 5 → PPN 1 和 VPN 2 → PPN 0（VPN 5 最久未用）。页表在主存里，VPN 1 和 4 的有效位是 0，它们的页在磁盘上。物理页 0、1、3、4 已被占用，2、5、6、7 空闲。按"下一步"或"播放"开始。' });
+    SEQ.forEach(function(va, i){
+      var vpn = va >> 12, off = va & 0xFFF, n = i + 1, ppn, fault = false;
+      cur.acc = n; cur.va = { full: va }; cur.pa = null;
+      snap({ cap: '第 ' + n + ' 次访问：CPU 发出虚拟地址 <b>0x' + hex(va, 4) + '</b>。', hl: ['vb-cpu', 'vp-cpu-va'], tok: { from: A.cpu, to: A.vaV, text: '0x' + hex(va, 4) } });
+      cur.va = { vpn: vpn, off: off }; cur.pa = { ppn: null, off: off };
+      snap({ cap: '拆分：页大小 4 KB，低 12 位（后 3 个十六进制位）是页内偏移 <b>' + hex(off, 3) + '</b>，高 4 位（第 1 个十六进制位）是 <b>VPN ' + vpn + '</b>。偏移不用翻译，直接抄到物理地址里。', hl: ['vb-vavpn', 'vb-vaoff', 'vb-paoff', 'vp-off'], tok: { from: A.vaO, to: A.paO, text: '偏移 ' + hex(off, 3) } });
+      cost += 1;
+      var ti = -1; tlb.forEach(function(e, k){ if (e.v === vpn) ti = k; });
+      snap({ cap: '查 TLB（+1 周期）：拿 VPN ' + vpn + ' 和 TLB 里的每一项比较……', hl: ['vb-tlb', 'vp-va-tlb'], tok: { from: A.vaV, to: A.tlb, text: 'VPN ' + vpn } });
+      if (ti >= 0){
+        hits++;
+        var e = tlb.splice(ti, 1)[0]; tlb.push(e); ppn = e.p;
+        cur.pa = { ppn: ppn, off: off };
+        snap({ cap: '<b>TLB 命中</b>：VPN ' + vpn + ' → PPN ' + ppn + '，不用查页表。这一项变成最近使用。', hl: ['vb-tlb', 'vp-tlb-pa', 'vb-pappn'], tlbHl: tlb.length - 1, tok: { from: tlbRow(tlb.length - 1), to: A.paP, text: 'PPN ' + ppn } });
+      } else {
+        miss++; cost += 50;
+        snap({ cap: '<b>TLB 缺失</b>：TLB 里没有 VPN ' + vpn + ' 的翻译，去主存读页表（+50 周期）。', hl: ['vb-tlb', 'vp-tlb-pt', 'vb-pt'], ptHl: vpn, tok: { from: A.tlb, to: ptRow(vpn), text: '查 VPN ' + vpn } });
+        var pe = pt[vpn];
+        if (pe.v){
+          snap({ cap: '页表第 ' + vpn + ' 项：<b>有效位 1</b>，PPN ' + pe.p + '。这一页本来就在内存里，只是 TLB 没记住它，所以<b>不是页缺失</b>。', hl: ['vb-pt'], ptHl: vpn, tok: { from: ptRow(vpn), to: ptRow(vpn), text: 'PPN ' + pe.p } });
+        } else {
+          faults++; fault = true;
+          snap({ cap: '页表第 ' + vpn + ' 项：<b>有效位 0</b>，这一页不在内存里 → <b>页缺失</b>！硬件不用这一行的 PPN，触发异常交给操作系统。', hl: ['vb-pt'], ptHl: vpn, ptWarn: true, tok: { from: ptRow(vpn), to: ptRow(vpn), text: '有效位 0', warn: true } });
+          cost += 1000000; frames[6] = vpn; disk = disk.filter(function(d){ return d !== vpn; });
+          snap({ cap: '操作系统从磁盘把 VPN ' + vpn + ' 的页读进空闲的物理页 6（约 1,000,000 周期，整个流程里最慢的一步）。', hl: ['vb-disk', 'vp-disk-fr'], frHl: 6, tok: { from: A.disk, to: frameAt(6), text: '页 ' + vpn, warn: true } });
+          pt[vpn] = { p: 6, v: 1 }; pe = pt[vpn];
+          snap({ cap: '更新页表：VPN ' + vpn + ' → PPN 6，有效位改成 1。然后重新执行这条访存指令。', hl: ['vb-pt'], ptHl: vpn, frHl: 6, tok: { from: frameAt(6), to: ptRow(vpn), text: 'PPN 6' } });
+        }
+        var ev = null; if (tlb.length >= N) ev = tlb.shift();
+        tlb.push({ v: vpn, p: pe.p }); ppn = pe.p;
+        snap({ cap: '把这条翻译装进 TLB' + (ev ? '：TLB 满了，踢掉最久未用的 VPN ' + ev.v + '（LRU）' : '（TLB 还有空位）') + '。下次再访问这一页就能 TLB 命中。', hl: ['vb-tlb', 'vp-tlb-pt'], tlbHl: tlb.length - 1, tok: { from: ptRow(vpn), to: tlbRow(tlb.length - 1), text: vpn + ' → ' + pe.p } });
+        cur.pa = { ppn: ppn, off: off };
+        snap({ cap: 'PPN ' + ppn + ' 送到物理地址的高位。', hl: ['vb-pappn', 'vp-tlb-pa'], tlbHl: tlb.length - 1, tok: { from: tlbRow(tlb.length - 1), to: A.paP, text: 'PPN ' + ppn } });
+      }
+      var pa = (ppn << 12) | off;
+      log.push([n, '0x' + hex(va, 4), vpn, hex(off, 3), ti >= 0 ? '命中' : '缺失', fault ? '是' : '否', '0x' + hex(pa, 4)]);
+      snap({ cap: '物理地址 = PPN ' + ppn + ' 拼接偏移 ' + hex(off, 3) + ' = <b>0x' + hex(pa, 4) + '</b>，用它去访问缓存 / 主存里的物理页 ' + ppn + '。', hl: ['vb-pappn', 'vb-paoff', 'vp-pa-fr'], frHl: ppn, tok: { from: A.paO, to: frameAt(ppn), text: '0x' + hex(pa, 4) } });
+    });
+    cur.acc = 0; cur.va = null; cur.pa = null;
+    snap({ cap: '完成：6 次访问，TLB 命中 ' + hits + ' 次、TLB 缺失 ' + miss + ' 次（其中页缺失 ' + faults + ' 次），翻译总代价 ' + cost.toLocaleString('en-US') + ' 周期。' + (N === 2 ? '切到"TLB 4 项"再播一遍对比：第 5、6 次访问会变成命中。' : 'TLB 有 4 项时不需要踢掉还要用的翻译，只剩第 2、4 次访问缺失。') });
+    return F;
+  }
+
+  var N = 2, F = build(N), idx = 0, timer = null, anim = null;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var tok = $('vx-tok'), tokTxt = $('vx-toktxt');
+
+  function el(tag, attrs, text){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; return e; }
+  function moveTok(t, animate){
+    if (anim) cancelAnimationFrame(anim);
+    if (!t){ tok.style.display = 'none'; return; }
+    tok.style.display = ''; tokTxt.textContent = t.text; tok.classList.toggle('warn', !!t.warn);
+    var from = t.from, to = t.to;
+    if (!animate || reduce || (from[0] === to[0] && from[1] === to[1])){ tok.setAttribute('transform', 'translate(' + to[0] + ',' + to[1] + ')'); return; }
+    var t0 = null, D = 700;
+    function stepF(ts){
+      if (t0 === null) t0 = ts;
+      var u = Math.min(1, (ts - t0) / D), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+      tok.setAttribute('transform', 'translate(' + (from[0] + (to[0] - from[0]) * e) + ',' + (from[1] + (to[1] - from[1]) * e) + ')');
+      if (u < 1) anim = requestAnimationFrame(stepF);
+    }
+    anim = requestAnimationFrame(stepF);
+  }
+  function render(animate){
+    var f = F[idx];
+    svg.querySelectorAll('[id^="vb-"].on, [id^="vp-"].on').forEach(function(x){ x.classList.remove('on'); });
+    f.hl.forEach(function(id){ var x = document.getElementById(id); if (x) x.classList.add('on'); });
+    var tg = $('vx-tlbrows'); tg.innerHTML = '';
+    for (var i = 0; i < N; i++){
+      var y = 138 + i * 24, e = f.tlb[i];
+      tg.appendChild(el('rect', { x: 180, y: y, width: 210, height: 20, rx: 2, 'class': 'vrow' + (e ? '' : ' empty') + (i === f.tlbHl ? ' on' : '') }));
+      if (e){
+        tg.appendChild(el('text', { x: 190, y: y + 14, 'class': 'vt' }, 'VPN ' + e.v + ' → PPN ' + e.p));
+        if (i === 0 && f.tlb.length === N) tg.appendChild(el('text', { x: 382, y: y + 14, 'class': 'vt lru', 'text-anchor': 'end' }, '最久未用'));
+      } else tg.appendChild(el('text', { x: 190, y: y + 14, 'class': 'vt s' }, '空'));
+    }
+    $('vx-tlbcap').textContent = N + ' 项 · 查一次 1 周期';
+    var pg = $('vx-ptrows'); pg.innerHTML = '';
+    f.pt.forEach(function(p, v){
+      var y = 92 + v * 22, cls = 'vrow' + (v === f.ptHl ? (f.ptWarn ? ' warn' : ' on') : '');
+      pg.appendChild(el('rect', { x: 470, y: y, width: 250, height: 20, rx: 2, 'class': cls }));
+      pg.appendChild(el('text', { x: 500, y: y + 14, 'class': 'vt', 'text-anchor': 'middle' }, String(v)));
+      pg.appendChild(el('text', { x: 595, y: y + 14, 'class': 'vt', 'text-anchor': 'middle' }, p.p === null ? '—' : String(p.p)));
+      pg.appendChild(el('text', { x: 680, y: y + 14, 'class': 'vt' + (p.v ? '' : ' bad'), 'text-anchor': 'middle' }, String(p.v)));
+    });
+    var fg = $('vx-frames'); fg.innerHTML = '';
+    for (var k = 0; k < 8; k++){
+      var x = 470 + k * 32, occ = f.frames[k];
+      fg.appendChild(el('rect', { x: x, y: 260, width: 28, height: 42, rx: 2, 'class': 'vfr' + (occ !== undefined ? ' used' : '') + (k === f.frHl ? ' on' : '') }));
+      fg.appendChild(el('text', { x: x + 14, y: 276, 'class': 'vt s', 'text-anchor': 'middle' }, String(k)));
+      fg.appendChild(el('text', { x: x + 14, y: 294, 'class': 'vt', 'text-anchor': 'middle' }, occ !== undefined ? 'v' + occ : ''));
+    }
+    $('vx-disktxt').textContent = f.disk.length ? 'VPN ' + f.disk.join('、') + ' 的页' : '（无）';
+    var vv = $('vx-vavpn'), vo = $('vx-vaoff');
+    if (!f.va){ vv.textContent = 'VPN'; vo.textContent = '偏移'; }
+    else if (f.va.full !== undefined){ vv.textContent = '0x' + hex(f.va.full, 4); vo.textContent = '（待拆分）'; }
+    else { vv.textContent = 'VPN ' + f.va.vpn; vo.textContent = '偏移 ' + hex(f.va.off, 3); }
+    $('vx-pappn').textContent = f.pa && f.pa.ppn !== null ? 'PPN ' + f.pa.ppn : 'PPN ?';
+    $('vx-paoff').textContent = f.pa ? '偏移 ' + hex(f.pa.off, 3) : '偏移';
+    moveTok(f.tok, animate);
+    var head = f.acc ? '第 ' + f.acc + ' 次访问 · 0x' + hex(SEQ[f.acc - 1], 4) + '\n' : '';
+    $('vxCap').innerHTML = esc(head) + f.cap;
+    $('vxKpis').innerHTML =
+      '<div class="kpi"><div class="k">TLB 命中</div><div class="v">' + f.hits + '</div></div>' +
+      '<div class="kpi"><div class="k">TLB 缺失</div><div class="v">' + f.miss + '</div></div>' +
+      '<div class="kpi"><div class="k">页缺失</div><div class="v">' + f.faults + '</div></div>' +
+      '<div class="kpi em"><div class="k">翻译总代价（周期）</div><div class="v">' + f.cost.toLocaleString('en-US') + '</div></div>';
+    $('vxLog').innerHTML = f.log.map(function(r){
+      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td>' + (r[4] === '命中' ? '<span class="res hit">命中</span>' : '<span class="res miss">缺失</span>') + '</td><td>' + (r[5] === '是' ? '<b class="badc">是</b>' : '否') + '</td><td><b>' + r[6] + '</b></td></tr>';
+    }).join('');
+    $('vxLabel').textContent = '步骤 ' + (idx + 1) + ' / ' + F.length;
+    $('vxPrev').disabled = idx === 0; $('vxNext').disabled = idx === F.length - 1;
+  }
+  function stop(){ if (timer){ clearInterval(timer); timer = null; } $('vxPlay').textContent = '▶ 播放'; }
+  function go(d){ var j = idx + d; if (j < 0 || j >= F.length) return; idx = j; render(d > 0); }
+  $('vxNext').addEventListener('click', function(){ stop(); go(1); });
+  $('vxPrev').addEventListener('click', function(){ stop(); go(-1); });
+  $('vxReset').addEventListener('click', function(){ stop(); idx = 0; render(false); });
+  $('vxPlay').addEventListener('click', function(){
+    if (timer){ stop(); return; }
+    if (idx >= F.length - 1) idx = 0;
+    $('vxPlay').textContent = '⏸ 暂停';
+    timer = setInterval(function(){ if (idx >= F.length - 1){ stop(); return; } go(1); }, 1700);
+  });
+  $('vxTlbSeg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    stop(); N = +b.getAttribute('data-n');
+    $('vxTlbSeg').querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    F = build(N); idx = 0; render(false);
+  });
+  render(false);
 })();
 </script>
 </body>
