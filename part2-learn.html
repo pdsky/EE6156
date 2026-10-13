@@ -466,6 +466,7 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
       <ul class="navsub">
         <li><a href="#m7-s1">冯·诺依曼结构与瓶颈</a></li>
         <li><a href="#m7-s2">存储层次与局部性</a></li>
+        <li><a class="deep" href="#m7-where">主存和缓存在哪里</a></li>
         <li><a class="deep" href="#m7-vram">显存在哪一层</a></li>
         <li><a href="#m7-s3">命中、缺失与 AMAT</a></li>
         <li><a class="deep" href="#m7-speedup">加速比是什么</a></li>
@@ -485,6 +486,7 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <li><a class="deep" href="#m8-hitmiss">判断 HIT / MISS</a></li>
         <li><a class="deep" href="#m8-inspect">怎么看在不在缓存里</a></li>
         <li><a href="#m8-s4">直接映射</a></li>
+        <li><a class="deep" href="#m8-dmvsfa">直接映射 vs 全相联</a></li>
         <li><a href="#m8-s5">组相联</a></li>
         <li><a class="deep" href="#m8-2way">2 路组相联逐步走</a></li>
         <li><a class="deep" href="#m8-perset">每组放几块</a></li>
@@ -500,11 +502,18 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <li><a href="#m9-s1">减少缺失：容量与相联度</a></li>
         <li><a href="#m9-s2">块大小的权衡</a></li>
         <li><a href="#m9-s3">地址位划分通用方法</a></li>
+        <li><a class="deep" href="#m9-blocks">块数怎么算</a></li>
         <li><a class="lablink" href="#m9-lab1">实验：地址拆分器</a></li>
         <li><a href="#m9-s4">写策略</a></li>
+        <li><a class="deep" href="#m9-wtwb">写直达 vs 写回逐步对比</a></li>
+        <li><a class="deep" href="#m9-dirty">脏位是什么</a></li>
+        <li><a class="deep" href="#m9-wmiss">写缺失怎么办</a></li>
         <li><a class="lablink" href="#m9-lab2">实验：写直达 vs 写回</a></li>
         <li><a href="#m9-s5">缺失代价被 CPU 放大</a></li>
         <li><a href="#m9-s6">多级缓存</a></li>
+        <li><a class="deep" href="#m9-l2count">1000 次访问数一遍</a></li>
+        <li><a class="deep" href="#m9-localglobal">局部 vs 全局缺失率</a></li>
+        <li><a class="deep" href="#m9-l2cpi">CPI 例子逐项拆开</a></li>
         <li><a href="#m9-s7">虚拟内存与 TLB</a></li>
         <li><a class="exlink" href="#m9-ex">课堂练习 Exercise 9.1</a></li>
       </ul>
@@ -636,6 +645,37 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
           </tbody>
         </table></div>
         <div class="callout teal"><div class="lbl">一眼识别两种局部性</div><p>序列 <code>100, 101, 102, 103, 100, 101, 102, 200, 200</code> 同时有两种局部性：100→103 依次递增是空间局部性；100 又出现、200 连续两次是时间局部性。Tutorial 9.1(d) 就是这样考的。</p></div>
+        <h4 id="m7-where">主存和缓存到底是什么、在哪里</h4>
+        <p>以一台常见的游戏本为例（Intel Core Ultra 7 处理器、16 GB 内存、2 TB SSD）：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>层次</th><th>是什么</th><th>物理位置</th><th>这台电脑上</th></tr></thead>
+          <tbody>
+            <tr><td>寄存器</td><td>CPU 正在算的那几个数</td><td>CPU 每个核<b>内部</b></td><td>每个核几十个</td></tr>
+            <tr><td><b>缓存</b>（cache）</td><td>SRAM，很小很快</td><td><b>CPU 芯片里面</b>，紧挨着各个核</td><td>L1 每核 32–48 KB；L2 几 MB；L3 30 MB，所有核共用</td></tr>
+            <tr><td><b>主存</b>（main memory）</td><td>DRAM，平时说的"内存"、RAM</td><td><b>CPU 外面</b>：主板上的内存条或内存芯片，经内存总线连到 CPU</td><td>16 GB</td></tr>
+            <tr><td>辅存</td><td>SSD / 硬盘</td><td>主板上的 M.2 插槽等</td><td>2 TB SSD</td></tr>
+          </tbody>
+        </table></div>
+        <div class="diagram"><div class="dcap">物理位置示意</div><pre class="mono" style="margin:0; font-size:12.5px; line-height:1.45; overflow-x:auto; color:var(--ink)">┌──────────── CPU 芯片（一小块硅片） ────────────┐
+│  核 0: 寄存器 + L1    核 1: 寄存器 + L1    …    │
+│  L2（每个核或每组核一个）                        │
+│  L3（所有核共用）              ← 这些都是"缓存"  │
+└───────────────────┬────────────────────────────┘
+                    │ 内存总线（芯片外面的导线）
+          ┌─────────┴─────────┐
+          │   内存条 DRAM     │   ← 这就是"主存"
+          └─────────┬─────────┘
+                    │ PCIe / NVMe
+          ┌─────────┴─────────┐
+          │   SSD / 硬盘      │   ← 辅存，关机后数据还在
+          └───────────────────┘</pre></div>
+        <ul class="speclist">
+          <li><strong>主存放"原件"</strong>：正在运行的程序和它的全部数据。打开程序时，系统先把它从 SSD 读进主存；断电就清空。</li>
+          <li><strong>缓存放"常用的复印件"</strong>：只是主存里最近用过的一小部分的副本（上例 L3 只有 30 MB，约为主存的 1/500）。CPU 读某个地址时先查 L1，没有再查 L2、L3，都没有才去主存；从主存取回时把整块复制进缓存，下次再用就快了。</li>
+          <li><strong>速度差得很远</strong>：L1 约 1 ns（几个周期）；主存约 50–100 ns（几百个周期）；SSD 约 50–150 μs，比主存再慢上千倍。</li>
+        </ul>
+        <div class="callout teal"><div class="lbl">打个比方</div><p>寄存器 = 手里正拿着的那张纸；缓存 = 书桌，只放得下几本书但伸手就拿到；主存 = 房间里的书架，书多得多但要起身去拿；SSD = 楼下的图书馆，什么都有，跑一趟最慢。<b>命中</b>就是书在桌上；<b>缺失</b>就是要去书架拿，多花的时间是缺失代价。缓存里是副本，在副本上改了值，原件就旧了，这就是 9.4 节写策略要解决的问题。</p></div>
+        <p>注意：日常说的"手机内存 256 GB"其实是存储空间，相当于这里的辅存；课程里的主存（内存）专指 RAM。考试题默认只有"一级缓存 + 主存"两层，不用管 L2、L3。</p>
         <h4 id="m7-vram">补充：显存（GPU 内存）在哪一层</h4>
         <p>显存在层次图上和<strong>主存是同一层</strong>：它本身就是 DRAM，只是不属于 CPU 这座金字塔，而是 GPU 自己那座金字塔里"主存"的位置。</p>
         <div class="tablewrap"><table>
@@ -953,6 +993,34 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
         <p>同一个序列在直接映射下：24（行 10）、20（行 01）、04（行 01，踢掉 20）、12（行 11）、20（行 01，踢掉 04）、44（行 11，踢掉 12）、04（行 01，踢掉 20）、24 命中、44 命中，只有 <b>2 次命中</b>。20 和 04 都映射到行 01，互相把对方踢出去，这就是冲突缺失。</p>
         <div class="callout teal"><div class="lbl">直接映射不需要替换策略</div><p>每个块只有一个位置可去，发生冲突时那一行原来的块直接被替换，不用 LRU、FIFO。这也是它比全相联便宜、快的原因之一。</p></div>
         <div class="callout warn"><div class="lbl">讲义第 43 页的两个小问题</div><p>第 3 步表格里 24 那一行的标签写成了 00，应为 01（24 = 01 10 00₂）。另外第 3 步把 04 的缺失标成 conflict，但 04 是第一次被访问，同一页第 6 步的 44 情况完全相同却标成 compulsory。按定义两者都是 compulsory。</p></div>
+        <h4 id="m8-dmvsfa">直接映射和全相联到底差在哪</h4>
+        <p>两者看起来像：都要存标签、比标签，讲义例题结果也差不多（全相联 3 次命中，直接映射 2 次）。根本区别只有一个：<strong>一个块能放在哪里</strong>。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>直接映射</th><th>全相联</th></tr></thead>
+          <tbody>
+            <tr><td>块能放哪</td><td><b>只能放一个固定的行</b>：行号 = 块号 mod 行数</td><td><b>任何一行都行</b></td></tr>
+            <tr><td>地址拆分</td><td class="mono">Tag | Index | Offset</td><td class="mono">Tag | Offset（没有 Index）</td></tr>
+            <tr><td>查找时比较几次</td><td>用 Index 直接选出那一行，<b>只比 1 次</b></td><td><b>和所有行都比一遍</b></td></tr>
+            <tr><td>满了踢谁</td><td>不用选，那一行原来的块直接被替换</td><td>要选，按 LRU 踢最久没用的</td></tr>
+            <tr><td>冲突缺失</td><td><b>有</b>：别的行空着也不能用</td><td><b>没有</b></td></tr>
+            <tr><td>硬件</td><td>1 个比较器，便宜、快</td><td>每行一个比较器 + LRU 记录，贵、慢</td></tr>
+          </tbody>
+        </table></div>
+        <p>打个比方：直接映射像<b>按学号尾号分配的储物柜</b>，你的东西只能放 3 号柜，3 号柜被人占了就得把他的拿走，哪怕旁边柜子全空着；全相联像<b>随便用哪个空柜子</b>，空间利用最好，但找东西时要把所有柜子都看一遍。</p>
+        <p>一个差别很大的例子：主存 64 字节、块 4 字节、缓存 4 行，访问 <code>0, 16, 0, 16, 0, 16</code>。地址 0 是块 0，地址 16 是块 4，直接映射下行号都是 0 mod 4 = 4 mod 4 = <b>0</b>，两块抢同一行。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>访问</th><th>直接映射（都只能去第 0 行）</th><th>全相联（随便放）</th></tr></thead>
+          <tbody>
+            <tr><td class="num">0</td><td><span class="res miss">MISS</span> 第 0 行 = 块 0</td><td><span class="res miss">MISS</span> 放第 1 行</td></tr>
+            <tr><td class="num">16</td><td><span class="res miss">MISS</span> 踢掉块 0，第 0 行 = 块 4</td><td><span class="res miss">MISS</span> 放第 2 行，块 0 还在</td></tr>
+            <tr><td class="num">0</td><td><span class="res miss">MISS</span> 踢掉块 4</td><td><span class="res hit">HIT</span></td></tr>
+            <tr><td class="num">16</td><td><span class="res miss">MISS</span> 踢掉块 0</td><td><span class="res hit">HIT</span></td></tr>
+            <tr><td class="num">0</td><td><span class="res miss">MISS</span></td><td><span class="res hit">HIT</span></td></tr>
+            <tr><td class="num">16</td><td><span class="res miss">MISS</span></td><td><span class="res hit">HIT</span></td></tr>
+            <tr><td>合计</td><td><b>0 次命中</b></td><td><b>4 次命中</b></td></tr>
+          </tbody>
+        </table></div>
+        <p>直接映射另外 3 行从头到尾空着，两个块却在第 0 行来回互踢（冲突缺失，见 8.6 节）。两者真正结果一样的情况：访问的块刚好落在不同的行、彼此不冲突时；以及缓存只有 1 行时。两者都是组相联的特例：直接映射是每组 1 行（1 路），全相联是所有行一组。可以在下面的缓存模拟器里亲手试：主存 64、行数 4、块大小 4，序列填 <code>0, 16, 0, 16, 0, 16</code>，切换"直接映射"和"全相联"各运行一次对比。</p>
       <div class="exgroup2"><div class="exgh">课堂练习 · In-class exercise</div><div class="excard" id="ex8-2"><div class="exhead"><span class="exid">Exercise 8.2</span><span class="extopic">直接映射手算<span class="ent"> · Direct-mapped cache</span></span></div><div class="exbody"><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>Same memory and sequence as Exercise 8.1, but a direct-mapped cache with 4 lines and 4-byte blocks (no replacement policy needed). (1) Number of bits for the address, offset, index and tag. (2) Update the cache for each reference. (3) Hit or miss; compulsory or conflict. (4) Total hits, misses and hit rate.</p><p>Sequence: <code>08, 124, 77, 45, 09, 126, 44, 211, 08, 212, 77, 241</code></p></div><div class="zh"><span class="lg">中</span><p>主存和序列同 Exercise 8.1，改为直接映射缓存，4 行，块 4 字节（不需要替换策略）。(1) 地址、偏移、索引、标签各几位；(2) 每次访问后的缓存内容；(3) 命中还是缺失，缺失是强制还是冲突；(4) 总命中、总缺失和命中率。</p><p>序列：<code>08, 124, 77, 45, 09, 126, 44, 211, 08, 212, 77, 241</code></p></div></div><details class="exans"><summary>解答 · Solution</summary><div class="exansbody"><div class="tablewrap"><table class="simtable"><thead><tr><th>#</th><th>Addr 地址</th><th>Tag Index Offset</th><th>Block 块</th><th>Set/Line 组/行</th><th>Tag</th><th>Result 结果</th><th>Evicted 被替换</th><th>Cache after 访问后缓存</th></tr></thead><tbody><tr><td>1</td><td>8</td><td>0000 10 00</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L2: 8–11</td></tr><tr><td>2</td><td>124</td><td>0111 11 00</td><td>124–127</td><td>3</td><td>0111</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L2: 8–11<br>L3: 124–127</td></tr><tr><td>3</td><td>77</td><td>0100 11 01</td><td>76–79</td><td>3</td><td>0100</td><td><span class="res miss">MISS</span> compulsory</td><td>124–127</td><td>L2: 8–11<br>L3: 76–79</td></tr><tr><td>4</td><td>45</td><td>0010 11 01</td><td>44–47</td><td>3</td><td>0010</td><td><span class="res miss">MISS</span> compulsory</td><td>76–79</td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>5</td><td>9</td><td>0000 10 01</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res hit">HIT</span></td><td></td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>6</td><td>126</td><td>0111 11 10</td><td>124–127</td><td>3</td><td>0111</td><td><span class="res miss">MISS</span> conflict</td><td>44–47</td><td>L2: 8–11<br>L3: 124–127</td></tr><tr><td>7</td><td>44</td><td>0010 11 00</td><td>44–47</td><td>3</td><td>0010</td><td><span class="res miss">MISS</span> conflict</td><td>124–127</td><td>L2: 8–11<br>L3: 44–47</td></tr><tr><td>8</td><td>211</td><td>1101 00 11</td><td>208–211</td><td>0</td><td>1101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L0: 208–211<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>9</td><td>8</td><td>0000 10 00</td><td>8–11</td><td>2</td><td>0000</td><td><span class="res hit">HIT</span></td><td></td><td>L0: 208–211<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>10</td><td>212</td><td>1101 01 00</td><td>212–215</td><td>1</td><td>1101</td><td><span class="res miss">MISS</span> compulsory</td><td></td><td>L0: 208–211<br>L1: 212–215<br>L2: 8–11<br>L3: 44–47</td></tr><tr><td>11</td><td>77</td><td>0100 11 01</td><td>76–79</td><td>3</td><td>0100</td><td><span class="res miss">MISS</span> conflict *</td><td>44–47</td><td>L0: 208–211<br>L1: 212–215<br>L2: 8–11<br>L3: 76–79</td></tr><tr><td>12</td><td>241</td><td>1111 00 01</td><td>240–243</td><td>0</td><td>1111</td><td><span class="res miss">MISS</span> compulsory</td><td>208–211</td><td>L0: 240–243<br>L1: 212–215<br>L2: 8–11<br>L3: 76–79</td></tr></tbody></table></div><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>(1) Address 8 bits, offset 2 bits, index log₂4 = 2 bits, tag 8 − 2 − 2 = <b>4</b> bits. Line = block number mod 4.</p><p>(4) <b>2</b> hits (09, 08) and <b>10</b> misses (7 compulsory, 3 conflict). Hit rate = 2/12 = <b>16.7%</b>. Blocks 31 (124–127), 19 (76–79) and 11 (44–47) all map to line 3 and keep evicting each other. The last access to 77 (marked *) would also miss in a fully associative cache of the same size (it is a capacity miss in Ex 8.1), so strict 3C calls it capacity; this exercise only asks compulsory vs conflict, so it is recorded as conflict.</p></div><div class="zh"><span class="lg">中</span><p>(1) 地址 8 位，偏移 2 位，索引 log₂4 = 2 位，标签 8 − 2 − 2 = <b>4</b> 位。行号 = 块号 mod 4。</p><p>(4) 命中 <b>2</b> 次（09、08），缺失 <b>10</b> 次（强制 7、冲突 3），命中率 2/12 = <b>16.7%</b>。块 31（124–127）、19（76–79）、11（44–47）全都映射到行 3，反复互相踢出。标 * 的最后一次 77：同样大小的全相联缓存也会缺失（Ex 8.1 里它是容量缺失），严格按 3C 应记 capacity；本题只要求区分强制与冲突，记 conflict。</p></div></div></div></details></div></div></div>
 </div>
 
@@ -1177,6 +1245,32 @@ details.exans[open] > summary{border-bottom:1px dashed var(--line);}
           <span class="fl">组数 = 块数 ÷ 相联度</span>
           <span class="fl">Offset = log₂(块大小)　Index = log₂(组数)　Tag = 地址位 − Index − Offset</span>
         </div>
+        <h4 id="m9-blocks">块数怎么算：容量 ÷ 块大小</h4>
+        <p>块数就是<b>缓存一共能放多少个块</b>，也就是缓存有多少行。关键是先把两个数换成同一单位（字节），再写成 2 的幂。以 Exercise 9.1（32 KB 缓存、256 B 块）为例：</p>
+        <ol class="steps">
+          <li><b>把 32 KB 换成字节</b>：1 KB = 1024 = 2¹⁰，32 = 2⁵，所以 32 KB = 2⁵ × 2¹⁰ = <b>2¹⁵</b> = 32768 字节。</li>
+          <li><b>块大小写成 2 的幂</b>：256 = <b>2⁸</b>。</li>
+          <li><b>2 的幂相除就是指数相减</b>：2¹⁵ ÷ 2⁸ = 2⁷ = <b>128 块</b>。直观地说，32768 字节的数据区切成每份 256 字节，正好 128 份，每份一行、放一个块。</li>
+        </ol>
+        <p>后面几步都从这个 128 出发：Offset = log₂256 = 8（一块 256 字节，编号 0–255 要 8 位）；组数 = 128 ÷ 相联度（直接映射 128、4 路 32、全相联 1）；Index = 7、5、0；Tag = 32 − Index − 8 = 17、19、24。</p>
+        <div class="tablewrap"><table>
+          <caption>记住这几个 2 的幂</caption>
+          <thead><tr><th>写法</th><th>2 的幂</th><th class="num">字节数</th></tr></thead>
+          <tbody>
+            <tr><td>1 KB</td><td>2¹⁰</td><td class="num">1024</td></tr>
+            <tr><td>32 KB</td><td>2¹⁵</td><td class="num">32768</td></tr>
+            <tr><td>64 KB</td><td>2¹⁶</td><td class="num">65536</td></tr>
+            <tr><td>256 KB</td><td>2¹⁸</td><td class="num">262144</td></tr>
+            <tr><td>1 MB</td><td>2²⁰</td><td class="num">1048576</td></tr>
+            <tr><td>4 GB</td><td>2³²</td><td class="num">—</td></tr>
+          </tbody>
+        </table></div>
+        <p>有了这张表，"容量 ÷ 块大小"就是指数相减：64 KB ÷ 64 B = 2¹⁶⁻⁶ = 1024 块（T9.5）；256 KB ÷ 64 B = 2¹⁸⁻⁶ = 4096 块（T8.5）。</p>
+        <div class="callout warn"><div class="lbl">容易出错</div><ul class="speclist" style="margin:0">
+          <li><b>KB 是 1024，不是 1000</b>：算成 32000 ÷ 256 就除不尽了。</li>
+          <li><b>块大小给的是"字"时先换成字节</b>：T8.2 的"8-word blocks"，1 字 = 4 字节，块是 32 B，不是 8 B。</li>
+          <li><b>这里算的是缓存里的块，不是主存里的块</b>：主存块数 = 2³² ÷ 2⁸ = 2²⁴。这正好说明全相联的标签为什么是 24 位：没有索引，标签要能区分主存里所有 2²⁴ 个块。</li>
+        </ul></div>
         <p>Offset 选块内字节，Index 选组，Tag 确认组里存的是不是要找的块。讲义两个例子（32 位地址、64 KB、32 B 块）：</p>
         <div class="tablewrap"><table>
           <thead><tr><th>组织</th><th>块数</th><th>组数</th><th>Offset</th><th>Index</th><th>Tag</th><th>比较器</th></tr></thead>
@@ -1250,11 +1344,70 @@ ABCDE 1F890 1
             <tr><td><b>缓存一致性</b></td><td>多核下用 MESI 等协议保证各缓存与主存一致</td><td>超出本课程范围</td></tr>
           </tbody>
         </table></div>
-        <h4>写缺失时怎么办</h4>
+        <h4 id="m9-whywrite">为什么"写"会带来麻烦</h4>
+        <p><b>读</b>只是把数据复制一份到缓存，缓存和主存内容一样，不会出问题。<b>写</b>会改值：缓存里有块 100–103 = A B C D，主存也是 A B C D；CPU 把 X 写到 101，缓存那份变成 A X C D，主存那份改不改？不改的话，同一个地址在两处就是两个不同的值。主存的值在这几种时候要紧：</p>
         <ul class="speclist">
-          <li><strong>写分配（write allocate / fetch-on-write）</strong>：先把块从主存取进缓存，再按写命中处理。通常和写回搭配。</li>
-          <li><strong>不写分配（no-write allocate / write-around）</strong>：只写主存，不把块装进缓存。简单，通常和写直达搭配。</li>
+          <li><strong>块被踢出缓存时</strong>：缓存里的新值若没写回主存，就永远丢了。</li>
+          <li><strong>I/O 设备（DMA）直接读主存时</strong>：它绕过缓存，会读到旧值。</li>
+          <li><strong>多核时</strong>：别的核读到的也可能是旧值。</li>
         </ul>
+        <p>写策略要解决的就是"什么时候、怎么把新值交给主存"。</p>
+        <h4 id="m9-wtwb">写命中：写直达 vs 写回，逐步对比</h4>
+        <p>"写命中"指要写的块已经在缓存里。依次执行 Store X → 101、Store Y → 102、Store Z → 101，最后这个块被替换出缓存（Tutorial 9.4）：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>步骤</th><th>写直达：缓存</th><th>写直达：主存</th><th>写回：缓存</th><th>写回：主存</th><th>脏位</th></tr></thead>
+          <tbody>
+            <tr><td>初始</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="mono">A B C D</td><td class="num">0</td></tr>
+            <tr><td>Store X → 101</td><td class="mono">A <b>X</b> C D</td><td class="mono">A <b>X</b> C D</td><td class="mono">A <b>X</b> C D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>Store Y → 102</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A X <b>Y</b> D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>Store Z → 101</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A <b>Z</b> Y D</td><td class="mono">A B C D</td><td class="num">1</td></tr>
+            <tr><td>块被替换</td><td>直接丢掉</td><td>已是最新</td><td>脏位为 1，整块写回</td><td class="mono"><b>A Z Y D</b></td><td>—</td></tr>
+            <tr><td>主存一共被写</td><td colspan="2"><b>3 次</b></td><td colspan="3"><b>1 次</b></td></tr>
+          </tbody>
+        </table></div>
+        <ul class="speclist">
+          <li><strong>写直达（write-through）</strong>：每次写，缓存和主存<b>同时</b>更新。好处是主存永远最新、简单可靠，块被踢时直接丢掉；坏处是每次写都要访问慢速的主存，流量大。上例写了 3 次主存，第一次写的 X 后来还被 Z 覆盖，等于白写。</li>
+          <li><strong>写回（write-back）</strong>：写的时候<b>只改缓存</b>，等这个块被踢出缓存时才一次性写回主存。好处是同一块的多次写合并成一次，流量小、速度快（上例 X 根本没写到主存）；坏处是主存有一段时间是旧的，控制更复杂，踢块时若要先写回会多花时间。</li>
+        </ul>
+        <h4 id="m9-dirty">脏位（dirty bit）是什么</h4>
+        <p>脏位是缓存<b>每一行</b>上额外的 1 个比特，标记"这一行被改过没有"。"脏"的意思是这份副本已经被改动，和主存里的原件不一样了。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>脏位</th><th>意思</th><th>这一行被踢出时</th></tr></thead>
+          <tbody>
+            <tr><td class="num"><b>0</b>（clean）</td><td>缓存里这份和主存那份一模一样</td><td>直接丢掉，什么都不用做</td></tr>
+            <tr><td class="num"><b>1</b>（dirty）</td><td>这一行在缓存里被写过，主存那份已经是旧的</td><td>必须先把<b>整块</b>写回主存，再丢掉</td></tr>
+          </tbody>
+        </table></div>
+        <div class="formula"><span class="fl">每一行存：| 有效位 V | 脏位 D | 标签 Tag | 数据（整个块） |</span></div>
+        <ul class="speclist">
+          <li><strong>每一行（每个块）1 位</strong>，不是每个字节 1 位。块里哪怕只改了一个字节，整行就算脏，写回时整块一起写。</li>
+          <li><strong>什么时候变</strong>：块从主存搬进缓存时 D = 0；对这一行写（store）时 D = 1；只读不改变 D；被踢出时看 D 决定要不要写回。</li>
+          <li><strong>只有写回策略才需要脏位</strong>：写回在写时不改主存，必须记住哪些行的主存副本已经过期。只读过的块 D 一直是 0，踢出时不用白写一次主存，这也是写回省流量的地方。写直达每次都同时改主存，行永远是"干净"的，不需要脏位。</li>
+          <li>T9.4(c) 问每次操作后的脏位：初始 0，三次写之后都是 <b>1、1、1</b>，直到块被写回、踢出。</li>
+        </ul>
+        <h4 id="m9-wbuf">写缓冲：让写直达不那么慢</h4>
+        <p>写和读不一样：<b>读</b>时 CPU 必须拿到数据才能继续算；<b>写</b>时 CPU 不需要拿回任何东西。所以可以加一个小队列：CPU 把"地址 + 数据"往缓冲里一放就继续执行，缓冲在后台慢慢写进主存，好比把信投进邮筒就走，不用等邮递员送到。只有缓冲<b>满了</b>（写得太快，主存来不及消化），CPU 才要停下来等。写缓冲通常和写直达搭配。</p>
+        <p><strong>缓存一致性</strong>是多核的问题：每个核有自己的缓存，核 1 改了 x，核 2 缓存里还是旧的 x，需要 MESI（Modified / Exclusive / Shared / Invalid）这类协议来通知和作废旧副本。讲义说超出本课程范围，知道名字即可。</p>
+        <h4 id="m9-wmiss">写缺失时怎么办</h4>
+        <p><b>写缺失</b>：要写的地址所在的块<b>不在缓存里</b>。例如执行 Store X → 205，块 204–207 不在缓存里，有两种处理：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>写分配<br><small>write allocate / fetch-on-write</small></th><th>不写分配<br><small>no-write allocate / write-around</small></th></tr></thead>
+          <tbody>
+            <tr><td>做法</td><td>先把块 204–207 从主存搬进缓存（和读缺失一样），再在缓存里写 X</td><td>直接写主存的 205，缓存不动</td></tr>
+            <tr><td>想法</td><td>刚写过的地方很可能马上还要读写（局部性），搬进来后面就能命中</td><td>有些数据写完就不再用（例如初始化一个大数组），搬进缓存反而挤掉有用的块</td></tr>
+            <tr><td>之后再读 205</td><td>命中</td><td>缺失，要去主存取</td></tr>
+            <tr><td>通常搭配</td><td><b>写回</b>：块进了缓存，之后的多次写都只改缓存，最后一起写回</td><td><b>写直达</b>：反正每次写都要写主存，没必要再把块搬进缓存</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tablewrap"><table>
+          <caption>两套常见组合</caption>
+          <thead><tr><th>组合</th><th>写命中</th><th>写缺失</th><th>特点</th></tr></thead>
+          <tbody>
+            <tr><td><b>写回 + 写分配</b></td><td>只写缓存，脏位置 1</td><td>先搬块进缓存，再写缓存</td><td>性能高，现代缓存主流</td></tr>
+            <tr><td><b>写直达 + 不写分配</b></td><td>缓存和主存都写</td><td>只写主存</td><td>简单，主存永远最新，通常配写缓冲</td></tr>
+          </tbody>
+        </table></div>
+        <p>数主存被写了几次：写直达 = 写的次数；写回 = 被踢出时脏块的个数。</p>
         <div class="callout teal"><div class="lbl">权衡（Tutorial 9.4 e、f 的答案点）</div><p><b>写回的优点</b>：同一块的多次写合并成一次写回，内存流量和带宽占用小；写操作以缓存速度完成，性能高、功耗低。<b>写直达的优点</b>：主存始终是最新的，一致性简单（DMA 读主存不会读到旧值）；不需要脏位；替换块时不用先等写回。趋势是现代缓存多用写回。</p></div>
 
         <div class="lab" id="m9-lab2">
@@ -1298,23 +1451,71 @@ ABCDE 1F890 1
 
       <div class="sub" id="m9-s6">
         <h3><span class="num">9.6</span> 多级缓存</h3>
-        <p>芯片面积够用后，可以加一个更大的二级缓存（通常是统一缓存，指令数据共用），甚至三级。L1 缺失先找 L2，L2 也缺失才去主存。</p>
-        <div class="formula">
-          <span class="fl">AMAT = HT<sub>L1</sub> + MR<sub>L1</sub> × MP<sub>L1</sub></span>
-          <span class="fl">MP<sub>L1</sub> = HT<sub>L2</sub> + MR<sub>L2</sub> × MP<sub>L2</sub>　<span class="cm">（L1 的缺失代价就是 L2 的平均访问时间）</span></span>
-          <span class="fl"><b>AMAT = HT<sub>L1</sub> + MR<sub>L1</sub> × (HT<sub>L2</sub> + MR<sub>L2</sub> × MP<sub>L2</sub>)</b></span>
-        </div>
+        <p>只有一级缓存时，L1 缺失就得直接去主存，一次要等 100 个周期；L1 又不能做大，做大了就变慢。办法是在 L1 和主存之间再加一层更大一点、稍慢一点的 <b>L2</b>（芯片面积够时还有 L3）：</p>
+        <div class="formula"><span class="fl">CPU → L1（很小、很快）→ L2（大一些、慢一些）→ 主存（很大、很慢）</span></div>
         <ul class="speclist">
-          <li><strong>局部缺失率</strong>：本级缺失次数 ÷ 到达本级的访问次数。MR<sub>L1</sub> = n1/N，MR<sub>L2</sub> = n2/n1。</li>
-          <li><strong>全局缺失率</strong>：本级缺失次数 ÷ CPU 发出的总访问次数。L2 的全局缺失率 = MR<sub>L1</sub> × MR<sub>L2</sub> = n2/N，它决定有多少访问最终要去主存。</li>
+          <li>L1 缺失先找 L2：L2 有，只付 L2 的时间（比如 19 或 25 周期），不用去主存；L2 也没有，才去主存。</li>
+          <li>L2 通常是<b>统一缓存</b>：指令和数据共用一个 L2；L1 则分成指令缓存和数据缓存两个。</li>
         </ul>
-        <p>接着 9.5 的例子，加一个统一 L2：L1 缺失时访问 L2 花 25 周期；有了 L2 之后，只有 0.5% 的访问最终要去主存（全局缺失率），去主存仍是 100 周期：</p>
+        <p>下面所有公式都从一个办法推出来：<b>数一数一共多少次访问、每次花多少时间，加起来再除以访问次数</b>。</p>
+        <h4 id="m9-l2count">用 1000 次访问数一遍（Tutorial 9.3 的数据）</h4>
+        <p>L1 命中 1 周期、缺失率 5%；L2 命中 19 周期、缺失率 2%；从主存取一块 50 周期。CPU 一共发出 N = 1000 次访问：</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>走到哪一层</th><th class="num">次数</th><th class="num">每次多花</th><th class="num">合计</th></tr></thead>
+          <tbody>
+            <tr><td>所有访问都先查 L1</td><td class="num">1000</td><td class="num">1</td><td class="num">1000</td></tr>
+            <tr><td>L1 缺失 → 去 L2</td><td class="num">1000 × 5% = <b>50</b></td><td class="num">19</td><td class="num">950</td></tr>
+            <tr><td>L2 也缺失 → 去主存</td><td class="num">50 × 2% = <b>1</b></td><td class="num">50</td><td class="num">50</td></tr>
+            <tr><td>总时间</td><td></td><td></td><td class="num"><b>2000 周期</b></td></tr>
+          </tbody>
+        </table></div>
+        <p>平均每次访问 = 2000 ÷ 1000 = <b>2 周期</b>，这就是 AMAT。把这张表写成公式：</p>
         <div class="formula">
-          <span class="fl">L1 停顿 = 1 × 2% × 25 + 0.36 × 4% × 25 = 0.5 + 0.36</span>
-          <span class="fl">L2 停顿 = 1 × 0.5% × 100 + 0.36 × 0.5% × 100 = 0.5 + 0.18 = 0.68</span>
-          <span class="fl"><b>CPI = 2 + 0.86 + 0.68 = 3.54</b>（没有 L2 时是 5.44）</span>
+          <span class="fl">AMAT = 1 + 5% × 19 + 5% × 2% × 50 = HT<sub>L1</sub> + MR<sub>L1</sub> × HT<sub>L2</sub> + MR<sub>L1</sub> × MR<sub>L2</sub> × MP<sub>L2</sub></span>
+          <span class="fl"><b>AMAT = HT<sub>L1</sub> + MR<sub>L1</sub> × (HT<sub>L2</sub> + MR<sub>L2</sub> × MP<sub>L2</sub>)</b></span>
+          <span class="fl">MP<sub>L1</sub> = HT<sub>L2</sub> + MR<sub>L2</sub> × MP<sub>L2</sub> = 19 + 2% × 50 = 20　<span class="cm">（= L2 自己的 AMAT）</span></span>
+          <span class="fl">AMAT<sub>L1</sub> = HT<sub>L1</sub> + MR<sub>L1</sub> × MP<sub>L1</sub> = 1 + 5% × 20 = 2</span>
         </div>
-        <div class="callout warn"><div class="lbl">先分清给的是哪种缺失率</div><p>讲义这里的 0.5% 是<b>全局</b>缺失率，所以直接乘每条指令的访存次数。如果题目给的是 L2 的<b>局部</b>缺失率，要先乘上 L1 缺失率，或者像 Tutorial 9.3 那样用 AMAT 嵌套公式逐级算：AMAT<sub>L2</sub> = 19 + 2% × 50 = 20，AMAT<sub>L1</sub> = 1 + 5% × 20 = 2 周期。</p></div>
+        <p>括号里正好是 L2 自己的 AMAT：L1 一旦缺失，平均还要再花 20 个周期才能拿到数据。所以"<b>L1 的缺失代价就是 L2 的平均访问时间</b>"。公式和一级缓存完全一样，只是 L1 的缺失代价不再是主存时间。这就是 Tutorial 9.3(a)(b)：AMAT<sub>L2</sub> = 20，AMAT<sub>L1</sub> = 2。</p>
+        <h4 id="m9-localglobal">局部缺失率 vs 全局缺失率</h4>
+        <p>还是那 1000 次访问：L1 缺失 50 次，L2 缺失 1 次。</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>怎么算</th><th class="num">L1</th><th class="num">L2</th></tr></thead>
+          <tbody>
+            <tr><td><b>局部缺失率</b></td><td>本级缺失次数 ÷ <b>到达本级</b>的访问次数</td><td class="num">50 / 1000 = 5%</td><td class="num">1 / <b>50</b> = 2%</td></tr>
+            <tr><td><b>全局缺失率</b></td><td>本级缺失次数 ÷ <b>CPU 发出的总</b>访问次数</td><td class="num">50 / 1000 = 5%</td><td class="num">1 / <b>1000</b> = 0.1%</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="speclist">
+          <li>对 L1 两者一样，因为所有访问都先到 L1；对 L2 差别很大，L2 只看得到 L1 漏下来的那 50 次。</li>
+          <li><b>全局 = 局部<sub>1</sub> × 局部<sub>2</sub></b> = 5% × 2% = 0.1%（讲义写作 n1/N × n2/n1 = n2/N）：CPU 的所有访问里，最终有多少要跑到主存。</li>
+          <li>L2 的局部缺失率常常看起来不低，因为它接到的都是 L1 搞不定的"难"访问，不代表 L2 没用。衡量 L2 的效果要看全局缺失率。</li>
+        </ul>
+        <h4 id="m9-l2cpi">讲义的 CPI 例子，逐项拆开</h4>
+        <p>接着 9.5 节：理想 CPI 2，load/store 36%，L1 指令缓存缺失率 2%、数据缓存 4%。L1 缺失后去 L2 要 25 周期；加了 L2 之后，只有 <b>0.5%</b> 的访问最终去主存（<b>全局</b>缺失率），去主存 100 周期。每次访存的平均停顿分两部分：</p>
+        <div class="formula"><span class="fl"><b>每次访存停顿 = MR<sub>L1</sub> × 去 L2 的时间 + 全局缺失率 × 去主存的时间</b></span></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>来源</th><th>去 L2 的停顿</th><th>去主存的停顿</th></tr></thead>
+          <tbody>
+            <tr><td>取指（每条 1 次）</td><td class="num">1 × 2% × 25 = <b>0.5</b></td><td class="num">1 × 0.5% × 100 = <b>0.5</b></td></tr>
+            <tr><td>取数（每条 0.36 次）</td><td class="num">0.36 × 4% × 25 = <b>0.36</b></td><td class="num">0.36 × 0.5% × 100 = <b>0.18</b></td></tr>
+            <tr><td>小计</td><td class="num">0.86</td><td class="num">0.68</td></tr>
+          </tbody>
+        </table></div>
+        <div class="formula">
+          <span class="fl"><b>CPI = 2 + 0.86 + 0.68 = 3.54</b></span>
+          <span class="fl">没有 L2：停顿 = 2% × 100 + 0.36 × 4% × 100 = 2 + 1.44 = 3.44，CPI = 5.44</span>
+        </div>
+        <p>省在哪里：原来每次 L1 缺失都要等 100 周期；现在大部分 L1 缺失在 L2 就解决了，只付 25 周期，只有 0.5% 的访问还要付 100 周期。</p>
+        <div class="callout warn"><div class="lbl">先分清给的是哪种缺失率</div>
+          <div class="tablewrap" style="margin:6px 0 10px 0; box-shadow:none"><table>
+            <thead><tr><th>题目给的</th><th>怎么用</th></tr></thead>
+            <tbody>
+              <tr><td>L2 的<b>全局</b>缺失率（讲义这个例子：0.5%）</td><td>直接乘每条指令的访存次数和主存时间</td></tr>
+              <tr><td>L2 的<b>局部</b>缺失率（Tutorial 9.3：2%）</td><td>先乘 L1 缺失率，或用嵌套公式从 L2 往上逐级算 AMAT</td></tr>
+            </tbody>
+          </table></div>
+          <p>Tutorial 9.3(c)：理想 CPI 2.0，25% 是 load/store，题目只讲数据缓存。每次数据访问的停顿 = MR<sub>L1</sub> × MP<sub>L1</sub> = 5% × 20 = 1 周期（也就是 AMAT<sub>L1</sub> − HT<sub>L1</sub> = 2 − 1，命中时间已经算在理想 CPI 里了）；每条指令停顿 = 0.25 × 1 = <b>0.25</b>，CPI = <b>2.25</b>。</p></div>
         <div class="tablewrap"><table>
           <caption>典型参数（讲义）</caption>
           <thead><tr><th></th><th>L1</th><th>L2</th></tr></thead>
@@ -1325,6 +1526,7 @@ ABCDE 1F890 1
             <tr><td>缺失率</td><td class="num">2%–5%</td><td class="num">0.1%–2%（全局）</td></tr>
           </tbody>
         </table></div>
+        <p>读法：越往下越大（L2 比 L1 大十几到上百倍）、越慢、块越大；L1 的缺失代价是去 L2 的时间，L2 的缺失代价是去主存的时间；L2 一栏写的是全局缺失率，所以数字很小。</p>
       </div>
 
       <div class="sub" id="m9-s7">
