@@ -538,6 +538,40 @@ article.mq.done-wrong{border-left:4px solid var(--warn);}
 .mk-key{border:1px solid var(--s4); border-left:3px solid var(--s4); background:color-mix(in srgb, var(--s4) 12%, var(--surface)); padding:8px 12px; border-radius:0 var(--radius) var(--radius) 0; font-size:14px; margin:8px 0; max-width:80ch;}
 .mk-key b{color:var(--ink);}
 #cache-topic .tablewrap td:first-child{white-space:nowrap;}
+/* 错题 & 重点 */
+.qhead .mq-badge{font-family:var(--font-mono); font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn);}
+.qhead .mq-badge.fixed{background:var(--ok-soft); color:var(--ok); border-color:var(--ok);}
+.qhead .mstar{margin-left:auto; font-family:var(--font-mono); font-size:11px; padding:4px 9px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface); color:var(--muted); cursor:pointer; white-space:nowrap;}
+.qhead .mstar[aria-pressed="true"]{background:var(--accent-soft); color:var(--accent-strong); border-color:var(--accent-strong); font-weight:700;}
+article.mq.starred{box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow);}
+.fchip.book{border-color:var(--warn); color:var(--warn);}
+.fchip.book.on{background:var(--warn-soft); border-color:var(--warn); color:var(--warn);}
+.bk-h{font-family:var(--font-display); font-size:19px; margin:24px 0 8px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.bk-h span{font-family:var(--font-mono); font-size:12px; background:var(--surface-2); border-radius:10px; padding:1px 8px;}
+.bk-h .fchk{margin-left:auto; font-family:var(--font-mono); font-weight:400;}
+.bk-list{list-style:none; margin:0; padding:0; display:grid; gap:6px; max-width:820px;}
+.bk-list li{display:flex; align-items:stretch; gap:4px;}
+.bk-go{flex:1; min-width:0; text-align:left; font-family:var(--font-body); font-size:14.5px; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:8px 12px; cursor:pointer; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:baseline;}
+.bk-go:hover{background:var(--surface-2);}
+.bk-go b{font-family:var(--font-mono); font-size:13px; color:var(--accent-strong);}
+.bk-go small{flex-basis:100%; font-size:12.5px; color:var(--muted); font-family:var(--font-mono);}
+.bk-pill{font-family:var(--font-mono); font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px;}
+.bk-pill.bad{background:var(--warn-soft); color:var(--warn);}
+.bk-pill.ok{background:var(--ok-soft); color:var(--ok);}
+.bk-pill.star{background:var(--accent-soft); color:var(--accent-strong);}
+.bk-x{border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:var(--radius); cursor:pointer; padding:0 10px; font-size:15px;}
+.bk-x:hover{color:var(--warn); border-color:var(--warn);}
+.bk-empty{color:var(--muted); font-size:14px;}
+details.bk-rand{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); margin-bottom:6px; max-width:820px;}
+details.bk-rand > summary{cursor:pointer; padding:8px 12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:14px;}
+details.bk-rand > summary .bk-x{margin-left:auto;}
+.bk-rbody{padding:4px 14px 12px 14px; border-top:1px dashed var(--line);}
+.bk-opts{list-style:none; padding:0; margin:8px 0; display:grid; gap:4px;}
+.bk-opts li{padding:5px 10px; border:1px solid var(--line); border-radius:var(--radius); font-size:14px;}
+.bk-opts li.right{border-color:var(--ok); background:var(--ok-soft); color:var(--ok);}
+.bk-opts li.wrong{border-color:var(--warn); background:var(--warn-soft); color:var(--warn);}
+.km-flash{animation:kmflash 1.4s ease;}
+@keyframes kmflash{0%,40%{box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent);}100%{box-shadow:none;}}
 /* ============ 我的重点 ============ */
 .km-host{position:relative;}
 .km-btn{font-family:var(--font-mono); font-size:11px; line-height:1; padding:4px 8px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface); color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0;}
@@ -563,6 +597,57 @@ article.mq.done-wrong{border-left:4px solid var(--warn);}
 .nav a.km-nav::after{content:" ★"; color:var(--accent-strong); font-size:11px;}
 @media (prefers-reduced-motion: reduce){ .km-flash{animation:none;} }
 @media print{ .km-btn, .km-panel{display:none !important;} }
+/* ============ 9.4 写策略：一步一步看 ============ */
+.ws-modes{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:10px; margin:0 0 12px 0;}
+.ws-modes button{display:flex; flex-direction:column; gap:2px; text-align:left; padding:10px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer; font-family:var(--font-body);}
+.ws-modes button b{font-family:var(--font-display); font-size:16px; color:var(--ink);}
+.ws-modes button span{font-family:var(--font-mono); font-size:11.5px; color:var(--muted);}
+.ws-modes button.on{border-color:var(--accent-strong); background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent-strong);}
+.ws-steps{list-style:none; margin:0 0 12px 0; padding:0; display:flex; flex-wrap:wrap; gap:6px;}
+.ws-steps button{font-family:var(--font-body); font-size:12.5px; padding:4px 10px 4px 4px; border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+.ws-steps button b{font-family:var(--font-mono); font-size:11px; min-width:20px; height:20px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background:var(--surface-2); color:var(--muted);}
+.ws-steps li.done button{color:var(--muted);}
+.ws-steps li.done button b{background:var(--teal-soft); color:var(--teal);}
+.ws-steps li.on button{border-color:var(--accent-strong); color:var(--ink); font-weight:700; background:var(--accent-soft);}
+.ws-steps li.on button b{background:var(--accent-strong); color:var(--accent-ink);}
+.ws-wrap{margin:0 0 10px 0; padding:12px;}
+.diagram .scrollx svg.wsv{min-width:600px;}
+.wsv .chip{fill:none; stroke:var(--muted); stroke-width:1.4; stroke-dasharray:6 4;}
+.wsv .box{fill:var(--surface-2); stroke:var(--line-strong); stroke-width:1.4;}
+.wsv .box.mem{fill:color-mix(in srgb, var(--surface-2) 55%, var(--surface));}
+.wsv .row{fill:transparent; stroke:transparent; stroke-width:3;}
+.wsv .cell{fill:var(--surface); stroke:var(--line-strong); stroke-width:1.2;}
+.wsv .bus{fill:color-mix(in srgb, var(--ink-soft) 10%, transparent); stroke:none;}
+.wsv .t{font-family:var(--font-mono); font-size:12px; fill:var(--ink);}
+.wsv .t.b{font-weight:700; font-size:13px;}
+.wsv .t.s{font-size:10.5px; fill:var(--muted);}
+.wsv .t.v{font-size:15px; font-weight:700;}
+.wsv .t.ins{font-size:12.5px; font-weight:700; fill:var(--accent-strong);}
+.wsv .t.bad{fill:var(--warn); font-weight:700;}
+.wsv .badge{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.4;}
+.wsv .ws-off{display:none;}
+.wsv .ws-hl{stroke:var(--accent-strong) !important; stroke-width:3 !important;}
+.wsv .cell.ws-hl, .wsv .box.ws-hl{fill:var(--accent-soft);}
+.wsv .row.ws-hl{fill:color-mix(in srgb, var(--accent) 12%, transparent);}
+.wsv .ws-flow{fill:none; stroke:var(--accent-strong); stroke-width:2.6; stroke-dasharray:7 5; animation:wsdash .9s linear infinite;}
+.wsv .ws-head{fill:var(--accent-strong);}
+.wsv .ws-dot{fill:var(--accent-strong);}
+.wsv .ws-lblbg{fill:var(--surface); stroke:var(--accent-strong); stroke-width:1.2;}
+.wsv .ws-lbl{font-family:var(--font-mono); font-size:11.5px; font-weight:700; fill:var(--accent-strong);}
+@keyframes wsdash{to{stroke-dashoffset:-12;}}
+.ws-nav{display:flex; align-items:center; gap:12px; margin:0 0 10px 0;}
+.ws-nav #wsCount{font-family:var(--font-mono); font-size:13px; color:var(--muted); margin:0 auto;}
+.ws-nav .btn:disabled{opacity:.4; cursor:default;}
+.ws-explain{background:var(--surface-2); border-left:3px solid var(--accent-strong); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px 4px 16px; max-width:82ch;}
+.ws-explain .ws-h{font-family:var(--font-display); font-size:17px; font-weight:700; margin:0 0 8px 0;}
+.ws-explain p{margin:0 0 10px 0; font-size:15px; line-height:1.75; display:grid; grid-template-columns:5.6em minmax(0,1fr); gap:10px;}
+.ws-explain .ws-k{font-family:var(--font-mono); font-size:11.5px; font-weight:700; color:var(--accent-strong); padding-top:3px; letter-spacing:.02em;}
+.ws-explain .tablewrap{margin:4px 0 10px 0; box-shadow:none;}
+.ws-explain .tablewrap table{min-width:420px;}
+.ws-explain p.ws-more{display:block; color:var(--muted); font-size:14px;}
+@media (max-width:640px){ .ws-explain p{grid-template-columns:minmax(0,1fr); gap:2px;} }
+@media (prefers-reduced-motion: reduce){ .wsv .ws-flow{animation:none;} }
+.wsv .t.leg{font-size:10.5px; fill:var(--ink-soft); font-weight:600;}
 
 .callout.tnote{border-left-color:var(--s4); background:color-mix(in srgb, var(--s4) 9%, var(--surface));}
 .callout.tnote .lbl{color:var(--ink);}
@@ -1031,6 +1116,7 @@ article.mq.done-wrong{border-left:4px solid var(--warn);}
           <li>写策略<span class="tm">（write policy）</span>要解决的问题：<b>怎么保证主存最终拿到正确的值</b>。主存的值在这几种时候要紧：块被踢出缓存时（新值没写回<span class="tm">（write-back）</span>就丢了）、I/O 设备（DMA）绕过缓存直接读主存时、多核时别的核来读时。</li>
           <li>写和读的另一个区别：写不需要把数据拿回 CPU，所以<b>不一定要让 CPU 等</b>，可以交给写缓冲（B6）。</li>
           <li>讲义列了四种机制：写直达<span class="tm">（write-through）</span>、写回、写缓冲、缓存一致性（MESI，超出课程范围）。</li>
+          <li><b>看动画</b>：<a href="#m9-lab0">9.4 节"一次写操作到底走了哪条路"</a>，两种策略下数据怎么走、脏位<span class="tm">（dirty bit）</span>和主存什么时候变，一步步播放。</li>
         </ul>
       </div>
 
@@ -1969,7 +2055,7 @@ ABCDE 1F890 1
         <h3><span class="num">9.4</span> 写策略：主存怎么拿到正确的值</h3>
         <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>写直达<span class="tm">（write-through）</span>和写回<span class="tm">（write-back）</span>的区别要记住（老师原话 "remember the differences"）。现代缓存<span class="tm">（cache）</span>多用写回，因为性能更好。</li><li>写分配<span class="tm">（write allocate）</span>（先把块搬进缓存再写，常配写回）vs 不写分配<span class="tm">（no-write allocate）</span>（直接写主存<span class="tm">（main memory）</span>，常配写直达）。写缓冲<span class="tm">（write buffer）</span>让 CPU 不用等写完。</li><li>多核缓存一致性（MESI）超出本课范围，只提了一下。</li></ul></div>
 
-        <p class="mk-ref">四种情况总表、"读缺失<span class="tm">（read miss）</span>也会写主存"、完整的读写序列例子和判断题自测，见 <a href="#ct-four">缓存专题 B 部分</a>。</p>
+        <p class="mk-ref">四种情况总表、"读缺失<span class="tm">（read miss）</span>也会写主存"、完整的读写序列例子和判断题自测，见 <a href="#ct-four">缓存专题 B 部分</a>。先看下面的<a href="#m9-lab0">动画</a>最直观。</p>
         <p>写和读不一样：写不一定要让 CPU 等（可以用写缓冲），但写会修改缓存，于是缓存和主存可能暂时存着同一数据的不同版本；有些 I/O 设备（DMA）还会绕过缓存直接读主存。四种机制：</p>
         <div class="tablewrap"><table>
           <thead><tr><th>机制</th><th>做法</th><th>特点</th></tr></thead>
@@ -1980,6 +2066,18 @@ ABCDE 1F890 1
             <tr><td><b>缓存一致性</b></td><td>多核下用 MESI 等协议保证各缓存与主存一致</td><td>超出本课程范围</td></tr>
           </tbody>
         </table></div>
+        <div class="lab ws" id="m9-lab0">
+          <div class="lab-head"><div><div class="lab-cap">动画 · 一步一步看</div><div class="lab-title">写操作到底怎么走：写回 vs 写直达</div></div></div>
+          <p class="lab-desc">同样 6 个操作（写 101 三次、DMA 读主存、读 108、写 105），分别用两种策略走一遍。每一步只做一件事，下面的说明会讲清楚<b>发生了什么、怎么算、为什么、图上看哪里</b>。用"上一步 / 下一步"或键盘 ← → 翻，也可以直接点上面的步骤跳过去。建议先看"写回 + 写分配"，再切换到"写直达"对比。</p>
+          <div class="ws-modes" id="wsMode" role="group" aria-label="选择写策略">
+            <button type="button" data-m="wb" class="on"><b>写回 + 写分配</b><span>write-back + write allocate · 现代缓存主流</span></button>
+            <button type="button" data-m="wt"><b>写直达 + 不写分配</b><span>write-through + no-write allocate · 配写缓冲</span></button>
+          </div>
+          <ol class="ws-steps" id="wsSteps" aria-label="步骤"></ol>
+          <div class="diagram ws-wrap"><div class="scrollx"><svg class="wsv" id="wsSvg" viewBox="0 0 800 330" role="img" aria-label="CPU、缓存两行、写缓冲、内存总线、主存和 DMA 设备的示意图"></svg></div></div>
+          <div class="ws-nav"><button type="button" class="btn" id="wsPrev">◀ 上一步</button><span id="wsCount"></span><button type="button" class="btn primary" id="wsNext">下一步 ▶</button></div>
+          <div class="ws-explain" id="wsText" aria-live="polite"></div>
+        </div>
         <h4 id="m9-whywrite">为什么"写"会带来麻烦</h4>
         <p><b>读</b>只是把数据复制一份到缓存，缓存和主存内容一样，不会出问题。<b>写</b>会改值：缓存里有块 100–103 = A B C D，主存也是 A B C D；CPU 把 X 写到 101，缓存那份变成 A X C D，主存那份改不改？不改的话，同一个地址在两处就是两个不同的值。主存的值在这几种时候要紧：</p>
         <ul class="speclist">
@@ -4225,6 +4323,326 @@ ABCDE 1F890 1
     }
   }, true);
   paint();
+})();
+</script>
+<script>
+/* ================= 9.4 写策略：一步一步看（build_learn.py 注入） =================
+   直接映射、2 行、每块 4 字节。块号 = 地址 ÷ 4，行号 = 块号 mod 2。
+   开始时第 1 行装着块 25（100–103 = A B C D），第 0 行为空。                */
+(function(){
+  'use strict';
+  var root = document.getElementById('m9-lab0'); if (!root) return;
+  var NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('wsSvg');
+  var $ = function(id){ return document.getElementById(id); };
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function el(tag, a, parent, text){
+    var e = document.createElementNS(NS, tag);
+    for (var k in a) e.setAttribute(k, a[k]);
+    if (text !== undefined) e.textContent = text;
+    (parent || svg).appendChild(e); return e;
+  }
+  function txt(x, y, s, cls, anchor, id){ var a = { x: x, y: y, 'class': 't ' + (cls || '') }; if (anchor) a['text-anchor'] = anchor; if (id) a.id = id; return el('text', a, null, s); }
+
+  /* ---------- 画静态部分 ---------- */
+  var defs = el('defs', {});
+  var mk = el('marker', { id: 'ws-arrow', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+  el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'ws-head' }, mk);
+
+  el('rect', { x: 8, y: 8, width: 470, height: 304, rx: 8, 'class': 'chip' });
+  txt(18, 26, 'CPU 芯片', 's');
+  el('rect', { x: 22, y: 40, width: 120, height: 88, rx: 5, 'class': 'box', id: 'ws-cpu' });
+  txt(82, 62, 'CPU 核', 'b', 'middle');
+  txt(82, 84, '正在执行', 's', 'middle');
+  txt(82, 108, '', 'ins', 'middle', 'ws-ins');
+  txt(22, 160, '', 'b', null, 'ws-wr');
+  txt(22, 180, '', 'b', null, 'ws-rd');
+  var badge = el('g', { id: 'ws-badge' });
+  el('rect', { x: 18, y: 196, width: 128, height: 46, rx: 5, 'class': 'badge' }, badge);
+  el('text', { x: 28, y: 215, 'class': 't bad' }, badge, '缓存和主存');
+  el('text', { x: 28, y: 233, 'class': 't bad' }, badge, '现在不一样');
+
+  el('rect', { x: 165, y: 28, width: 300, height: 172, rx: 5, 'class': 'box' });
+  txt(176, 46, '缓存：直接映射 · 2 行 · 每块 4 字节', 'b');
+  txt(227, 64, 'V', 's', 'middle'); txt(257, 64, 'D', 's', 'middle'); txt(295, 64, '块号', 's', 'middle'); txt(390, 64, '地址 / 数据', 's', 'middle');
+  var ROWY = [70, 132], CY = [97, 159];
+  [0, 1].forEach(function(r){
+    var y = ROWY[r];
+    el('rect', { x: 170, y: y, width: 290, height: 54, rx: 4, 'class': 'row', id: 'ws-l' + r });
+    txt(178, y + 32, '第' + r + '行', 's');
+    el('rect', { x: 214, y: y + 10, width: 26, height: 34, rx: 3, 'class': 'cell', id: 'ws-v' + r }); txt(227, y + 32, '', 'v', 'middle', 'ws-vt' + r);
+    el('rect', { x: 244, y: y + 10, width: 26, height: 34, rx: 3, 'class': 'cell', id: 'ws-d' + r }); txt(257, y + 32, '', 'v', 'middle', 'ws-dt' + r);
+    el('rect', { x: 274, y: y + 10, width: 42, height: 34, rx: 3, 'class': 'cell', id: 'ws-b' + r }); txt(295, y + 32, '', 'v', 'middle', 'ws-bt' + r);
+    for (var i = 0; i < 4; i++){
+      var x = 322 + i * 35;
+      el('rect', { x: x, y: y + 5, width: 31, height: 44, rx: 3, 'class': 'cell', id: 'ws-c' + r + i });
+      txt(x + 15.5, y + 19, '', 's', 'middle', 'ws-ca' + r + i);
+      txt(x + 15.5, y + 41, '', 'v', 'middle', 'ws-cv' + r + i);
+    }
+  });
+  txt(170, 212, 'V = 有效位（valid）　D = 脏位（dirty）　块号 = Tag', 'leg');
+  el('rect', { x: 165, y: 218, width: 300, height: 50, rx: 5, 'class': 'box', id: 'ws-buf' });
+  txt(177, 248, '写缓冲', 'b');
+  for (var q = 0; q < 3; q++){ el('rect', { x: 245 + q * 72, y: 228, width: 66, height: 30, rx: 3, 'class': 'cell', id: 'ws-q' + q }); txt(278 + q * 72, 248, '', 's', 'middle', 'ws-qt' + q); }
+
+  el('rect', { x: 484, y: 46, width: 40, height: 214, rx: 4, 'class': 'bus' });
+  el('text', { x: 504, y: 152, 'class': 't s', 'text-anchor': 'middle', transform: 'rotate(-90 504 152)' }, null, '内存总线');
+
+  el('rect', { x: 540, y: 20, width: 250, height: 218, rx: 5, 'class': 'box mem' });
+  txt(552, 40, '主存 DRAM（芯片外）', 'b');
+  var MEMY = { 25: 54, 26: 112, 27: 170 }, MCY = { 25: 74, 26: 132, 27: 190 };
+  [25, 26, 27].forEach(function(b){
+    var y = MEMY[b];
+    el('rect', { x: 546, y: y - 4, width: 238, height: 50, rx: 4, 'class': 'row', id: 'ws-mr' + b });
+    txt(552, y + 17, '块 ' + b, 'b');
+    txt(552, y + 34, (4 * b) + '–' + (4 * b + 3), 's');
+    for (var i = 0; i < 4; i++){
+      var x = 618 + i * 41;
+      el('rect', { x: x, y: y, width: 37, height: 42, rx: 3, 'class': 'cell', id: 'ws-m' + b + i });
+      txt(x + 18.5, y + 14, String(4 * b + i), 's', 'middle');
+      txt(x + 18.5, y + 35, '', 'v', 'middle', 'ws-mv' + b + i);
+    }
+  });
+  el('rect', { x: 560, y: 262, width: 230, height: 56, rx: 5, 'class': 'box', id: 'ws-dma' });
+  txt(572, 283, 'I/O 设备（DMA）', 'b');
+  txt(572, 305, '', 's', null, 'ws-dmat');
+  var arrows = el('g', { id: 'ws-arrows' });
+
+  /* ---------- 状态 ---------- */
+  function init(){
+    return { L: [{ v: 0, d: 0, b: null, x: ['', '', '', ''] }, { v: 1, d: 0, b: 25, x: ['A', 'B', 'C', 'D'] }],
+             M: { 25: ['A', 'B', 'C', 'D'], 26: ['I', 'J', 'K', 'L'], 27: ['E', 'F', 'G', 'H'] },
+             Q: [], wr: 0, rd: 0, dma: '可以绕过缓存直接读主存' };
+  }
+  function render(S, st){
+    [0, 1].forEach(function(r){
+      var l = S.L[r];
+      $('ws-vt' + r).textContent = l.v; $('ws-dt' + r).textContent = l.d; $('ws-bt' + r).textContent = l.b === null ? '—' : l.b;
+      $('ws-dt' + r).setAttribute('class', 't v' + (l.d ? ' bad' : ''));
+      for (var i = 0; i < 4; i++){ $('ws-ca' + r + i).textContent = l.b === null ? '' : 4 * l.b + i; $('ws-cv' + r + i).textContent = l.x[i]; }
+    });
+    for (var b in S.M) for (var i = 0; i < 4; i++) $('ws-mv' + b + i).textContent = S.M[b][i];
+    for (var q = 0; q < 3; q++){ $('ws-qt' + q).textContent = S.Q[q] || ''; }
+    $('ws-wr').textContent = '主存被写：' + S.wr + ' 次';
+    $('ws-rd').textContent = '主存被读：' + S.rd + ' 次';
+    $('ws-dmat').textContent = S.dma;
+    $('ws-ins').textContent = st.ins || '';
+    var stale = S.L.some(function(l){ return l.v && l.x.join() !== S.M[l.b].join(); });
+    $('ws-badge').setAttribute('class', stale ? '' : 'ws-off');
+    svg.querySelectorAll('.ws-hl').forEach(function(n){ n.classList.remove('ws-hl'); });
+    (st.hl || []).forEach(function(id){ var n = $(id); if (n) n.classList.add('ws-hl'); });
+    while (arrows.firstChild) arrows.removeChild(arrows.firstChild);
+    (st.ar || []).forEach(function(a, k){
+      var d = 'M' + a.p.map(function(p){ return p[0] + ' ' + p[1]; }).join(' L');
+      el('path', { d: d, 'class': 'ws-flow', 'marker-end': 'url(#ws-arrow)' }, arrows);
+      if (!reduce){
+        var dot = el('circle', { r: 5, 'class': 'ws-dot' }, arrows);
+        el('animateMotion', { dur: '1.6s', repeatCount: 'indefinite', path: d, begin: (k * 0.5) + 's' }, dot);
+      }
+      var best = 0, bi = 1;
+      for (var i = 1; i < a.p.length; i++){ var len = Math.abs(a.p[i][0] - a.p[i - 1][0]) + Math.abs(a.p[i][1] - a.p[i - 1][1]); if (len > best){ best = len; bi = i; } }
+      var lx = a.lx !== undefined ? a.lx : (a.p[bi][0] + a.p[bi - 1][0]) / 2, ly = a.ly !== undefined ? a.ly : (a.p[bi][1] + a.p[bi - 1][1]) / 2 - 9;
+      var w = a.l.length * 7.4 + 14;
+      el('rect', { x: lx - w / 2, y: ly - 12, width: w, height: 18, rx: 3, 'class': 'ws-lblbg' }, arrows);
+      el('text', { x: lx, y: ly + 1, 'text-anchor': 'middle', 'class': 'ws-lbl' }, arrows, a.l);
+    });
+  }
+
+  /* ---------- 路径 ---------- */
+  var P = {
+    cpuLine: function(r){ return [[142, 80], [154, 80], [154, CY[r]], [170, CY[r]]]; },
+    lineCpu: function(r){ return [[170, CY[r] + 10], [160, CY[r] + 10], [160, 116], [142, 116]]; },
+    lineBuf: function(r){ return [[440, ROWY[r] + 54], [440, 228]]; },
+    cpuBuf: function(){ return [[100, 128], [100, 150], [154, 150], [154, 243], [165, 243]]; },
+    bufMem: function(b){ return [[465, 243], [500, 243], [500, MCY[b]], [546, MCY[b]]]; },
+    lineMem: function(r, b){ return [[460, CY[r] - 6], [494, CY[r] - 6], [494, MCY[b] - 6], [546, MCY[b] - 6]]; },
+    memLine: function(b, r){ return [[546, MCY[b] + 8], [514, MCY[b] + 8], [514, CY[r] + 8], [460, CY[r] + 8]]; },
+    memDma: function(){ return [[665, 238], [665, 262]]; }
+  };
+  function X(parts){ return parts.map(function(p){ return '<p><span class="ws-k">' + p[0] + '</span><span>' + p[1] + '</span></p>'; }).join(''); }
+
+  /* ---------- 两种模式的步骤 ---------- */
+  function steps(mode){
+    var wb = mode === 'wb', S = [];
+    S.push({ t: '认识这张图', ins: '（还没开始）', hl: ['ws-l1', 'ws-mr25'], x: X([
+      ['图上有什么', '左边虚线框是 <b>CPU 芯片</b>：里面有 CPU 核、<b>缓存</b>和<b>写缓冲</b>。右边是芯片外面的<b>主存</b>（内存条），中间通过<b>内存总线</b>连接。右下角的 <b>I/O 设备（DMA）</b>可以绕过缓存，直接读主存。'],
+      ['缓存每一行', '<b>V</b> 有效位：1 = 这一行装着真实的块。<b>D</b> 脏位：1 = 这一行在缓存里被改过，主存那份已经旧了。<b>块号</b>：记住装的是哪一块（相当于 Tag）。后面 4 格是这一块的 4 个字节。'],
+      ['怎么找行', '这个缓存是直接映射、2 行、每块 4 字节：<b>块号 = 地址 ÷ 4</b>（取整），<b>行号 = 块号 mod 2</b>。现在第 1 行装着块 25（地址 100–103 = A B C D），和主存一模一样，所以 D = 0；第 0 行是空的（V = 0）。'],
+      ['本次模式', wb ? '<b>写回 + 写分配</b>：写的时候只改缓存，等这个块被踢出时才写回主存；写缺失时先把块读进缓存再写。写缓冲在这个模式里用不上。'
+                     : '<b>写直达 + 不写分配</b>：每次写都同时写主存（先放进写缓冲排队，CPU 不用等）；写缺失时不把块搬进缓存。脏位 D 在这个模式里始终是 0。']]) });
+
+    /* ---- Store X → 101 ---- */
+    S.push({ t: '101 在哪一行', ins: 'Store X → 101', hl: ['ws-l1'], ar: [{ p: P.cpuLine(1), l: '101 在哪？', lx: 98, ly: 150 }], x: X([
+      ['发生了什么', 'CPU 执行 <code>Store X → 101</code>：要把 X 写到地址 101。缓存先算出地址 101 属于哪一块、应该在哪一行。'],
+      ['计算', '101 ÷ 4 = 25 余 1 → <b>块 25</b>，块内第 1 个字节；25 mod 2 = 1 → <b>第 1 行</b>。'],
+      ['为什么', '直接映射里每个块只有一个固定的位置，算出行号就知道只要去第 1 行找，不用看别的行。'],
+      ['看图', '高亮的是缓存第 1 行：块 25 如果在缓存里，只可能在这里。']]) });
+    S.push({ t: '写命中', ins: 'Store X → 101', hl: ['ws-v1', 'ws-b1'], x: X([
+      ['发生了什么', '检查第 1 行：V = 1（装着真实的块），块号是 25，正好是要找的块 25 → <b>写命中（write hit）</b>。'],
+      ['为什么', '命中要同时满足两个条件：这一行 <b>V = 1</b>，而且它的<b>块号（Tag）和要找的一样</b>。'],
+      ['看图', '高亮的是第 1 行的 V 和块号两个格子。']]) });
+    if (wb){
+      S.push({ t: '只写缓存，D = 1', ins: 'Store X → 101', hl: ['ws-c11', 'ws-d1', 'ws-m251'], ar: [{ p: P.cpuLine(1), l: 'X', lx: 154, ly: 128 }],
+        ap: function(s){ s.L[1].x[1] = 'X'; s.L[1].d = 1; }, x: X([
+        ['发生了什么', '写回策略：<b>只改缓存</b>。缓存里 101 从 B 变成 X，这一行的脏位 <b>D 从 0 变成 1</b>。主存一个字节都没碰，101 还是 B。'],
+        ['为什么', '写回的规则是"写只改缓存，等这个块被踢出缓存时，再一次性写回主存"。D = 1 是给这一行做的记号：<b>我被改过了，主存那份已经旧了，将来踢我的时候要先把我写回去</b>。'],
+        ['看图', '缓存 101 = X、D = 1；主存 101 = B。左边出现红色提示"缓存和主存现在不一样"，在写回里这是正常的，允许暂时不一样。']]) });
+    } else {
+      S.push({ t: '写缓存 + 放进写缓冲', ins: 'Store X → 101', hl: ['ws-c11', 'ws-q0'], ar: [{ p: P.cpuLine(1), l: 'X', lx: 154, ly: 128 }, { p: P.lineBuf(1), l: '101:X', lx: 440, ly: 205 }],
+        ap: function(s){ s.L[1].x[1] = 'X'; s.Q.push('101:X'); }, x: X([
+        ['发生了什么', '写直达策略：缓存里 101 改成 X，<b>同时</b>把"101 ← X"这件事放进<b>写缓冲</b>。放进去以后，CPU 就继续执行下一条指令，不等主存。'],
+        ['为什么', '写直达的规则是"每次写都要同时写主存"。可是主存很慢，如果每次都让 CPU 等主存写完，会很慢。所以先放进写缓冲排队，由写缓冲在后台去写。'],
+        ['看图', '缓存 101 = X；写缓冲里多了一项"101:X"；主存 101 暂时还是 B，下一步就会写。D 一直是 0：写直达不需要脏位。']]) });
+      S.push({ t: '写缓冲写主存', ins: 'Store X → 101（后台）', hl: ['ws-m251'], ar: [{ p: P.bufMem(25), l: '101:X' }],
+        ap: function(s){ s.Q.shift(); s.M[25][1] = 'X'; s.wr++; }, x: X([
+        ['发生了什么', '写缓冲把排队的"101:X"经内存总线写进主存：主存 101 变成 X。<b>主存被写第 1 次</b>，写缓冲清空。'],
+        ['为什么', '硬件保证写缓冲里的写最终都会写进主存。写完以后缓存和主存又一样了，而 CPU 在这段时间里已经在做别的事。'],
+        ['看图', '主存块 25 的 101 = X；左边计数变成"主存被写 1 次"。']]) });
+    }
+
+    /* ---- Store Y → 102, Store Z → 101 ---- */
+    if (wb){
+      S.push({ t: 'Store Y → 102', ins: 'Store Y → 102', hl: ['ws-c12'], ar: [{ p: P.cpuLine(1), l: 'Y', lx: 154, ly: 128 }],
+        ap: function(s){ s.L[1].x[2] = 'Y'; }, x: X([
+        ['发生了什么', '102 ÷ 4 = 25 余 2 → 还是块 25、第 1 行，第 1 行装的就是块 25 → 写命中。只改缓存：102 从 C 变成 Y。D 已经是 1，<b>保持 1</b>。主存还是 A B C D。'],
+        ['为什么', 'D 只记录"改过没有"，不记录改了几次、改了哪几个字节。已经是 1，再改一次还是 1。'],
+        ['看图', '缓存第 1 行现在是 A X Y D，主存还是 A B C D，一次都没被写。']]) });
+      S.push({ t: 'Store Z → 101', ins: 'Store Z → 101', hl: ['ws-c11'], ar: [{ p: P.cpuLine(1), l: 'Z', lx: 154, ly: 128 }],
+        ap: function(s){ s.L[1].x[1] = 'Z'; }, x: X([
+        ['发生了什么', '又写 101：写命中，缓存里 101 从 X 变成 Z，D 还是 1。'],
+        ['为什么', '注意 X 从头到尾<b>没有进过主存</b>，它在缓存里就被 Z 覆盖了。这就是写回省流量的地方：同一块被写多少次，主存都还没被写过，等最后被踢出时只写一次。'],
+        ['看图', '缓存 A Z Y D，主存 A B C D。主存被写 0 次。']]) });
+    } else {
+      S.push({ t: 'Store Y → 102', ins: 'Store Y → 102', hl: ['ws-c12', 'ws-m252'], ar: [{ p: P.cpuLine(1), l: 'Y', lx: 154, ly: 128 }, { p: P.bufMem(25), l: '102:Y' }],
+        ap: function(s){ s.L[1].x[2] = 'Y'; s.M[25][2] = 'Y'; s.wr++; }, x: X([
+        ['发生了什么', '102 ÷ 4 = 25 余 2 → 还是块 25、第 1 行 → 写命中。缓存 102 = Y，同时经写缓冲写主存 102 = Y。<b>主存被写第 2 次</b>。'],
+        ['为什么', '写直达每一次写都要写主存，写命中也一样。（为了不重复，这一步把"放进写缓冲"和"写缓冲写主存"合在一起画。）'],
+        ['看图', '缓存和主存都是 A X Y D，一直保持一致。']]) });
+      S.push({ t: 'Store Z → 101', ins: 'Store Z → 101', hl: ['ws-c11', 'ws-m251'], ar: [{ p: P.cpuLine(1), l: 'Z', lx: 154, ly: 128 }, { p: P.bufMem(25), l: '101:Z' }],
+        ap: function(s){ s.L[1].x[1] = 'Z'; s.M[25][1] = 'Z'; s.wr++; }, x: X([
+        ['发生了什么', '写 101：缓存 101 = Z，经写缓冲写主存 101 = Z。<b>主存被写第 3 次</b>。'],
+        ['为什么', '第 1 次写进主存的 X，现在被 Z 覆盖了，那一次写主存等于白写。这就是写直达流量大的原因：每次写都写主存，不管之后会不会被覆盖。'],
+        ['看图', '缓存和主存都是 A Z Y D。主存被写 3 次。']]) });
+    }
+
+    /* ---- DMA ---- */
+    S.push({ t: 'DMA 读主存', ins: '（I/O 设备在读）', hl: ['ws-m251', 'ws-dma'], ar: [{ p: P.memDma(), l: '读 101', lx: 720, ly: 252 }],
+      ap: function(s){ s.dma = '读到 101 = ' + s.M[25][1] + (wb ? '（旧值！）' : '（最新）'); }, x: X(wb ? [
+        ['发生了什么', '一个 I/O 设备用 DMA <b>绕过缓存</b>，直接去主存读地址 101，读到的是 <b>B</b>，是<b>旧值</b>！最新的 Z 还在缓存里，没写回主存。'],
+        ['为什么', '写回让主存有一段时间是旧的。讲义说"缓存和主存可能暂时存着同一数据的不同版本；有些 I/O 设备会绕过缓存直接访问主存"，指的就是这个问题。实际系统有别的机制处理它，本课知道有这个问题即可。'],
+        ['看图', 'DMA 框显示"读到 101 = B（旧值！）"；缓存里 101 = Z。']] : [
+        ['发生了什么', 'I/O 设备用 DMA 绕过缓存，直接读主存 101，读到 <b>Z</b>，是最新值。'],
+        ['为什么', '写直达每次写都同步写了主存，主存永远是最新的，所以绕过缓存去读也不会出错。这是写直达的优点。'],
+        ['看图', 'DMA 框显示"读到 101 = Z（最新）"。']]) });
+
+    /* ---- Load 108 ---- */
+    S.push({ t: '108 在哪一行', ins: 'Load 108', hl: ['ws-l1', 'ws-mr27'], ar: [{ p: P.cpuLine(1), l: '108 在哪？', lx: 98, ly: 150 }], x: X([
+      ['发生了什么', 'CPU 执行 <code>Load 108</code>：要读地址 108。先算位置。'],
+      ['计算', '108 ÷ 4 = 27 余 0 → <b>块 27</b>（地址 108–111），块内第 0 个字节；27 mod 2 = 1 → <b>也是第 1 行</b>。'],
+      ['为什么', '块 25 和块 27 除以 2 的余数都是 1，所以直接映射规定它们只能用同一个位置：第 1 行。'],
+      ['看图', '高亮的是缓存第 1 行（它现在装的是块 25）和主存里的块 27。']]) });
+    S.push({ t: '读缺失：块 25 要被踢出', ins: 'Load 108', hl: ['ws-b1', 'ws-mr27'], x: X([
+      ['发生了什么', '第 1 行的块号是 25，不是 27 → <b>读缺失（read miss）</b>：要读的块不在缓存里，得从主存搬进来。'],
+      ['为什么被踢', '块 27 只能放第 1 行（直接映射只有这一个位置），可第 1 行已经被块 25 占着。要让块 27 进来，<b>只能把块 25 移出缓存</b>，这就叫<b>踢出（evict）</b>。所以块被踢出不是它出了什么错，而是<b>别的块要用它的位置</b>。'],
+      ['看图', '第 1 行的块号格子高亮：里面是 25，可我们要的是 27。']]) });
+    if (wb){
+      S.push({ t: '踢出前：脏块先写回', ins: 'Load 108', hl: ['ws-d1', 'ws-mr25'], ar: [{ p: P.lineMem(1, 25), l: '整块 A Z Y D', lx: 505, ly: 100 }],
+        ap: function(s){ s.M[25] = s.L[1].x.slice(); s.wr++; s.L[1].d = 0; }, x: X([
+        ['发生了什么', '踢出之前先看块 25 的脏位：<b>D = 1</b>。所以要先把<b>整块 A Z Y D 写回主存</b>，主存块 25 变成 A Z Y D。<b>主存被写第 1 次</b>。'],
+        ['为什么', 'D = 1 说明缓存里的块 25 被改过，比主存那份新。直接丢掉的话，Z 和 Y 就永远丢了。注意，这次写主存是一个<b>读</b>操作（Load 108）引起的：写回策略下，<b>读缺失也可能写主存</b>。写回的是整块 4 个字节，哪怕只改过其中两个。'],
+        ['看图', '箭头从缓存第 1 行指向主存块 25；主存块 25 变成 A Z Y D，红色提示消失了（两边又一样了）。']]) });
+    } else {
+      S.push({ t: '踢出前：干净块直接丢', ins: 'Load 108', hl: ['ws-d1', 'ws-mr25'], x: X([
+        ['发生了什么', '踢出之前看块 25：写直达模式下它的 <b>D 一直是 0</b>，主存里早就是最新的 A Z Y D。所以<b>直接丢掉，不用写主存</b>。'],
+        ['为什么', '写直达每次写都已经同步写了主存，缓存里的块永远和主存一样（干净），踢出时没有什么要保存的。讲义说写直达的优点之一是"替换块之前不用等写回"。'],
+        ['看图', '主存块 25 本来就是 A Z Y D；主存被写的次数没有增加。']]) });
+    }
+    S.push({ t: '读入块 27', ins: 'Load 108', hl: ['ws-l1'], ar: [{ p: P.memLine(27, 1), l: '块 27：E F G H', lx: 420, ly: 208 }],
+      ap: function(s){ s.L[1] = { v: 1, d: 0, b: 27, x: s.M[27].slice() }; s.rd++; }, x: X([
+      ['发生了什么', '从主存把<b>整块 27</b>（地址 108–111 = E F G H）读进第 1 行：块号改成 27，V = 1，D = 0。<b>主存被读 1 次</b>。'],
+      ['为什么', '缓存和主存之间按<b>整块</b>搬数据。CPU 只要 108 这一个字节，但 109–111 也一起搬进来，接下来访问它们就会命中（空间局部性）。刚搬进来的块和主存一样，所以 D = 0。'],
+      ['看图', '缓存第 1 行变成块 27：E F G H。']]) });
+    S.push({ t: '把 E 交给 CPU', ins: 'Load 108 → E', hl: ['ws-c10'], ar: [{ p: P.lineCpu(1), l: 'E', lx: 160, ly: 140 }], x: X([
+      ['发生了什么', '108 是块内第 0 个字节，把 <b>E</b> 交给 CPU，这次 Load 完成。'],
+      ['为什么', wb ? 'CPU 从发出 Load 108 开始一直在等：先等写回块 25，再等读入块 27。这段等待就是<b>缺失代价（miss penalty）</b>。因为多了一次写回，这次比普通缺失还慢。'
+                    : 'CPU 从发出 Load 108 开始一直在等读入块 27，这段等待就是<b>缺失代价（miss penalty）</b>。写直达不用先写回，所以比写回模式下这一步少等一次。'],
+      ['看图', '箭头从缓存第 1 行回到 CPU，带着 E。']]) });
+
+    /* ---- Store W → 105 ---- */
+    S.push({ t: '105：写缺失', ins: 'Store W → 105', hl: ['ws-l0', 'ws-mr26'], ar: [{ p: P.cpuLine(0), l: '105 在哪？', lx: 98, ly: 150 }], x: X([
+      ['发生了什么', 'CPU 执行 <code>Store W → 105</code>。'],
+      ['计算', '105 ÷ 4 = 26 余 1 → <b>块 26</b>（地址 104–107），块内第 1 个字节；26 mod 2 = 0 → <b>第 0 行</b>。'],
+      ['结果', '第 0 行 V = 0，是空的，块 26 不在缓存里 → <b>写缺失（write miss）</b>。'],
+      ['为什么', '写缺失怎么处理要看<b>写分配 / 不写分配</b>，下一步就是两种策略分开走的地方。'],
+      ['看图', '高亮的是第 0 行（空）和主存里的块 26。']]) });
+    if (wb){
+      S.push({ t: '写分配：读入块 26', ins: 'Store W → 105', hl: ['ws-l0'], ar: [{ p: P.memLine(26, 0), l: '块 26：I J K L', lx: 505, ly: 118 }],
+        ap: function(s){ s.L[0] = { v: 1, d: 0, b: 26, x: s.M[26].slice() }; s.rd++; }, x: X([
+        ['发生了什么', '<b>写分配（write allocate）</b>：先把整块 26（地址 104–107 = I J K L）从主存读进第 0 行：块号 26，V = 1，D = 0。<b>主存被读第 2 次</b>。第 0 行本来是空的，所以这次不用踢出任何块。'],
+        ['为什么', '缓存按整块存数据，要在缓存里改 105，必须先有整块 26。写分配的想法是：刚写过的地方很可能马上还要读写，搬进来以后就能命中。'],
+        ['看图', '缓存第 0 行变成块 26：I J K L。']]) });
+      S.push({ t: '在缓存里写 W', ins: 'Store W → 105', hl: ['ws-c01', 'ws-d0', 'ws-m261'], ar: [{ p: P.cpuLine(0), l: 'W', lx: 154, ly: 128 }],
+        ap: function(s){ s.L[0].x[1] = 'W'; s.L[0].d = 1; }, x: X([
+        ['发生了什么', '块 26 已经在缓存里了，现在就当作一次写命中：缓存 105 从 J 变成 <b>W</b>，D = 1。主存不动，105 还是 J。'],
+        ['为什么', '这就是写回 + 写分配的配合：块进来以后，对它的写都只改缓存，最后被踢出时一次写回。'],
+        ['看图', '缓存第 0 行 I W K L、D = 1；主存块 26 还是 I J K L；红色提示又出现了。']]) });
+    } else {
+      S.push({ t: '不写分配：直接写主存', ins: 'Store W → 105', hl: ['ws-m261', 'ws-l0'], ar: [{ p: P.cpuBuf(), l: '105:W', lx: 120, ly: 270 }, { p: P.bufMem(26), l: '105:W' }],
+        ap: function(s){ s.M[26][1] = 'W'; s.wr++; }, x: X([
+        ['发生了什么', '<b>不写分配（no-write allocate）</b>：不把块 26 搬进缓存。W 放进写缓冲，再经内存总线写进主存 105。<b>主存被写第 4 次</b>。缓存第 0 行还是空的。'],
+        ['为什么', '写直达反正每次写都要写主存，把块搬进缓存也省不了这次写，所以通常配不写分配，省掉一次读块。代价是：如果马上再读 105，还是会缺失。'],
+        ['看图', '主存块 26 变成 I W K L；缓存第 0 行仍然 V = 0。']]) });
+    }
+
+    /* ---- 总结 ---- */
+    var table = '<div class="tablewrap"><table><thead><tr><th></th><th>写回 + 写分配</th><th>写直达 + 不写分配</th></tr></thead><tbody>'
+      + '<tr><td>三次写命中</td><td>只改缓存，D = 1，主存 0 次</td><td>每次都写主存，3 次</td></tr>'
+      + '<tr><td>DMA 读主存</td><td>读到旧值 B</td><td>读到最新 Z</td></tr>'
+      + '<tr><td>读缺失踢出块 25</td><td>D = 1 → 先写回整块</td><td>直接丢</td></tr>'
+      + '<tr><td>写缺失（105）</td><td>先读入块 26，再写缓存</td><td>只写主存，块不进缓存</td></tr>'
+      + '<tr><td><b>主存被写 / 被读</b></td><td><b>1 / 2</b></td><td><b>4 / 1</b></td></tr></tbody></table></div>';
+    S.push({ t: '总结', ins: '（完成）', hl: [], x: X(wb ? [
+        ['结果', '主存一共被<b>写 1 次</b>（踢出脏块 25 时的写回），被<b>读 2 次</b>（读入块 27、写分配读入块 26）。块 26 现在是脏的（D = 1），以后被踢出时还要再写回一次。'],
+        ['记住', '写回：写只改缓存、置 D = 1；<b>只有踢出脏块时才写主存</b>，而踢出可以由读缺失或写缺失引起。主存可能暂时是旧的（DMA 那一步读到 B）。']]
+      : [
+        ['结果', '主存一共被<b>写 4 次</b>（每个 Store 一次），被<b>读 1 次</b>（读入块 27）。缓存里从来没有脏块，替换时直接丢。'],
+        ['记住', '写直达：<b>每次写都写主存</b>（经写缓冲，CPU 不用等，除非缓冲满了）；主存永远最新（DMA 读到 Z）；写缺失时不写分配，块不进缓存。']]) + table
+      + '<p class="ws-more">切换到上面另一种策略，再从头走一遍对比。</p>' });
+    return S;
+  }
+
+  /* ---------- 控制 ---------- */
+  var mode = 'wb', list = steps(mode), k = 0;
+  function show(n){
+    k = Math.max(0, Math.min(list.length - 1, n));
+    var s = init();
+    for (var i = 0; i <= k; i++) if (list[i].ap) list[i].ap(s);
+    render(s, list[k]);
+    $('wsText').innerHTML = '<div class="ws-h">第 ' + (k + 1) + ' 步 · ' + list[k].t + '</div>' + list[k].x;
+    $('wsCount').textContent = (k + 1) + ' / ' + list.length;
+    $('wsPrev').disabled = k === 0;
+    $('wsNext').textContent = k === list.length - 1 ? '从头再来 ↺' : '下一步 ▶';
+    $('wsSteps').querySelectorAll('li').forEach(function(li, i){ li.classList.toggle('on', i === k); li.classList.toggle('done', i < k); });
+  }
+  function build(){
+    list = steps(mode);
+    $('wsSteps').innerHTML = list.map(function(s, i){ return '<li><button type="button" data-k="' + i + '"><b>' + (i + 1) + '</b>' + s.t + '</button></li>'; }).join('');
+    show(0);
+  }
+  $('wsPrev').addEventListener('click', function(){ show(k - 1); });
+  $('wsNext').addEventListener('click', function(){ show(k === list.length - 1 ? 0 : k + 1); });
+  $('wsSteps').addEventListener('click', function(e){ var b = e.target.closest('button[data-k]'); if (b) show(+b.getAttribute('data-k')); });
+  $('wsMode').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-m]'); if (!b) return;
+    mode = b.getAttribute('data-m');
+    $('wsMode').querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    build();
+  });
+  root.addEventListener('keydown', function(e){
+    if (e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowRight'){ e.preventDefault(); show(k + 1); }
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); show(k - 1); }
+  });
+  build();
 })();
 </script>
 </body>
