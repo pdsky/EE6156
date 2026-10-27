@@ -572,6 +572,18 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
 .bk-opts li.wrong{border-color:var(--warn); background:var(--warn-soft); color:var(--warn);}
 .km-flash{animation:kmflash 1.4s ease;}
 @keyframes kmflash{0%,40%{box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent);}100%{box-shadow:none;}}
+/* 错题 & 重点：直接重做 */
+.bk-tabs{display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 10px 0;}
+.bk-tabs button{font-family:var(--font-display); font-weight:700; font-size:15px; padding:7px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer;}
+.bk-tabs button b{font-family:var(--font-mono); font-size:12px; margin-left:4px;}
+.bk-tabs button.on{background:var(--warn); border-color:var(--warn); color:#fff;}
+.bk-tabs .bk-reset{margin-left:auto; font-family:var(--font-mono); font-weight:400; font-size:12.5px;}
+.bk-open{margin:0 0 12px 0;}
+.bk-cards{display:block;}
+.qhead .bk-src{font-family:var(--font-mono); font-size:11px; padding:2px 8px; border-radius:20px; background:var(--surface); border:1px solid var(--line-strong); color:var(--muted);}
+.qhead .bk-state:empty{display:none;}
+.qhead .bk-x{padding:2px 10px;}
+.qhead .mstar + .bk-x{margin-left:0;}
 /* ============ 我的重点 ============ */
 .km-host{position:relative;}
 .km-btn{font-family:var(--font-mono); font-size:11px; line-height:1; padding:4px 8px; border-radius:20px; border:1px solid var(--line-strong); background:var(--surface); color:var(--muted); cursor:pointer; white-space:nowrap; flex-shrink:0;}

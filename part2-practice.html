@@ -575,6 +575,18 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
 .bk-opts li.wrong{border-color:var(--warn); background:var(--warn-soft); color:var(--warn);}
 .km-flash{animation:kmflash 1.4s ease;}
 @keyframes kmflash{0%,40%{box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent);}100%{box-shadow:none;}}
+/* 错题 & 重点：直接重做 */
+.bk-tabs{display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 10px 0;}
+.bk-tabs button{font-family:var(--font-display); font-weight:700; font-size:15px; padding:7px 14px; border-radius:var(--radius); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer;}
+.bk-tabs button b{font-family:var(--font-mono); font-size:12px; margin-left:4px;}
+.bk-tabs button.on{background:var(--warn); border-color:var(--warn); color:#fff;}
+.bk-tabs .bk-reset{margin-left:auto; font-family:var(--font-mono); font-weight:400; font-size:12.5px;}
+.bk-open{margin:0 0 12px 0;}
+.bk-cards{display:block;}
+.qhead .bk-src{font-family:var(--font-mono); font-size:11px; padding:2px 8px; border-radius:20px; background:var(--surface); border:1px solid var(--line-strong); color:var(--muted);}
+.qhead .bk-state:empty{display:none;}
+.qhead .bk-x{padding:2px 10px;}
+.qhead .mstar + .bk-x{margin-left:0;}
 
 .qtext.bi{gap:12px;}
 .qtext.bi > div > p:first-child{margin-top:0;}
@@ -1954,7 +1966,7 @@ details.ex > div{padding:6px 16px 14px 16px;}
   }
   pane.addEventListener('click', function(e){
     var b = e.target.closest('.mopt'); if (!b) return;
-    var c = b.closest('article.mq'); if (!c || c.id === 'mrCard') return;
+    var c = b.closest('article.mq'); if (!c || c.id === 'mrCard' || c.closest('.mpaper[data-p="book"]')) return;
     var p = c.closest('.mpaper').getAttribute('data-p'), a = st.ans[p] = st.ans[p] || {};
     if (st.exam ? st.sub[p] : typeof a[c.id] === 'number') return;
     a[c.id] = +b.getAttribute('data-i'); save(); paint(p);
@@ -2177,11 +2189,11 @@ details.ex > div{padding:6px 16px 14px 16px;}
   var allCards = Array.prototype.slice.call(pane.querySelectorAll('.mpaper article.mq')).filter(function(c){ return c.id !== 'mrCard'; });
   function paperOf(c){ return c.closest('.mpaper').getAttribute('data-p'); }
   function topicOf(c){ var t = c.querySelector('.qtopic').cloneNode(true); t.querySelectorAll('.tm').forEach(function(x){ x.remove(); }); return t.textContent.trim(); }
-  function grade(c, ch){
+  function grade(c, ch, keepBook){
     var ans = +c.getAttribute('data-ans'), w = bk.wrong[c.id];
     if (ch === ans){ if (w) w.fixed = true; }
     else { w = w || { n: 0 }; w.n++; w.last = typeof ch === 'number' ? ch : -1; w.fixed = false; bk.wrong[c.id] = w; }
-    saveBk(); decorate();
+    saveBk(); decorate(keepBook);
   }
   /* 每张卡片：右上角"☆ 重点"按钮 + 错题标记 */
   allCards.forEach(function(c){
@@ -2198,9 +2210,10 @@ details.ex > div{padding:6px 16px 14px 16px;}
     var w = 0, open = 0, s = 0;
     for (var id in bk.wrong) if ($(id)){ w++; if (!bk.wrong[id].fixed) open++; }
     for (id in bk.star) if ($(id)) s++;
-    return { w: w, open: open, s: s, r: bk.rand.length };
+    var ro = bk.rand.filter(function(r){ return !r.fixed; }).length;
+    return { w: w, open: open, s: s, r: bk.rand.length, ro: ro };
   }
-  function decorate(){
+  function decorate(keepBook){
     allCards.forEach(function(c){
       var w = bk.wrong[c.id], badge = c.querySelector('.mq-badge'), b = c.querySelector('.mstar'), on = !!bk.star[c.id];
       badge.hidden = !w;
@@ -2209,50 +2222,101 @@ details.ex > div{padding:6px 16px 14px 16px;}
       c.classList.toggle('starred', on);
     });
     var n = counts();
-    bookChip.innerHTML = '错题 &amp; 重点 <b>' + (n.open + n.r) + '</b> / <b>' + n.s + '</b>';
-    bookChip.title = '未订正的错题 ' + (n.open + n.r) + ' 道，重点 ' + n.s + ' 道';
-    if (cur === 'book') renderBook();
+    bookChip.innerHTML = '错题 &amp; 重点 <b>' + (n.open + n.ro) + '</b> / <b>' + n.s + '</b>';
+    bookChip.title = '未订正的错题 ' + (n.open + n.ro) + ' 道，重点 ' + n.s + ' 道';
+    if (cur === 'book' && !keepBook) renderBook();
   }
-  function item(c, kind){
-    var w = bk.wrong[c.id], ans = +c.getAttribute('data-ans'), info = '';
-    if (kind === 'wrong') info = (w.last >= 0 ? '你选了 ' + L[w.last] : '未作答') + '，正确 ' + L[ans] + ' · 错过 ' + w.n + ' 次';
-    else if (w) info = w.fixed ? '错过，已订正' : '错过 ' + w.n + ' 次';
-    var st2 = kind === 'wrong' ? (w.fixed ? '<span class="bk-pill ok">已订正</span>' : '<span class="bk-pill bad">未订正</span>') : '<span class="bk-pill star">★</span>';
-    return '<li><button type="button" class="bk-go" data-go="' + c.id + '">' + st2 + '<b>' + esc(PN[paperOf(c)] || '') + ' Q' + c.querySelector('.qid').textContent.replace('Q', '') + '</b> '
-      + esc(topicOf(c)) + (info ? '<small>' + info + '</small>' : '') + '</button>'
-      + '<button type="button" class="bk-x" data-x="' + kind + ':' + c.id + '" title="' + (kind === 'wrong' ? '移出错题本' : '取消重点') + '">×</button></li>';
+  /* 错题本里的题直接在这里重做：把原题卡片复制一份，状态清空 */
+  function pill(w){ return w ? (w.fixed ? '<span class="bk-pill ok">错过 ' + w.n + ' 次 · 已订正</span>' : '<span class="bk-pill bad">错过 ' + w.n + ' 次</span>') : ''; }
+  function cloneCard(c, kind){
+    var k = c.cloneNode(true);
+    k.id = 'bk-' + kind + '-' + c.id; k.setAttribute('data-src', c.id);
+    k.classList.remove('done-right', 'done-wrong', 'starred');
+    k.querySelectorAll('.mq-badge, .mstar').forEach(function(x){ x.remove(); });
+    k.querySelectorAll('.mopt').forEach(function(b){ b.classList.remove('sel', 'right', 'wrong'); b.removeAttribute('aria-pressed'); });
+    k.querySelector('.msol').hidden = true;
+    var res = k.querySelector('.mres'); res.textContent = ''; res.className = 'mres';
+    var h = k.querySelector('.qhead'), on = !!bk.star[c.id];
+    var src = document.createElement('span'); src.className = 'bk-src'; src.textContent = PN[paperOf(c)] || ''; h.insertBefore(src, h.firstChild);
+    var p = document.createElement('span'); p.className = 'bk-state'; p.innerHTML = pill(bk.wrong[c.id]); h.appendChild(p);
+    var st = document.createElement('button'); st.type = 'button'; st.className = 'mstar'; st.setAttribute('data-star', c.id);
+    st.textContent = on ? '★ 重点' : '☆ 重点'; st.setAttribute('aria-pressed', on ? 'true' : 'false'); h.appendChild(st);
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'bk-x'; x.setAttribute('data-x', kind + ':' + c.id);
+    x.title = kind === 'wrong' ? '移出错题本' : '取消重点'; x.textContent = '×'; h.appendChild(x);
+    return k;
+  }
+  function randCard(r, i){
+    var k = document.createElement('article'); k.className = 'mq'; k.setAttribute('data-rand', i); k.setAttribute('data-ans', r.ans);
+    k.innerHTML = '<div class="qhead"><span class="bk-src">随机变式</span><span class="qtopic">' + esc(r.t) + '</span><span class="bk-state">'
+      + (r.fixed ? '<span class="bk-pill ok">已订正</span>' : '<span class="bk-pill bad">当时选了 ' + L[r.ch] + '</span>') + '</span>'
+      + '<button type="button" class="bk-x" data-x="rand:' + i + '" title="移出">×</button></div>'
+      + '<div class="qbody">' + r.q + '<div class="mopts">' + r.opts.map(function(t, j){ return '<button type="button" class="mopt" data-i="' + j + '"><b>' + L[j] + '</b><span>' + esc(t) + '</span></button>'; }).join('')
+      + '</div><div class="msol" hidden><p class="mres"></p>' + r.sol + '</div></div>';
+    return k;
   }
   function renderBook(){
-    var n = counts(), onlyOpen = !!bk.onlyOpen;
+    var n = counts(), tab = bk.tab || 'wrong', onlyOpen = bk.onlyOpen !== false;
     var wr = allCards.filter(function(c){ var w = bk.wrong[c.id]; return w && (!onlyOpen || !w.fixed); });
     var sr = allCards.filter(function(c){ return bk.star[c.id]; });
-    var h = '<div class="score"><div class="kpi em"><div class="k">未订正错题</div><div class="v">' + (n.open + n.r) + '</div></div>'
-      + '<div class="kpi"><div class="k">错过的题（含已订正）</div><div class="v">' + (n.w + n.r) + '</div></div>'
+    var nOpen = n.open + n.ro;
+    bookPane.innerHTML = '<div class="score"><div class="kpi em"><div class="k">未订正错题</div><div class="v">' + nOpen + '</div></div>'
+      + '<div class="kpi"><div class="k">做错过的题</div><div class="v">' + (n.w + n.r) + '</div></div>'
       + '<div class="kpi"><div class="k">重点题</div><div class="v">' + n.s + '</div></div></div>'
-      + '<p class="tutnote">做错的题会自动收进来（即时判分时选错就记，交卷模式在交卷时记；没作答也算错）。重做本卷再答对，就标成"已订正"。点题目跳回原卷看解析；× 移出。卡片右上角"☆ 重点"可以把任何一题加进重点。记录只保存在这个浏览器里。</p>'
-      + '<h3 class="bk-h">错题 <span>' + wr.length + '</span><label class="fchk"><input type="checkbox" id="bkOpen"' + (onlyOpen ? ' checked' : '') + '> 只看未订正</label></h3>'
-      + (wr.length ? '<ul class="bk-list">' + wr.map(function(c){ return item(c, 'wrong'); }).join('') + '</ul>' : '<p class="bk-empty">还没有错题。</p>')
-      + '<h3 class="bk-h">重点题 <span>' + sr.length + '</span></h3>'
-      + (sr.length ? '<ul class="bk-list">' + sr.map(function(c){ return item(c, 'star'); }).join('') + '</ul>' : '<p class="bk-empty">在任意题目右上角点"☆ 重点"，就会列在这里。</p>')
-      + '<h3 class="bk-h">随机变式里做错的题 <span>' + bk.rand.length + '</span></h3>'
-      + (bk.rand.length ? bk.rand.map(function(r, k){
-          return '<details class="bk-rand"><summary><span class="bk-pill bad">错</span><b>' + esc(r.t) + '</b> 你选了 ' + L[r.ch] + '，正确 ' + L[r.ans]
-            + '<button type="button" class="bk-x" data-x="rand:' + k + '" title="移出">×</button></summary><div class="bk-rbody">' + r.q
-            + '<ol class="bk-opts">' + r.opts.map(function(t, j){ return '<li class="' + (j === r.ans ? 'right' : (j === r.ch ? 'wrong' : '')) + '"><b>' + L[j] + '</b> ' + esc(t) + '</li>'; }).join('') + '</ol>'
-            + r.sol + '</div></details>';
-        }).join('') : '<p class="bk-empty">随机变式里做错的题会把题目、选项和解析一起存下来（最多 30 道）。</p>');
-    bookPane.innerHTML = h;
+      + '<div class="bk-tabs" role="tablist">'
+      + '<button type="button" data-bt="wrong"' + (tab === 'wrong' ? ' class="on"' : '') + '>错题重做 <b>' + n.w + '</b></button>'
+      + '<button type="button" data-bt="star"' + (tab === 'star' ? ' class="on"' : '') + '>重点题重做 <b>' + n.s + '</b></button>'
+      + '<button type="button" data-bt="rand"' + (tab === 'rand' ? ' class="on"' : '') + '>随机变式错题 <b>' + n.r + '</b></button>'
+      + '<button type="button" class="bk-reset" data-bt="' + tab + '" title="把这一组题的作答清空，从头再做">↺ 全部重新做</button></div>'
+      + '<p class="tutnote">' + (tab === 'wrong' ? '做错的题都在这里，直接点选项重做：做对了标成"已订正"，做错了再记一次。勾掉"只看未订正"可以连已订正的一起复习。'
+          : tab === 'star' ? '你在题目右上角点过"☆ 重点"的题，都可以在这里直接重做。'
+          : '随机变式里做错的题（题目、选项、解析当时就存下来了），一样可以直接重做。')
+      + '记录只保存在这个浏览器里。</p>'
+      + (tab === 'wrong' ? '<label class="fchk bk-open"><input type="checkbox" id="bkOpen"' + (onlyOpen ? ' checked' : '') + '> 只看未订正</label>' : '')
+      + '<div class="bk-cards"></div>';
+    var box = bookPane.querySelector('.bk-cards'), list;
+    if (tab === 'wrong') list = wr.map(function(c){ return cloneCard(c, 'wrong'); });
+    else if (tab === 'star') list = sr.map(function(c){ return cloneCard(c, 'star'); });
+    else list = bk.rand.map(randCard);
+    list.forEach(function(k){ box.appendChild(k); });
+    if (!list.length) box.innerHTML = '<p class="bk-empty">' + (tab === 'wrong' ? (onlyOpen && n.w ? '错题都订正完了。勾掉"只看未订正"可以再复习一遍。' : '还没有错题。') : tab === 'star' ? '还没有重点题。在任意题目右上角点"☆ 重点"就会收进来。' : '随机变式里还没有做错的题。') + '</p>';
   }
+  /* 错题本里作答 */
+  bookPane.addEventListener('click', function(e){
+    var t = e.target.closest('.bk-tabs button');
+    if (t){ bk.tab = t.getAttribute('data-bt'); saveBk(); renderBook(); return; }
+    var b = e.target.closest('.mopt'); if (!b) return;
+    var k = b.closest('article.mq'); if (k.getAttribute('data-done')) return;
+    var ch = +b.getAttribute('data-i'), ans = +k.getAttribute('data-ans'), ok = ch === ans;
+    k.setAttribute('data-done', '1');
+    k.querySelectorAll('.mopt').forEach(function(x){ var i = +x.getAttribute('data-i'); x.classList.toggle('right', i === ans); x.classList.toggle('wrong', i === ch && !ok); });
+    var wasWrong = k.hasAttribute('data-src') ? !!bk.wrong[k.getAttribute('data-src')] : true;
+    var res = k.querySelector('.mres'); res.textContent = ok ? (wasWrong ? '✓ 答对了，已订正' : '✓ 答对了') : '✗ 你选了 ' + L[ch] + '，正确答案是 ' + L[ans] + '，看下面的解析';
+    res.className = 'mres ' + (ok ? 'good' : 'bad');
+    k.querySelector('.msol').hidden = false;
+    k.classList.add(ok ? 'done-right' : 'done-wrong');
+    if (k.hasAttribute('data-src')){
+      var src = $(k.getAttribute('data-src')); grade(src, ch, true);
+      k.querySelector('.bk-state').innerHTML = pill(bk.wrong[src.id]);
+    } else {
+      var r = bk.rand[+k.getAttribute('data-rand')]; if (ok) r.fixed = true; saveBk(); decorate(true);
+      k.querySelector('.bk-state').innerHTML = ok ? '<span class="bk-pill ok">已订正</span>' : '<span class="bk-pill bad">又错了</span>';
+    }
+  });
   function flash(el){ el.classList.remove('km-flash'); void el.offsetWidth; el.classList.add('km-flash'); }
   pane.addEventListener('click', function(e){
     var s = e.target.closest('.mstar');
-    if (s){ var id = s.getAttribute('data-star'); if (bk.star[id]) delete bk.star[id]; else bk.star[id] = 1; saveBk(); decorate(); return; }
+    if (s){
+      var id = s.getAttribute('data-star'), inBook = !!s.closest('.mpaper[data-p="book"]');
+      if (bk.star[id]) delete bk.star[id]; else bk.star[id] = 1; saveBk(); decorate(inBook);
+      if (inBook){ var on = !!bk.star[id]; s.textContent = on ? '★ 重点' : '☆ 重点'; s.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+      return;
+    }
     var x = e.target.closest('.bk-x');
     if (x){ e.preventDefault(); var v = x.getAttribute('data-x').split(':');
       if (v[0] === 'wrong') delete bk.wrong[v[1]]; else if (v[0] === 'star') delete bk.star[v[1]]; else bk.rand.splice(+v[1], 1);
-      saveBk(); decorate(); return; }
-    var g = e.target.closest('.bk-go');
-    if (g){ var c = $(g.getAttribute('data-go')); setPaper(paperOf(c)); c.scrollIntoView({ block: 'start', behavior: 'smooth' }); flash(c); }
+      saveBk();
+      if (v[0] === 'rand') decorate(); else { x.closest('article').remove(); decorate(true); }
+      return; }
   });
   pane.addEventListener('change', function(e){ if (e.target.id === 'bkOpen'){ bk.onlyOpen = e.target.checked; saveBk(); renderBook(); } });
   decorate();
