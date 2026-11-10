@@ -837,14 +837,15 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
     </header>
     <!-- ===================== 老师划重点（课堂录音整理） ===================== -->
     <section class="focus" id="focus">
-      <div class="modhead"><span class="ref">课堂录音</span><h2>老师划重点：考什么、不考什么</h2><span class="scope">第 1–9 周</span></div>
-      <p class="modintro">根据第 1–9 周的课堂录音整理。老师在课上说过的考试安排、范围、易错点和"不考"的内容都在这里。<b>和讲义有冲突时，以老师课上说的为准</b>；手册里对应的小节已经按老师的口径改过，各小节开头的"老师上课提醒"框也放了对应的提醒。</p>
+      <div class="modhead"><span class="ref">课堂录音</span><h2>老师划重点：考什么、不考什么</h2><span class="scope">第 1–12 周</span></div>
+      <p class="modintro">根据第 1–12 周的课堂录音整理（第 10–12 周的流水线<span class="tm">（pipeline）</span>部分 11 月 10 日补充）。老师在课上说过的考试安排、范围、易错点和"不考"的内容都在这里。<b>和讲义有冲突时，以老师课上说的为准</b>；手册里对应的小节已经按老师的口径改过，各小节开头的"老师上课提醒"框也放了对应的提醒。</p>
 
       <div class="fgrid">
-        <div class="fcard hot">
-          <div class="k">Quiz 2 · 10%</div>
+        <div class="fcard">
+          <div class="k">Quiz 2 · 10% · 已考完</div>
           <div class="v">10 月 27 日（周二）晚 8:45–9:15</div>
           <ul>
+            <li><b>已经考完</b>，成绩已上传 NTULearn。老师第 12 周说"很多人满分"。下面是当时的考试安排，留作记录。</li>
             <li>就在上课的讲室。6:30–8:30 正常上课，休息 15 分钟后开考，约 30 分钟。</li>
             <li><b>10 道选择题</b>，老师说"不难"：有概念题，也有算地址位、算有效 CPI、做映射<span class="tm">（mapping）</span>的题。</li>
             <li>范围：<b>第 7、8、9 周讲的内容</b>（存储层次<span class="tm">（memory hierarchy）</span>与 AMAT/CPI、三种缓存<span class="tm">（cache）</span>映射、3C 缺失<span class="tm">（miss）</span>、块大小<span class="tm">（block size）</span>、写策略<span class="tm">（write policy）</span>）。<b>虚拟内存<span class="tm">（virtual memory）</span>不考。</b></li>
@@ -853,7 +854,7 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
             <li>NTULearn 上有 mock-up quiz，老师在删掉虚拟内存的题后重新放出来，一定要做一遍。<a href="#mock">逐题精讲 →</a></li>
           </ul>
         </div>
-        <div class="fcard">
+        <div class="fcard hot">
           <div class="k">Final Exam · 60%</div>
           <div class="v">11 月 20 日 9:00–11:00</div>
           <ul>
@@ -862,6 +863,9 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
             <li>难度分布：约 <b>50%</b> 和 Tutorial/例题同类，<b>30%</b> 换情境应用，<b>20%</b> 较难。</li>
             <li>手算缓存轨迹题在考试里会<b>短很多</b>（大约 4 次访问），不会像课堂练习那样 9–12 次。</li>
             <li>MIPS 指令表考试会提供，不用背格式，要会用。</li>
+            <li>第 10 周原话：Part 2 <b>一道题考缓存（architecture），一道题考流水线</b>。</li>
+            <li>老师出题<b>以计算为主</b>，描述题不好改所以尽量少出；指令都是 ADDI、LW 这种简单的，用到不常见的指令会在<b>脚注</b>里解释。</li>
+            <li><b>第 13 周（11 月 10 日）</b>老师会讲完第 12 课和 Tutorial 12，告诉大家<b>哪些 slides / 内容可以不看</b>，并发一份他那两道题的 <b>mock-up 考卷</b>。</li>
           </ul>
         </div>
         <div class="fcard">
@@ -870,7 +874,7 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
           <ul>
             <li>Quiz 1（第 7 周）和电路作业（第 7 周周五截止）已经结束。</li>
             <li>参与分 = 每周课上扫码签到。</li>
-            <li>第 13 周是备用/复习课。如果时间不够，老师可能删减流水线<span class="tm">（pipeline）</span>的部分内容；删掉的内容会做成录像，<b>不考</b>。</li>
+            <li>第 13 周是最后一课：讲完冒险<span class="tm">（hazard）</span>（控制冒险<span class="tm">（control hazard）</span>和分支<span class="tm">（branch）</span>处理从 slide 44 继续），然后复习、公布可以省略的内容和 mock-up 考卷。</li>
           </ul>
         </div>
       </div>
@@ -929,15 +933,52 @@ details.bk-rand > summary .bk-x{margin-left:auto;}
         </div>
       </div>
 
+      <h3 class="fh">第 10–12 周（流水线）老师强调的点</h3>
+      <div class="fgrid two">
+        <div class="fcard hot">
+          <div class="k">必须会的</div>
+          <ul>
+            <li><b>五个阶段要背下来</b>：IF 取指<span class="tm">（instruction fetch）</span>、PC + 4；ID 译码<span class="tm">（instruction decode）</span>、<b>读源寄存器<span class="tm">（register）</span>、立即数<span class="tm">（immediate）</span>符号扩展<span class="tm">（sign extension）</span></b>；EX ALU 运算 / 算地址 / 判断分支<span class="tm">（branch）</span>；MEM 只有 load / store 真正访存<span class="tm">（memory access）</span>；WB 写回<span class="tm">（write-back）</span>寄存器，<b>只在第 5 级</b>。</li>
+            <li>流水线<span class="tm">（pipeline）</span>里<b>每条指令都走完 5 级</b>：ADD 的 MEM、SW 和分支的 WB 也照样经过，只是什么都不做。</li>
+            <li>寄存器只记两个：<b>R0 永远是 0</b>，<b>R31 存返回地址</b>。要会的指令：LW、SW、ADD、SUB、ADDI、BEQZ、BNEZ；指令格式只要会判断 R / I / J，字段细节不用背。</li>
+            <li>DLX 是 load-store 架构：<b>算术运算只能用寄存器 / 立即数</b>，用存储器做操作数的 ADD 是非法的（Tutorial 10.8）。</li>
+            <li>补码<span class="tm">（two's complement）</span>和符号扩展：考试可以用计算器把 −12 之类转成 16 位补码，再在高 16 位补符号位。</li>
+          </ul>
+        </div>
+        <div class="fcard">
+          <div class="k">流水线<span class="tm">（pipeline）</span>计算</div>
+          <ul>
+            <li>流水线提高的是<b>吞吐</b>，不缩短（甚至会拉长）单条指令的<b>延迟<span class="tm">（latency）</span></b>。</li>
+            <li>周期 = <b>最慢那一级</b>；k 级、n 个任务：总时间 = (k + n − 1) × 周期；非流水时间 = n × 各级之和。</li>
+            <li>加速比<span class="tm">（speedup）</span>最多约等于级数；各级不均衡、填充 / 排空会让它变小。</li>
+            <li><b>优化不是瓶颈的那一级没有用</b>（T10.3、T10.5）；有预算时把几级最慢的削平，已经很快的那级不要动（T10.6：A 22 不动，B、C、D 削到 26）。</li>
+            <li>有停顿<span class="tm">（stall）</span>时：<b>CPI = 1 + 每条指令平均停顿周期</b>，再乘周期时间比快慢。</li>
+          </ul>
+        </div>
+        <div class="fcard">
+          <div class="k">冒险<span class="tm">（hazard）</span>（第 12 课）</div>
+          <ul>
+            <li>结构冒险<span class="tm">（structural hazard）</span>：单端口、指令和数据共用的存储器，IF 和 MEM 会撞车；解决：停顿<span class="tm">（stall）</span>或双端口 / 分开的存储器。</li>
+            <li>数据冒险<span class="tm">（data hazard）</span>：<b>本课只考虑 RAW</b>，WAR 和 WAW 在 DLX 里不会发生（老师说这是本课的假设）。</li>
+            <li>寄存器<span class="tm">（register）</span>前半周期写、后半周期读；<b>转发<span class="tm">（forwarding）</span></b>能消掉 ALU 结果的 RAW，但 <b>load-use 仍要停 1 周期</b>。</li>
+            <li>老师的方法：<b>把五级时序图画出来</b>，看结果什么时候有、什么时候要用。</li>
+            <li>控制冒险<span class="tm">（control hazard）</span>：分支<span class="tm">（branch）</span>在 EX 才知道结果，后面已取进的 3 条要冲掉，最简单就是停 3 个周期。</li>
+          </ul>
+        </div>
+      </div>
+
       <h3 class="fh">老师给出的答案和手册原来不一样的地方（已改）</h3>
       <div class="tablewrap"><table>
         <thead><tr><th>题目</th><th>老师课上的答案</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td>Exercise 7.2</td><td class="num">5 次访存，50 ms vs 15 ms，<b>3.3 倍</b></td><td>每轮只算一次 a[i]；原来按 10 次算出 5 倍</td></tr>
-          <tr><td>Tutorial 7.4</td><td class="num">80 ms vs 22 + 6 = 28 ms，<b>2.86 倍</b></td><td>老师用缓存 2 ms、主存 20 ms（学生版题目没给时间）</td></tr>
+          <tr><td>Exercise 7.2</td><td class="num">5 次访存<span class="tm">（memory access）</span>，50 ms vs 15 ms，<b>3.3 倍</b></td><td>每轮只算一次 a[i]；原来按 10 次算出 5 倍</td></tr>
+          <tr><td>Tutorial 7.4</td><td class="num">80 ms vs 22 + 6 = 28 ms，<b>2.86 倍</b></td><td>老师用缓存<span class="tm">（cache）</span> 2 ms、主存<span class="tm">（main memory）</span> 20 ms（学生版题目没给时间）</td></tr>
           <tr><td>Tutorial 7.6</td><td class="num">AMAT 15 ns vs 50 ns → 88 分钟，<b>多 28 分钟</b></td><td>MT = 10 + 50 = 60 ns；原来用 100 ns 得 19.6 分钟</td></tr>
           <tr><td>T7.6+（新增）</td><td class="num">停顿 1.2 + 1.2 = 2.4，<b>CPI 3.9</b></td><td>老师解答里多出来的一题，已加进习题小程序</td></tr>
           <tr><td>Exercise 8.1</td><td class="num">最后的 241 是 <b>compulsory</b></td><td>老师课上改正了讲义；手册一直按这个口径</td></tr>
+          <tr><td>Tutorial 10.4</td><td class="num">加速比<span class="tm">（speedup）</span> 400 / 220 = <b>1.82</b></td><td>讲义答案页写成 2，老师课上改正；习题小程序一直是 1.82</td></tr>
+          <tr><td>Tutorial 10.5</td><td class="num">同步流水：第一个任务 <b>75 s</b>，总时间 75 + 999 × 25 = <b>25,050 s</b></td><td>讲义答案按各级实际时间相加（50 s、25,025 s）。老师说"看你的假设"，答题时把假设写清楚</td></tr>
+          <tr><td>饼干例子（10.2）</td><td class="num">时间并行 <b>4 盘/小时</b></td><td>讲义上"3 盘 ÷ 50 分钟 ≈ 3.6 盘/小时"是错误算法，把冷启动算进去了</td></tr>
         </tbody>
       </table></div>
 
@@ -2567,28 +2608,32 @@ ABCDE 1F890 1
     <section class="module" id="m10">
       <div class="modhead"><span class="ref">LESSON 10</span><h2>流水线入门与 DLX 指令集</h2><span class="scope">Final 范围</span></div>
       <p class="modintro">Topic II 从这里开始。缓存<span class="tm">（cache）</span>解决的是"等内存"，流水线<span class="tm">（pipeline）</span>解决的是"一条指令做完才开始下一条"。这一课先用延迟<span class="tm">（latency）</span>和吞吐量<span class="tm">（throughput）</span>两个指标说清楚流水线到底快在哪里，给出流水线总时间公式；然后介绍后面三课都要用的教学处理器 <strong>DLX</strong>：寄存器<span class="tm">（register）</span>、指令、寻址模式<span class="tm">（addressing mode）</span>和 R/I/J 三种编码格式。</p>
-        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>Final 的 Q4 考流水线<span class="tm">（pipeline）</span>（第 10–12 周）。第 13 周是备用 / 复习课；如果时间不够，老师可能删减流水线的部分内容，删掉的内容做成录像，<b>不考</b>。</li></ul></div>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li><b>Final 的 Q4 考流水线<span class="tm">（pipeline）</span></b>：老师第 10 周原话，Part 2 一道题考缓存<span class="tm">（cache）</span>、一道题考流水线。流水线不考 Quiz 2。</li><li>题目<b>以计算为主</b>（老师说描述题不好改，尽量少出）；用到的指令都是 ADDI、LW 这种简单的。</li><li>第 13 周（11 月 10 日）老师会讲完第 12 课和 Tutorial 12，告诉大家<b>哪些 slides / 内容可以不看</b>，并发一份他那两道题的 <b>mock-up 考卷</b>。</li></ul></div>
 
       <div class="exindex" id="m10-ex"><span class="lb">本课课堂练习 · Exercises</span><a href="#ex10-1">10.1</a><a href="#ex10-2">10.2</a><a href="#ex10-3">10.3</a><a href="#ex10-4">10.4</a><a href="#ex10-5">10.5</a><a href="#ex10-6">10.6</a><a href="#ex10-7">10.7</a><a href="#ex10-8">10.8</a><a href="#ex10-9">10.9</a></div>
 
 
       <div class="sub" id="m10-s1">
         <h3><span class="num">10.1</span> 延迟、吞吐与关键路径</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>latency = 一个任务从头到尾的时间；throughput = 单位时间完成多少任务（单处理器时 = 1 / latency）。<b>并行和流水线<span class="tm">（pipeline）</span>提高的是 throughput，不能缩短 latency</b>，流水线甚至会让 latency 变长一点。</li><li>关键路径<span class="tm">（critical path）</span>：逐门累加延迟<span class="tm">（latency）</span>，找最长的那条。Exercise 10.1 是 57 → 吞吐 1/57 ns ≈ 17.5 MHz；Exercise 10.2 是 74（题目没写单位，老师按 ns 算）。</li></ul></div>
+
         <ul class="speclist">
           <li><strong>延迟（latency）</strong>：一个工作单位从进入系统到完成所需的时间。</li>
           <li><strong>吞吐量（throughput）</strong>：单位时间内系统能完成的工作单位数。</li>
           <li><strong>并行的目标</strong>：提高吞吐量；有时也能降低延迟。</li>
         </ul>
-        <p>组合电路的延迟由<strong>关键路径<span class="tm">（critical path）</span></strong>决定：从输入到输出所有路径中门延迟之和最大的那条。讲义的 1 位全加器：AND、OR、非门各 t<sub>g</sub>，XOR 为 3t<sub>g</sub>，关键路径 A → XOR → XOR → S，延迟 6t<sub>g</sub>，吞吐量 = 每 6t<sub>g</sub> 完成一次加法 = 1/(6t<sub>g</sub>)。</p>
+        <p>组合电路的延迟由<strong>关键路径</strong>决定：从输入到输出所有路径中门延迟之和最大的那条。讲义的 1 位全加器：AND、OR、非门各 t<sub>g</sub>，XOR 为 3t<sub>g</sub>，关键路径 A → XOR → XOR → S，延迟 6t<sub>g</sub>，吞吐量 = 每 6t<sub>g</sub> 完成一次加法 = 1/(6t<sub>g</sub>)。</p>
         <div class="callout teal"><div class="lbl">找关键路径<span class="tm">（critical path）</span>的方法</div><p>从输入开始，给每个门的输出标上"最早稳定时间" = 它所有输入的最晚稳定时间 + 本门延迟<span class="tm">（latency）</span>（输入端的小圆圈是非门，要单独加一个非门延迟）。输出端的时间就是延迟，倒推取最大值的那条输入就是关键路径。Exercise 10.1、10.2 的完整解答见习题小程序。</p></div>
       <div class="exgroup2"><div class="exgh">课堂练习 · In-class exercises</div><div class="excard" id="ex10-1"><div class="exhead"><span class="exid">Exercise 10.1</span><span class="extopic">门电路关键路径（一）<span class="ent"> · Critical path of a gate circuit (1)</span></span></div><div class="exbody"><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>For the logic circuit below, (a) determine and clearly show the critical path delay using the gate delays NOT = 9, AND = 13, OR = 11, XOR = 23; (b) compute the latency and throughput of the circuit.</p></div><div class="zh"><span class="lg">中</span><p>对下面的电路：(a) 用门延迟<span class="tm">（latency）</span> NOT = 9、AND = 13、OR = 11、XOR = 23 找出并标明关键路径延迟；(b) 求电路的延迟和吞吐量<span class="tm">（throughput）</span>。</p></div></div><div class="dagwrap"><svg class="dag" viewBox="0 0 680 304" role="img" aria-label="Exercise 10.1 circuit → Z"><path class="ed" d="M40 120 H109 V90 H123"/><path class="ed" d="M40 260 H102 V100 H123"/><path class="ed" d="M40 120 H109 V163 H123"/><path class="ed" d="M40 190 H102 V173 H123"/><path class="ed" d="M40 190 H109 V240 H123"/><path class="ed" d="M40 260 H102 V250 H123"/><path class="ed" d="M197 245 H239 V245 H253"/><path class="ed" d="M40 50 H379 V65 H393"/><path class="ed" d="M327 245 H372 V75 H393"/><path class="ed" d="M197 95 H379 V145 H393"/><path class="ed" d="M197 168 H372 V155 H393"/><path class="ed" d="M467 70 H519 V105 H533"/><path class="ed" d="M467 150 H512 V115 H533"/><path class="ed" d="M607 110 H643"/><text class="io" x="649" y="114">Z</text><circle class="pin" cx="40" cy="50" r="3"/><text class="io" x="30" y="54" text-anchor="end">A</text><circle class="pin" cx="40" cy="120" r="3"/><text class="io" x="30" y="124" text-anchor="end">B</text><circle class="pin" cx="40" cy="190" r="3"/><text class="io" x="30" y="194" text-anchor="end">C</text><circle class="pin" cx="40" cy="260" r="3"/><text class="io" x="30" y="264" text-anchor="end">D</text><g class="nd"><rect x="123" y="79" width="74" height="32" rx="3"/><text x="160" y="99" text-anchor="middle">XOR · 23</text></g><g class="nd"><rect x="123" y="152" width="74" height="32" rx="3"/><text x="160" y="172" text-anchor="middle">AND · 13</text></g><g class="nd"><rect x="123" y="229" width="74" height="32" rx="3"/><text x="160" y="249" text-anchor="middle">OR · 11</text></g><g class="nd"><rect x="253" y="229" width="74" height="32" rx="3"/><text x="290" y="249" text-anchor="middle">NOT · 9</text></g><g class="nd"><rect x="393" y="54" width="74" height="32" rx="3"/><text x="430" y="74" text-anchor="middle">OR · 11</text></g><g class="nd"><rect x="393" y="134" width="74" height="32" rx="3"/><text x="430" y="154" text-anchor="middle">OR · 11</text></g><g class="nd"><rect x="533" y="94" width="74" height="32" rx="3"/><text x="570" y="114" text-anchor="middle">XOR · 23</text></g></svg><p class="dagnote">Boxes show gate type · delay 方框内为门类型 · 延迟</p></div><details class="exans"><summary>解答 · Solution</summary><div class="exansbody"><div class="dagwrap"><svg class="dag" viewBox="0 0 680 304" role="img" aria-label="Exercise 10.1 critical path → Z"><path class="ed crit" d="M40 120 H109 V90 H123"/><path class="ed crit" d="M40 260 H102 V100 H123"/><path class="ed" d="M40 120 H109 V163 H123"/><path class="ed" d="M40 190 H102 V173 H123"/><path class="ed" d="M40 190 H109 V240 H123"/><path class="ed" d="M40 260 H102 V250 H123"/><path class="ed" d="M197 245 H239 V245 H253"/><path class="ed" d="M40 50 H379 V65 H393"/><path class="ed" d="M327 245 H372 V75 H393"/><path class="ed crit" d="M197 95 H379 V145 H393"/><path class="ed" d="M197 168 H372 V155 H393"/><path class="ed" d="M467 70 H519 V105 H533"/><path class="ed crit" d="M467 150 H512 V115 H533"/><path class="ed crit" d="M607 110 H643"/><text class="io" x="649" y="114">Z</text><circle class="pin" cx="40" cy="50" r="3"/><text class="io" x="30" y="54" text-anchor="end">A</text><circle class="pin" cx="40" cy="120" r="3"/><text class="io" x="30" y="124" text-anchor="end">B</text><circle class="pin" cx="40" cy="190" r="3"/><text class="io" x="30" y="194" text-anchor="end">C</text><circle class="pin" cx="40" cy="260" r="3"/><text class="io" x="30" y="264" text-anchor="end">D</text><g class="nd crit"><rect x="123" y="79" width="74" height="32" rx="3"/><text x="160" y="99" text-anchor="middle">XOR · 23</text></g><text class="tt on" x="160" y="74" text-anchor="middle">t = 23</text><g class="nd"><rect x="123" y="152" width="74" height="32" rx="3"/><text x="160" y="172" text-anchor="middle">AND · 13</text></g><text class="tt" x="160" y="147" text-anchor="middle">t = 13</text><g class="nd"><rect x="123" y="229" width="74" height="32" rx="3"/><text x="160" y="249" text-anchor="middle">OR · 11</text></g><text class="tt" x="160" y="224" text-anchor="middle">t = 11</text><g class="nd"><rect x="253" y="229" width="74" height="32" rx="3"/><text x="290" y="249" text-anchor="middle">NOT · 9</text></g><text class="tt" x="290" y="224" text-anchor="middle">t = 20</text><g class="nd"><rect x="393" y="54" width="74" height="32" rx="3"/><text x="430" y="74" text-anchor="middle">OR · 11</text></g><text class="tt" x="430" y="49" text-anchor="middle">t = 31</text><g class="nd crit"><rect x="393" y="134" width="74" height="32" rx="3"/><text x="430" y="154" text-anchor="middle">OR · 11</text></g><text class="tt on" x="430" y="129" text-anchor="middle">t = 34</text><g class="nd crit"><rect x="533" y="94" width="74" height="32" rx="3"/><text x="570" y="114" text-anchor="middle">XOR · 23</text></g><text class="tt on" x="570" y="89" text-anchor="middle">t = 57</text></svg><p class="dagnote">Highlighted = critical path 高亮为关键路径<span class="tm">（critical path）</span>；t = arrival time 到达时间</p></div><div class="tablewrap"><table class=""><thead><tr><th>Path 路径</th><th>Delay 延迟<span class="tm">（latency）</span></th></tr></thead><tbody><tr><td>A → OR → XOR</td><td>11 + 23 = 34</td></tr><tr><td>C/D → OR → NOT → OR → XOR</td><td>11 + 9 + 11 + 23 = 54</td></tr><tr><td>B/C → AND → OR → XOR</td><td>13 + 11 + 23 = 47</td></tr><tr><td><b>B/D → XOR → OR → XOR</b></td><td><b>23 + 11 + 23 = 57</b></td></tr></tbody></table></div><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>Critical path: <b>B (or D) → XOR → OR → XOR → Z</b>, delay = <b>57</b> time units. One result is produced every 57 units, so throughput = <b>1/57</b> computations per unit time.</p><p>Method: label each gate output with its earliest settle time = latest input settle time + gate delay; the time at the output is the latency.</p></div><div class="zh"><span class="lg">中</span><p>关键路径：<b>B（或 D）→ XOR → OR → XOR → Z</b>，延迟 = <b>57</b> 个时间单位。电路每 57 个单位完成一次计算，吞吐量<span class="tm">（throughput）</span> = <b>1/57</b>（每单位时间完成的计算次数）。</p><p>方法：给每个门的输出标"最早稳定时间" = 各输入最晚稳定时间 + 本门延迟，输出端的时间就是延迟。</p></div></div></div></details></div></div><div class="excard" id="ex10-2"><div class="exhead"><span class="exid">Exercise 10.2</span><span class="extopic">门电路关键路径（二）<span class="ent"> · Critical path of a gate circuit (2)</span></span></div><div class="exbody"><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><p>For the circuit below (a small circle at a gate input is an inverter, i.e. a NOT gate), (a) determine and clearly show the critical path delay using NOT = 10, AND = 15, OR = 17; (b) compute the latency and throughput.</p></div><div class="zh"><span class="lg">中</span><p>对下面的电路（门输入端的小圆圈表示非门）：(a) 用 NOT = 10、AND = 15、OR = 17 找出并标明关键路径延迟<span class="tm">（latency）</span>；(b) 求延迟和吞吐量<span class="tm">（throughput）</span>。</p></div></div><div class="dagwrap"><svg class="dag" viewBox="0 0 770 384" role="img" aria-label="Exercise 10.2 circuit → f"><path class="ed" d="M40 95 H89 V60 H103"/><path class="ed" d="M40 165 H89 V200 H103"/><path class="ed" d="M177 60 H219 V25 H233"/><path class="ed" d="M40 165 H212 V35 H233"/><path class="ed" d="M40 95 H219 V90 H233"/><path class="ed" d="M177 200 H212 V100 H233"/><path class="ed" d="M40 95 H219 V155 H233"/><path class="ed" d="M40 165 H212 V165 H233"/><path class="ed" d="M177 60 H219 V220 H233"/><path class="ed" d="M177 200 H212 V230 H233"/><path class="ed" d="M307 30 H349 V57 H363"/><path class="ed" d="M307 95 H342 V67 H363"/><path class="ed" d="M307 160 H349 V187 H363"/><path class="ed" d="M307 225 H342 V197 H363"/><path class="ed" d="M40 290 H219 V290 H233"/><path class="ed" d="M40 340 H219 V340 H233"/><path class="ed" d="M437 62 H479 V85 H493"/><path class="ed" d="M307 290 H472 V95 H493"/><path class="ed" d="M307 290 H479 V205 H493"/><path class="ed" d="M307 340 H472 V215 H493"/><path class="ed" d="M437 192 H479 V295 H493"/><path class="ed" d="M307 340 H472 V305 H493"/><path class="ed" d="M567 90 H609 V202 H623"/><path class="ed" d="M567 210 H602 V210 H623"/><path class="ed" d="M567 300 H595 V218 H623"/><path class="ed" d="M697 210 H733"/><text class="io" x="739" y="214">f</text><circle class="pin" cx="40" cy="95" r="3"/><text class="io" x="30" y="99" text-anchor="end">a</text><circle class="pin" cx="40" cy="165" r="3"/><text class="io" x="30" y="169" text-anchor="end">b</text><circle class="pin" cx="40" cy="290" r="3"/><text class="io" x="30" y="294" text-anchor="end">c</text><circle class="pin" cx="40" cy="340" r="3"/><text class="io" x="30" y="344" text-anchor="end">d</text><g class="nd"><rect x="103" y="44" width="74" height="32" rx="3"/><text x="140" y="64" text-anchor="middle">NOT · 10</text></g><g class="nd"><rect x="103" y="184" width="74" height="32" rx="3"/><text x="140" y="204" text-anchor="middle">NOT · 10</text></g><g class="nd"><rect x="233" y="14" width="74" height="32" rx="3"/><text x="270" y="34" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="233" y="79" width="74" height="32" rx="3"/><text x="270" y="99" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="233" y="144" width="74" height="32" rx="3"/><text x="270" y="164" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="233" y="209" width="74" height="32" rx="3"/><text x="270" y="229" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="363" y="46" width="74" height="32" rx="3"/><text x="400" y="66" text-anchor="middle">OR · 17</text></g><g class="nd"><rect x="363" y="176" width="74" height="32" rx="3"/><text x="400" y="196" text-anchor="middle">OR · 17</text></g><g class="nd"><rect x="233" y="274" width="74" height="32" rx="3"/><text x="270" y="294" text-anchor="middle">NOT · 10</text></g><g class="nd"><rect x="233" y="324" width="74" height="32" rx="3"/><text x="270" y="344" text-anchor="middle">NOT · 10</text></g><g class="nd"><rect x="493" y="74" width="74" height="32" rx="3"/><text x="530" y="94" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="493" y="194" width="74" height="32" rx="3"/><text x="530" y="214" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="493" y="284" width="74" height="32" rx="3"/><text x="530" y="304" text-anchor="middle">AND · 15</text></g><g class="nd"><rect x="623" y="194" width="74" height="32" rx="3"/><text x="660" y="214" text-anchor="middle">OR · 17</text></g></svg><p class="dagnote">Boxes show gate type · delay 方框内为门类型 · 延迟</p></div><details class="exans"><summary>解答 · Solution</summary><div class="exansbody"><div class="dagwrap"><svg class="dag" viewBox="0 0 770 384" role="img" aria-label="Exercise 10.2 critical path → f"><path class="ed crit" d="M40 95 H89 V60 H103"/><path class="ed crit" d="M40 165 H89 V200 H103"/><path class="ed crit" d="M177 60 H219 V25 H233"/><path class="ed" d="M40 165 H212 V35 H233"/><path class="ed" d="M40 95 H219 V90 H233"/><path class="ed crit" d="M177 200 H212 V100 H233"/><path class="ed" d="M40 95 H219 V155 H233"/><path class="ed" d="M40 165 H212 V165 H233"/><path class="ed crit" d="M177 60 H219 V220 H233"/><path class="ed crit" d="M177 200 H212 V230 H233"/><path class="ed crit" d="M307 30 H349 V57 H363"/><path class="ed crit" d="M307 95 H342 V67 H363"/><path class="ed" d="M307 160 H349 V187 H363"/><path class="ed crit" d="M307 225 H342 V197 H363"/><path class="ed" d="M40 290 H219 V290 H233"/><path class="ed" d="M40 340 H219 V340 H233"/><path class="ed crit" d="M437 62 H479 V85 H493"/><path class="ed" d="M307 290 H472 V95 H493"/><path class="ed" d="M307 290 H479 V205 H493"/><path class="ed" d="M307 340 H472 V215 H493"/><path class="ed crit" d="M437 192 H479 V295 H493"/><path class="ed" d="M307 340 H472 V305 H493"/><path class="ed crit" d="M567 90 H609 V202 H623"/><path class="ed" d="M567 210 H602 V210 H623"/><path class="ed crit" d="M567 300 H595 V218 H623"/><path class="ed crit" d="M697 210 H733"/><text class="io" x="739" y="214">f</text><circle class="pin" cx="40" cy="95" r="3"/><text class="io" x="30" y="99" text-anchor="end">a</text><circle class="pin" cx="40" cy="165" r="3"/><text class="io" x="30" y="169" text-anchor="end">b</text><circle class="pin" cx="40" cy="290" r="3"/><text class="io" x="30" y="294" text-anchor="end">c</text><circle class="pin" cx="40" cy="340" r="3"/><text class="io" x="30" y="344" text-anchor="end">d</text><g class="nd crit"><rect x="103" y="44" width="74" height="32" rx="3"/><text x="140" y="64" text-anchor="middle">NOT · 10</text></g><text class="tt on" x="140" y="39" text-anchor="middle">t = 10</text><g class="nd crit"><rect x="103" y="184" width="74" height="32" rx="3"/><text x="140" y="204" text-anchor="middle">NOT · 10</text></g><text class="tt on" x="140" y="179" text-anchor="middle">t = 10</text><g class="nd crit"><rect x="233" y="14" width="74" height="32" rx="3"/><text x="270" y="34" text-anchor="middle">AND · 15</text></g><text class="tt on" x="270" y="9" text-anchor="middle">t = 25</text><g class="nd crit"><rect x="233" y="79" width="74" height="32" rx="3"/><text x="270" y="99" text-anchor="middle">AND · 15</text></g><text class="tt on" x="270" y="74" text-anchor="middle">t = 25</text><g class="nd"><rect x="233" y="144" width="74" height="32" rx="3"/><text x="270" y="164" text-anchor="middle">AND · 15</text></g><text class="tt" x="270" y="139" text-anchor="middle">t = 15</text><g class="nd crit"><rect x="233" y="209" width="74" height="32" rx="3"/><text x="270" y="229" text-anchor="middle">AND · 15</text></g><text class="tt on" x="270" y="204" text-anchor="middle">t = 25</text><g class="nd crit"><rect x="363" y="46" width="74" height="32" rx="3"/><text x="400" y="66" text-anchor="middle">OR · 17</text></g><text class="tt on" x="400" y="41" text-anchor="middle">t = 42</text><g class="nd crit"><rect x="363" y="176" width="74" height="32" rx="3"/><text x="400" y="196" text-anchor="middle">OR · 17</text></g><text class="tt on" x="400" y="171" text-anchor="middle">t = 42</text><g class="nd"><rect x="233" y="274" width="74" height="32" rx="3"/><text x="270" y="294" text-anchor="middle">NOT · 10</text></g><text class="tt" x="270" y="269" text-anchor="middle">t = 10</text><g class="nd"><rect x="233" y="324" width="74" height="32" rx="3"/><text x="270" y="344" text-anchor="middle">NOT · 10</text></g><text class="tt" x="270" y="319" text-anchor="middle">t = 10</text><g class="nd crit"><rect x="493" y="74" width="74" height="32" rx="3"/><text x="530" y="94" text-anchor="middle">AND · 15</text></g><text class="tt on" x="530" y="69" text-anchor="middle">t = 57</text><g class="nd"><rect x="493" y="194" width="74" height="32" rx="3"/><text x="530" y="214" text-anchor="middle">AND · 15</text></g><text class="tt" x="530" y="189" text-anchor="middle">t = 25</text><g class="nd crit"><rect x="493" y="284" width="74" height="32" rx="3"/><text x="530" y="304" text-anchor="middle">AND · 15</text></g><text class="tt on" x="530" y="279" text-anchor="middle">t = 57</text><g class="nd crit"><rect x="623" y="194" width="74" height="32" rx="3"/><text x="660" y="214" text-anchor="middle">OR · 17</text></g><text class="tt on" x="660" y="189" text-anchor="middle">t = 74</text></svg><p class="dagnote">Highlighted = critical path 高亮为关键路径<span class="tm">（critical path）</span>；t = arrival time 到达时间</p></div><div class="bi"><div class="en" lang="en"><span class="lg">EN</span><div class="calc"><span class="l">a/b → NOT → AND → OR → AND → OR → f</span><span class="l">= 10 + 15 + 17 + 15 + 17 = <b>74</b></span><span class="l">c/d → NOT → AND → OR = 10 + 15 + 17 = 42 (shorter)</span></div><p>Latency = <b>74</b>, throughput = <b>1/74</b>. Do not forget the NOT delay hidden in the input bubbles.</p></div><div class="zh"><span class="lg">中</span><div class="calc"><span class="l">a/b → NOT → AND → OR → AND → OR → f</span><span class="l">= 10 + 15 + 17 + 15 + 17 = <b>74</b></span><span class="l">c/d → NOT → AND → OR = 10 + 15 + 17 = 42（较短）</span></div><p>延迟<span class="tm">（latency）</span> <b>74</b>，吞吐量<span class="tm">（throughput）</span> <b>1/74</b>。别漏掉输入端小圆圈代表的非门延迟。</p></div></div></div></details></div></div></div>
 </div>
 
       <div class="sub" id="m10-s2">
         <h3><span class="num">10.2</span> 空间并行 vs 时间并行</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>饼干例子：两人空间并行 6 盘/小时；一人流水线<span class="tm">（pipeline）</span>（时间并行）4 盘/小时；两人都用流水线 8 盘/小时。</li><li>老师特别指出讲义上"3 盘 ÷ 50 分钟 ≈ 3.6 盘/小时"是<b>错误算法</b>：它把只出现一次的冷启动（第一盘的 5 分钟）也算进去了。盘数很多时每 15 分钟出一盘，所以是 4 盘/小时。</li><li>入门课只讲流水线、不讲空间并行：空间并行还要处理同步、通信，复杂得多。</li></ul></div>
+
         <ul class="speclist">
           <li><strong>空间并行</strong>：多套硬件同时工作，同时处理多个任务。通常直接叫"并行"。</li>
-          <li><strong>时间并行</strong>：把任务切成几级（像流水线<span class="tm">（pipeline）</span>工厂），不同任务同时处在不同级，执行在时间上重叠。这就是<strong>流水线</strong>。</li>
+          <li><strong>时间并行</strong>：把任务切成几级（像流水线工厂），不同任务同时处在不同级，执行在时间上重叠。这就是<strong>流水线</strong>。</li>
         </ul>
         <p>讲义的饼干例子：擀饼干 5 分钟，烤 15 分钟。一盘的<strong>延迟<span class="tm">（latency）</span></strong>永远是 20 分钟（1/3 小时），不管用哪种并行。</p>
         <div class="tablewrap"><table>
@@ -2605,6 +2650,8 @@ ABCDE 1F890 1
 
       <div class="sub" id="m10-s3">
         <h3><span class="num">10.3</span> 流水线总时间公式</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>总时间 = 第一个任务的时间 + (n − 1) × 周期，<b>周期由最慢的一级决定</b>（洗衣例子里是烘干）。各级都是 1 个周期时就是 <b>(m + n − 1)</b> 个周期（Tutorial 10.1，老师说推出来以后可以直接用）。</li><li>最大加速比<span class="tm">（speedup）</span> ≈ 级数；各级不等长、填充 / 排空（fill / drain）都会让加速比达不到级数。Tutorial 10.1：三级流水要加速比 ≥ 2.5，3n / (n + 2) ≥ 2.5 → 至少 <b>10 个</b>。</li></ul></div>
+
         <p>洗衣房例子：4 个人各有一筐衣服，洗 30 分钟、烘 40 分钟、叠 20 分钟。顺序做要 4 × 90 = 360 分钟（6 小时）。流水起来，一台机器空出来就接下一筐：</p>
         <div class="formula">
           <span class="fl"><b>T<sub>total</sub> = T<sub>first</sub> + (n − 1) × T<sub>cycle</sub></b></span>
@@ -2616,7 +2663,7 @@ ABCDE 1F890 1
         <ul class="speclist">
           <li>流水线<strong>不降低单个任务的延迟<span class="tm">（latency）</span></strong>，提高的是整批工作的吞吐量<span class="tm">（throughput）</span>。</li>
           <li>吞吐量受<strong>最慢的一级</strong>限制。</li>
-          <li>理论最大加速比<span class="tm">（speedup）</span>约等于<strong>级数</strong>；各级时间不均衡会降低加速比。</li>
+          <li>理论最大加速比约等于<strong>级数</strong>；各级时间不均衡会降低加速比。</li>
           <li>填充（filling）和排空（draining）流水线的时间也会拉低加速比，任务越多这部分影响越小。</li>
         </ul>
         <div class="callout warn"><div class="lbl">两种算法，看题目设定</div><p>讲义里出现了两种模型。<b>任务流水</b>（洗衣房、Tutorial 10.5/10.6 写明"一级做完就能立刻接下一个任务"）：第一个任务只需 ΣT<sub>i</sub>，用上面的公式。<b>时钟流水</b>（处理器、DLX）：每级都被拉长到一个时钟周期<span class="tm">（clock cycle）</span>，第一条指令的延迟<span class="tm">（latency）</span> = 级数 × 时钟周期（讲义 5 × 250 = 1250 ps），总时间 = (k + n − 1) × T<sub>clk</sub>。n 很大时两者几乎相等，加速比<span class="tm">（speedup）</span>都趋近 ΣT<sub>i</sub> / max T<sub>i</sub>。</p></div>
@@ -2647,14 +2694,16 @@ ABCDE 1F890 1
 
       <div class="sub" id="m10-s4">
         <h3><span class="num">10.4</span> 单周期 vs 流水线处理器</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>单周期：延迟<span class="tm">（latency）</span> = 各级之和（950 ps）。流水线<span class="tm">（pipeline）</span>：每级拉长到最慢级（250 ps），延迟变成 5 × 250 = 1250 ps，<b>但每 250 ps 完成一条</b>，加速比<span class="tm">（speedup）</span> 950 / 250 = 3.8，不是 5。练习：各级之和 1100、最慢级 300 → 流水延迟 1500，加速比 3.67。</li><li><b>改进不是瓶颈的那一级没有用</b>：Tutorial 10.3 原来 800 / 200 = 4；ALU 从 200 降到 150，流水周期还是 200，加速比反而变成 750 / 200 = 3.75；ALU 变成 250，加速比 850 / 250 = 3.4。</li><li>Tutorial 10.2：5 级、1 ns 对 单周期 5 ns → 加速比 5；40% 指令各停 1 周期 → CPI 1.4，加速比 5 / 1.4 = 3.57；改成 4 级、1.1 ns 反而更慢（看吞吐，不是看级数少）。</li></ul></div>
+
         <p>讲义的五级时间：取指<span class="tm">（instruction fetch）</span> 250 ps、译码<span class="tm">（instruction decode）</span>读寄存器<span class="tm">（register）</span> 150、执行 200、访存<span class="tm">（memory access）</span> 250、写寄存器 100。</p>
         <div class="tablewrap"><table>
-          <thead><tr><th></th><th>单周期处理器</th><th>五级流水线<span class="tm">（pipeline）</span>处理器</th></tr></thead>
+          <thead><tr><th></th><th>单周期处理器</th><th>五级流水线处理器</th></tr></thead>
           <tbody>
             <tr><td>时钟周期<span class="tm">（clock cycle）</span></td><td class="num">950 ps（五级之和）</td><td class="num">250 ps（最慢一级）</td></tr>
-            <tr><td>单条指令延迟<span class="tm">（latency）</span></td><td class="num">950 ps</td><td class="num">5 × 250 = 1250 ps（变长了）</td></tr>
+            <tr><td>单条指令延迟</td><td class="num">950 ps</td><td class="num">5 × 250 = 1250 ps（变长了）</td></tr>
             <tr><td>吞吐量<span class="tm">（throughput）</span></td><td class="num">1/950 ps ≈ 1.05×10⁹ 条/秒</td><td class="num">1/250 ps = 4×10⁹ 条/秒</td></tr>
-            <tr><td>大量指令时的加速比<span class="tm">（speedup）</span></td><td colspan="2" class="num">950 / 250 = 3.8（不是 5，因为各级不均衡）</td></tr>
+            <tr><td>大量指令时的加速比</td><td colspan="2" class="num">950 / 250 = 3.8（不是 5，因为各级不均衡）</td></tr>
           </tbody>
         </table></div>
         <div class="callout warn"><div class="lbl">讲义的笔误</div><p>讲义第 22 页把单周期吞吐量<span class="tm">（throughput）</span>写成 1.59 × 10⁹ 条/秒，第 25 页写"每 950 ns 一条"。正确值是 1/950 ps ≈ <b>1.05 × 10⁹</b> 条/秒，单位是 ps。</p></div>
@@ -2664,11 +2713,11 @@ ABCDE 1F890 1
 
       <div class="sub" id="m10-s5">
         <h3><span class="num">10.5</span> DLX 寄存器、数据类型与指令</h3>
-        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>MIPS 指令表考试会提供，不用背格式，要会用。</li></ul></div>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>MIPS 指令表考试会提供，不用背格式，要会用。</li><li>寄存器<span class="tm">（register）</span>只记两个：<b>R0 永远是 0</b>（硬连线，改不了），<b>R31 存返回地址</b>。其余是通用寄存器。</li><li>数据类型（byte / half word / word、float / double、HI / LO）<b>不用背</b>，考试需要时会在脚注里解释。</li><li>要会的指令：<b>LW、SW、ADD、SUB、ADDI、BEQZ、BNEZ</b>（老师说 BEQZ / BNEZ 要会）。Jump 类如果用到，题目会解释它是干什么的。</li><li>逻辑运算做位操作：<b>AND 清 0、OR 置 1、XOR 翻转</b>。AND 的掩码里要清的位放 0、其余放 1；OR、XOR 的掩码里要改的位放 1、其余放 0。课上练习最后得 243。</li></ul></div>
 
         <p>DLX（读作 "deluxe"）是教学用的简化 RISC 处理器，结构和 MIPS 很像，五级流水线<span class="tm">（pipeline）</span>：取指<span class="tm">（instruction fetch）</span>、译码<span class="tm">（instruction decode）</span>、执行、访存<span class="tm">（memory access）</span>、写回<span class="tm">（write-back）</span>。和 MIPS 相比，DLX 指令更少、寻址模式<span class="tm">（addressing mode）</span>更简单，冒险<span class="tm">（hazard）</span>处理也用教学化的例子。</p>
         <ul class="speclist">
-          <li><strong>32 个 32 位通用寄存器<span class="tm">（register）</span> R0–R31</strong>。<code>R0</code> 恒为 0（只读，写它无效）；<code>R31</code> 是链接寄存器，JAL/JALR 把返回地址存在这里。</li>
+          <li><strong>32 个 32 位通用寄存器 R0–R31</strong>。<code>R0</code> 恒为 0（只读，写它无效）；<code>R31</code> 是链接寄存器，JAL/JALR 把返回地址存在这里。</li>
           <li><strong>数据类型</strong>：整数 B（8 位字节）、H（16 位半字）、W（32 位字），U 表示无符号；浮点 F（32 位单精度）、D（64 位双精度）；HI/LO 存放扩展结果的高、低 32 位。</li>
           <li><strong>立即数<span class="tm">（immediate）</span>是 16 位</strong>，嵌在 I 型指令里（ADDI、LW 等）。</li>
         </ul>
@@ -2691,11 +2740,13 @@ ABCDE 1F890 1
 
       <div class="sub" id="m10-s6">
         <h3><span class="num">10.6</span> 寻址模式与 load-store 架构</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>DLX 是 load-store 架构：<b>算术运算的操作数只能是寄存器<span class="tm">（register）</span>或立即数<span class="tm">（immediate）</span>，不能直接用存储器里的值</b>。Tutorial 10.8 那条把存储器当操作数的 ADD 是非法的，要先 LW 到寄存器再加。</li><li>LW / SW 的地址 = 立即数 + 寄存器，例如 LW R5, 20(R1)，R1 = 100 → 地址 120。</li></ul></div>
+
         <div class="tablewrap"><table>
           <thead><tr><th>寻址模式<span class="tm">（addressing mode）</span></th><th>例子</th><th>操作数在哪</th></tr></thead>
           <tbody>
-            <tr><td>寄存器<span class="tm">（register）</span>寻址</td><td><code>ADD R1, R2, R3</code></td><td>都在寄存器里，不访存<span class="tm">（memory access）</span>，最快</td></tr>
-            <tr><td>立即数<span class="tm">（immediate）</span>寻址</td><td><code>ADDI R2, R1, #3</code></td><td>一个操作数是指令里的常数</td></tr>
+            <tr><td>寄存器寻址</td><td><code>ADD R1, R2, R3</code></td><td>都在寄存器里，不访存<span class="tm">（memory access）</span>，最快</td></tr>
+            <tr><td>立即数寻址</td><td><code>ADDI R2, R1, #3</code></td><td>一个操作数是指令里的常数</td></tr>
             <tr><td>偏移（基址）寻址</td><td><code>LW R17, 400(R23)</code></td><td>有效地址 = 基址寄存器 + 偏移（以字节计），用于数组、结构体</td></tr>
             <tr><td>PC 相对</td><td><code>BEQZ R2, label</code>、<code>J label</code></td><td>目标 = PC + 4 + 偏移（立即数字段当作分支<span class="tm">（branch）</span>位移）</td></tr>
           </tbody>
@@ -2707,6 +2758,8 @@ ABCDE 1F890 1
 
       <div class="sub" id="m10-s7">
         <h3><span class="num">10.7</span> R / I / J 三种指令格式</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>R / I / J 三种格式的<b>字段细节不用背</b>，会判断类型就行：全是寄存器<span class="tm">（register）</span> → R 型；带立即数<span class="tm">（immediate）</span>（包括 LW / SW 的偏移、分支<span class="tm">（branch）</span>的偏移）→ I 型；J / JAL → J 型。</li></ul></div>
+
         <div class="diagram"><div class="dcap">DLX 指令格式（32 位）</div><div class="scrollx">
           <svg viewBox="0 0 640 190" aria-label="R、I、J 三种格式的位域">
             <g font-size="11">
@@ -2730,7 +2783,7 @@ ABCDE 1F890 1
         <div class="tablewrap"><table>
           <thead><tr><th>格式</th><th>用于</th><th>要点</th></tr></thead>
           <tbody>
-            <tr><td><b>I 型</b></td><td>立即数<span class="tm">（immediate）</span>运算、load、store、条件分支<span class="tm">（branch）</span>、JR、JALR</td><td>一个源/基址寄存器<span class="tm">（register）</span> Rs + 一个 Rt + 16 位立即数。<b>Rt 不一定是目的寄存器</b>：LW 时 Rt 接收数据，SW 时 Rt 提供数据，ADDI 时 Rt 接收结果。立即数的含义随指令变：算术里是常数，load/store 里是地址偏移，分支里是位移</td></tr>
+            <tr><td><b>I 型</b></td><td>立即数运算、load、store、条件分支、JR、JALR</td><td>一个源/基址寄存器 Rs + 一个 Rt + 16 位立即数。<b>Rt 不一定是目的寄存器</b>：LW 时 Rt 接收数据，SW 时 Rt 提供数据，ADDI 时 Rt 接收结果。立即数的含义随指令变：算术里是常数，load/store 里是地址偏移，分支里是位移</td></tr>
             <tr><td><b>R 型</b></td><td>寄存器-寄存器 ALU 运算（ADD、SUB、AND、OR、SLT…）</td><td>Rs、Rt 永远是两个源操作数，Rd 永远接收结果；Opcode 只说明是 ALU 类，<b>Function 字段</b>才指定具体做哪种运算</td></tr>
             <tr><td><b>J 型</b></td><td>J、JAL（以及 trap、异常返回）</td><td>只有 Opcode 和 26 位偏移，不读寄存器；只有 JAL 会写寄存器（R31）</td></tr>
           </tbody>
@@ -2758,14 +2811,16 @@ ABCDE 1F890 1
 
       <div class="sub" id="m11-s1">
         <h3><span class="num">11.1</span> 五个步骤的微操作</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>五个阶段要"by heart"：<b>IF</b> 取指<span class="tm">（instruction fetch）</span>、PC + 4；<b>ID</b> 译码<span class="tm">（instruction decode）</span>、<b>读源寄存器<span class="tm">（register）</span>到 A / B、立即数<span class="tm">（immediate）</span>符号扩展<span class="tm">（sign extension）</span></b>（老师特别强调读寄存器发生在 ID）；<b>EX</b> ALU 运算 / 算地址 / 判断分支<span class="tm">（branch）</span>；<b>MEM</b> 只有 load / store 真正访问数据存储器；<b>WB</b> 写回<span class="tm">（write-back）</span>寄存器只在第 5 级。</li><li>EX 算出的结果这时还<b>没有</b>写进目标寄存器，要等到 WB（Exercise 11.1：ADDI R5 的 32 在第 5 级才写进 R5）。</li></ul></div>
+
         <div class="tablewrap"><table>
           <thead><tr><th>步骤</th><th>名称</th><th>微操作（RTL）</th><th>说明</th></tr></thead>
           <tbody>
-            <tr><td><b>IF</b></td><td>取指<span class="tm">（instruction fetch）</span></td><td class="mono">IR ← Mem[PC]<br>NPC ← PC + 4</td><td>用 PC 从指令存储器取指令；加法器同时算下一条地址（每条指令 4 字节）</td></tr>
-            <tr><td><b>ID</b></td><td>译码<span class="tm">（instruction decode）</span> / 读寄存器<span class="tm">（register）</span></td><td class="mono">A ← Regs[Rs]<br>B ← Regs[Rt]<br>Imm ← SignExt(imm16)<br>b ← 目的寄存器号</td><td>译码、读源寄存器、符号扩展<span class="tm">（sign extension）</span>立即数<span class="tm">（immediate）</span>、产生控制信号，三件事并行（固定字段译码）。b 是目的寄存器的<b>编号</b>：R 型是 Rd，I 型是 Rt</td></tr>
-            <tr><td><b>EX</b></td><td>执行 / 算地址</td><td class="mono">load/store：ALUOut ← A + Imm<br>R 型：ALUOut ← A op B<br>I 型运算：ALUOut ← A op Imm<br>分支<span class="tm">（branch）</span>：ALUOut ← NPC + Imm；Cond ← (A == 0)</td><td>ALU 要么算结果，要么算有效地址，要么算分支目标；Zero? 单元判断分支条件（BEQZ 判 A = 0，BNEZ 判 A ≠ 0）</td></tr>
+            <tr><td><b>IF</b></td><td>取指</td><td class="mono">IR ← Mem[PC]<br>NPC ← PC + 4</td><td>用 PC 从指令存储器取指令；加法器同时算下一条地址（每条指令 4 字节）</td></tr>
+            <tr><td><b>ID</b></td><td>译码 / 读寄存器</td><td class="mono">A ← Regs[Rs]<br>B ← Regs[Rt]<br>Imm ← SignExt(imm16)<br>b ← 目的寄存器号</td><td>译码、读源寄存器、符号扩展立即数、产生控制信号，三件事并行（固定字段译码）。b 是目的寄存器的<b>编号</b>：R 型是 Rd，I 型是 Rt</td></tr>
+            <tr><td><b>EX</b></td><td>执行 / 算地址</td><td class="mono">load/store：ALUOut ← A + Imm<br>R 型：ALUOut ← A op B<br>I 型运算：ALUOut ← A op Imm<br>分支：ALUOut ← NPC + Imm；Cond ← (A == 0)</td><td>ALU 要么算结果，要么算有效地址，要么算分支目标；Zero? 单元判断分支条件（BEQZ 判 A = 0，BNEZ 判 A ≠ 0）</td></tr>
             <tr><td><b>MEM</b></td><td>访存<span class="tm">（memory access）</span> / 完成分支</td><td class="mono">load：LMD ← Mem[ALUOut]<br>store：Mem[ALUOut] ← B<br>分支：PC ← Cond ? ALUOut : NPC</td><td>只有 load/store 访问数据存储器；分支在这里更新 PC；ALU 指令直接穿过</td></tr>
-            <tr><td><b>WB</b></td><td>写回<span class="tm">（write-back）</span></td><td class="mono">R 型：Regs[Rd] ← ALUOut<br>I 型运算：Regs[Rt] ← ALUOut<br>load：Regs[Rt] ← LMD</td><td>WB 前的 MUX 选 ALUOut（ALU 指令）或 LMD（load）。store 和分支不写回</td></tr>
+            <tr><td><b>WB</b></td><td>写回</td><td class="mono">R 型：Regs[Rd] ← ALUOut<br>I 型运算：Regs[Rt] ← ALUOut<br>load：Regs[Rt] ← LMD</td><td>WB 前的 MUX 选 ALUOut（ALU 指令）或 LMD（load）。store 和分支不写回</td></tr>
           </tbody>
         </table></div>
         <p>讲义的 MEM 例子：<code>SW R3, 500(R4)</code>，R4 = 100、R3 = 99：EX 算出 ALUOut = 600，MEM 执行 Mem[600] ← 99。<code>LW R1, 30(R2)</code>，R2 = 100、Mem[130] = 55：ALUOut = 130，LMD = 55。<code>BEQZ R4, LOOP</code>，R4 = 0、NPC = 104、偏移 40：ALUOut = 144，Cond = 1，MEM 阶段 PC ← 144。</p>
@@ -2773,7 +2828,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m11-s2">
         <h3><span class="num">11.2</span> 补码与符号扩展</h3>
-        <p>I 型指令的立即数<span class="tm">（immediate）</span>只有 16 位，进 ALU 前要扩展成 32 位。<strong>符号扩展<span class="tm">（sign extension）</span></strong>就是把第 15 位（符号位）复制到高 16 位：正数前面补 0，负数前面补 1，数值不变。</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>补码<span class="tm">（two's complement）</span> = 取反加 1。考试可以<b>用计算器</b>把 −12 之类转成 16 位补码；符号扩展<span class="tm">（sign extension）</span>就是把符号位复制到高 16 位（负数补 1，正数补 0）。</li></ul></div>
+
+        <p>I 型指令的立即数<span class="tm">（immediate）</span>只有 16 位，进 ALU 前要扩展成 32 位。<strong>符号扩展</strong>就是把第 15 位（符号位）复制到高 16 位：正数前面补 0，负数前面补 1，数值不变。</p>
         <div class="formula">
           <span class="fl">+12 = 0000 0000 0000 1100</span>
           <span class="fl">取反 = 1111 1111 1111 0011</span>
@@ -2786,23 +2843,27 @@ ABCDE 1F890 1
 
       <div class="sub" id="m11-s3">
         <h3><span class="num">11.3</span> 为什么所有指令都要经过 MEM</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>流水线<span class="tm">（pipeline）</span>里<b>每条指令都走完 5 级</b>：ADD 没有访存<span class="tm">（memory access）</span>，MEM 级照样要经过（什么都不做）；SW 和分支<span class="tm">（branch）</span>没有写回<span class="tm">（write-back）</span>，WB 级也照样经过。这样各级才能同步。</li></ul></div>
+
         <div class="tablewrap"><table>
           <thead><tr><th>指令类型</th><th>用数据存储器吗</th><th>MEM 阶段在做什么</th></tr></thead>
           <tbody>
             <tr><td>LW</td><td class="okc">✓ 读</td><td>把数据读进 LMD</td></tr>
             <tr><td>SW</td><td class="okc">✓ 写</td><td>把寄存器<span class="tm">（register）</span>的值写进存储器</td></tr>
-            <tr><td>BEQZ / BNEZ</td><td>✗</td><td>完成分支<span class="tm">（branch）</span>：按 Cond 更新 PC</td></tr>
+            <tr><td>BEQZ / BNEZ</td><td>✗</td><td>完成分支：按 Cond 更新 PC</td></tr>
             <tr><td>ADD / SUB / AND …</td><td>✗</td><td>空操作，结果直接穿过</td></tr>
           </tbody>
         </table></div>
-        <p>所以第 4 步全名叫"Memory Access / Branch Completion"。DLX 流水线<span class="tm">（pipeline）</span>是固定五级结构，每条指令都占用这一级，即使什么都不做。</p>
+        <p>所以第 4 步全名叫"Memory Access / Branch Completion"。DLX 流水线是固定五级结构，每条指令都占用这一级，即使什么都不做。</p>
       </div>
 
       <div class="sub" id="m11-s4">
         <h3><span class="num">11.4</span> 非流水 DLX 的 CPI</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>非流水 DLX 按指令类型算周期：分支<span class="tm">（branch）</span>、store 4 个周期，其他 5 个周期。例：12% 分支、5% store、83% 其他 → CPI = <b>4.83</b>。课上另一例 40% ALU、20% 分支各 4 周期，40% 访存<span class="tm">（memory access）</span> 5 周期 → CPI 4.4，每条 4.4 ns；流水后每条 1.1 ns，加速比<span class="tm">（speedup）</span> 4。</li></ul></div>
+
         <p>非流水实现中，每一步用一个时钟周期<span class="tm">（clock cycle）</span>，用 NPC、IR、A、B、Imm、Cond、ALUOut、LMD 这些临时寄存器<span class="tm">（register）</span>保存步与步之间的中间结果。不需要 WB 的指令可以少一个周期：</p>
         <div class="formula">
-          <span class="fl">分支<span class="tm">（branch）</span> 4 周期（不写回<span class="tm">（write-back）</span>）　store 4 周期（不写寄存器）　其余 5 周期</span>
+          <span class="fl">分支 4 周期（不写回<span class="tm">（write-back）</span>）　store 4 周期（不写寄存器）　其余 5 周期</span>
           <span class="fl">讲义：分支 12%、store 5%、其他 83%</span>
           <span class="fl"><b>CPI = 4 × 0.12 + 4 × 0.05 + 5 × 0.83 = 4.83</b></span>
         </div>
@@ -2810,6 +2871,8 @@ ABCDE 1F890 1
 
       <div class="sub" id="m11-s5">
         <h3><span class="num">11.5</span> 流水线寄存器 F/D · D/A · A/M · M/W</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>流水线寄存器（F/D、D/A、A/M、M/W）在时钟上升沿锁存，存每一级交给下一级的东西。LMD（load memory data）<b>只有 load 用</b>，store 不用。</li></ul></div>
+
         <p>流水化以后，原来的临时寄存器<span class="tm">（register）</span>变成四组<strong>级间缓冲（inter-stage buffer）</strong>，用边沿触发寄存器实现：时钟沿到来时锁存输入，保持到下一个时钟沿。这样每一级在一个周期结束时把结果交给下一级，多条指令才能同时在流水线<span class="tm">（pipeline）</span>里走而互不干扰。讲义类比的器件是 74LS374 边沿触发 D 锁存器。</p>
         <div class="tablewrap"><table>
           <thead><tr><th>缓冲</th><th>位置</th><th>存什么（讲义）</th></tr></thead>
@@ -2947,11 +3010,13 @@ ABCDE 1F890 1
 
       <div class="sub" id="m11-s6">
         <h3><span class="num">11.6</span> 流水线性能与要点</h3>
-        <p>理想情况下五级流水线<span class="tm">（pipeline）</span>每个周期完成一条指令，CPI = 1。讲义例子：非流水 DLX 时钟 1 ns，ALU 指令 4 周期（40%）、分支<span class="tm">（branch）</span> 4 周期（20%）、访存<span class="tm">（memory access）</span>指令 5 周期（40%）；流水化额外增加 0.1 ns 时钟开销（寄存器<span class="tm">（register）</span>延迟<span class="tm">（latency）</span>、时钟偏移）。</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>Tutorial 11：非流水 CPI 4.6、周期 0.8 ns → 每条 3.68 ns；流水 CPI 1.2、周期 1.0 ns → 1.2 ns；加速比<span class="tm">（speedup）</span> 3.68 / 1.2 = <b>3.07</b>。老师说这类题不难，关键是读懂题目在问什么。</li><li>各级延迟<span class="tm">（latency）</span>给定时：非流水 = 各级之和（1250）；流水周期 = 最慢级（350）；加速比 1250 / 350 = 3.57；各级完全均衡时每级 250，加速比 5。</li></ul></div>
+
+        <p>理想情况下五级流水线<span class="tm">（pipeline）</span>每个周期完成一条指令，CPI = 1。讲义例子：非流水 DLX 时钟 1 ns，ALU 指令 4 周期（40%）、分支<span class="tm">（branch）</span> 4 周期（20%）、访存<span class="tm">（memory access）</span>指令 5 周期（40%）；流水化额外增加 0.1 ns 时钟开销（寄存器<span class="tm">（register）</span>延迟、时钟偏移）。</p>
         <div class="formula">
           <span class="fl">非流水 CPI = 0.4 × 4 + 0.2 × 4 + 0.4 × 5 = 4.4　→　每条 4.4 × 1 ns = 4.4 ns</span>
           <span class="fl">流水：CPI ≈ 1，时钟 1.0 + 0.1 = 1.1 ns　→　每条 1.1 ns</span>
-          <span class="fl"><b>加速比<span class="tm">（speedup）</span> = 4.4 / 1.1 = 4</b></span>
+          <span class="fl"><b>加速比 = 4.4 / 1.1 = 4</b></span>
           <span class="fl">通式：平均每条指令时间 = CPI × 时钟周期<span class="tm">（clock cycle）</span>；加速比 = 非流水时间 / 流水时间</span>
         </div>
         <ul class="speclist">
@@ -2981,16 +3046,18 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s1">
         <h3><span class="num">12.1</span> 三类冒险与 CPI</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>三类冒险<span class="tm">（hazard）</span>：<b>结构</b>（资源冲突）、<b>数据</b>（要用前面指令还没写回<span class="tm">（write-back）</span>的结果）、<b>控制</b>（还不知道分支<span class="tm">（branch）</span>跳不跳）。</li><li><b>流水线<span class="tm">（pipeline）</span> CPI = 1 + 每条指令平均停顿<span class="tm">（stall）</span>周期</b>，再和非流水比。例：25% 指令各停 1 周期 → 1.25，对 CPI 5 的非流水加速 4 倍；40% 停 1 周期且时钟快 5% → 1.4 / 1.05 = 1.33。</li></ul></div>
+
         <div class="tablewrap"><table>
-          <thead><tr><th>冒险<span class="tm">（hazard）</span></th><th>原因</th><th>例子</th><th>典型对策</th></tr></thead>
+          <thead><tr><th>冒险</th><th>原因</th><th>例子</th><th>典型对策</th></tr></thead>
           <tbody>
             <tr><td><b>结构冒险<span class="tm">（structural hazard）</span></b></td><td>硬件资源冲突</td><td>单端口存储器：取指<span class="tm">（instruction fetch）</span>和 load/store 同一周期都要用</td><td>双端口存储器、分离的指令/数据缓存<span class="tm">（cache）</span></td></tr>
-            <tr><td><b>数据冒险<span class="tm">（data hazard）</span></b></td><td>指令依赖前面指令的结果</td><td><code>ADD R1,…</code> 后紧跟 <code>SUB …,R1,…</code></td><td>转发<span class="tm">（forwarding）</span>、流水线<span class="tm">（pipeline）</span>互锁、编译器调度<span class="tm">（compiler scheduling）</span></td></tr>
-            <tr><td><b>控制冒险<span class="tm">（control hazard）</span></b></td><td>分支<span class="tm">（branch）</span>结果还不知道</td><td><code>BEQZ R1, Label</code></td><td>提前判断分支、分支预测<span class="tm">（branch prediction）</span>、延迟<span class="tm">（latency）</span>槽</td></tr>
+            <tr><td><b>数据冒险<span class="tm">（data hazard）</span></b></td><td>指令依赖前面指令的结果</td><td><code>ADD R1,…</code> 后紧跟 <code>SUB …,R1,…</code></td><td>转发<span class="tm">（forwarding）</span>、流水线互锁、编译器调度<span class="tm">（compiler scheduling）</span></td></tr>
+            <tr><td><b>控制冒险<span class="tm">（control hazard）</span></b></td><td>分支结果还不知道</td><td><code>BEQZ R1, Label</code></td><td>提前判断分支、分支预测<span class="tm">（branch prediction）</span>、延迟<span class="tm">（latency）</span>槽</td></tr>
           </tbody>
         </table></div>
         <div class="formula">
-          <span class="fl"><b>CPI<sub>pipeline</sub> = 1 + 每条指令的平均停顿<span class="tm">（stall）</span>周期</b></span>
+          <span class="fl"><b>CPI<sub>pipeline</sub> = 1 + 每条指令的平均停顿周期</b></span>
           <span class="fl">平均每条指令时间 = CPI × 时钟周期<span class="tm">（clock cycle）</span></span>
           <span class="fl">加速比<span class="tm">（speedup）</span> = CPI<sub>unpipelined</sub> / CPI<sub>pipeline</sub> = 5 / (1 + 停顿) <span class="cm">（5 级、各级等长、无流水开销时）</span></span>
           <span class="fl">更一般：加速比 = 流水深度 / (1 + 停顿) × (非流水时钟 / 流水时钟)</span>
@@ -3001,7 +3068,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s2">
         <h3><span class="num">12.2</span> 结构冒险</h3>
-        <p>两条或更多指令在同一周期要用同一个硬件资源，资源又不能同时满足，就是结构冒险<span class="tm">（structural hazard）</span>。例子：寄存器<span class="tm">（register）</span>堆只有一个写端口；指令和数据共用一个单端口存储器。解决方法：<strong>停顿<span class="tm">（stall）</span></strong>到资源空出来，或者<strong>复制资源</strong>（双端口存储器有两套独立的地址、数据和控制信号，一个端口给 IF，一个给 MEM，冲突就消失了）。</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>DLX 只有 IF 和 MEM 两级访问存储器。<b>单端口、指令和数据共用的存储器</b>会让 load / store 的 MEM 和后面第 3 条指令的 IF 撞在同一个周期 → 结构冒险<span class="tm">（structural hazard）</span>。解决：停顿<span class="tm">（stall）</span>，或用<b>双端口 / 指令和数据分开的存储器</b>。</li></ul></div>
+
+        <p>两条或更多指令在同一周期要用同一个硬件资源，资源又不能同时满足，就是结构冒险。例子：寄存器<span class="tm">（register）</span>堆只有一个写端口；指令和数据共用一个单端口存储器。解决方法：<strong>停顿</strong>到资源空出来，或者<strong>复制资源</strong>（双端口存储器有两套独立的地址、数据和控制信号，一个端口给 IF，一个给 MEM，冲突就消失了）。</p>
         <p>讲义例子：LOAD 在第 4 周期处于 MEM，此时第 4 条指令正要 IF，两者都要访问存储器，只能让取指<span class="tm">（instruction fetch）</span>晚一拍。</p>
         <div class="formula">
           <span class="fl">40% 的指令是 load/store，每条造成 1 周期结构停顿</span>
@@ -3014,7 +3083,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s3">
         <h3><span class="num">12.3</span> 数据冒险：RAW / WAR / WAW</h3>
-        <p>流水线<span class="tm">（pipeline）</span>改变了对操作数的读写顺序，如果和顺序执行时的顺序不一致，指令就可能用到错误的值。设指令 i 在前、j 在后：</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>本课的约定：<b>DLX 五级流水线<span class="tm">（pipeline）</span>里只有 RAW 会造成冒险<span class="tm">（hazard）</span></b>，WAR 和 WAW 不会发生（读都在 ID、写都在 WB）。老师原话："these are our assumptions for this course"。</li></ul></div>
+
+        <p>流水线改变了对操作数的读写顺序，如果和顺序执行时的顺序不一致，指令就可能用到错误的值。设指令 i 在前、j 在后：</p>
         <div class="tablewrap"><table>
           <thead><tr><th>类型</th><th>含义</th><th>例子</th><th>DLX 五级流水线会发生吗</th></tr></thead>
           <tbody>
@@ -3030,14 +3101,16 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s4">
         <h3><span class="num">12.4</span> 寄存器分半周期与转发</h3>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li><b>寄存器<span class="tm">（register）</span>分半周期</b>：前半周期写、后半周期读，所以写回<span class="tm">（write-back）</span>和读在同一周期的那条指令能读到新值。</li><li><b>转发（forwarding / bypassing）</b>：ALU 结果在 EX 结束就有了，直接送回 ALU 输入，不用等写回，算术指令之间的 RAW 基本都能消掉。</li><li>老师的方法：<b>把五级时序图画出来</b>，看"结果什么时候有"和"什么时候要用"，再判断要不要停顿<span class="tm">（stall）</span>。</li></ul></div>
+
         <p>序列 <code>ADD R1,R2,R3</code> 后面跟着 <code>SUB R4,R1,R5</code>、<code>AND R6,R1,R7</code>、<code>OR R8,R1,R9</code>、<code>XOR R10,R1,R11</code>。ADD 在第 5 周期（WB）才写 R1：</p>
         <ul class="speclist">
-          <li><strong>寄存器<span class="tm">（register）</span>堆分半周期</strong>：一个周期内<b>前半写、后半读</b>。所以和 WB 同一周期的 ID 能读到新值。</li>
+          <li><strong>寄存器堆分半周期</strong>：一个周期内<b>前半写、后半读</b>。所以和 WB 同一周期的 ID 能读到新值。</li>
           <li>SUB 在第 3 周期读 R1、AND 在第 4 周期读 → 都读到旧值，<b>有冒险<span class="tm">（hazard）</span></b>。</li>
           <li>OR 在第 5 周期的后半读，正好拿到 ADD 前半写进去的新值 → 无冒险。XOR 更晚，也没问题。</li>
-          <li>结论：没有转发<span class="tm">（forwarding）</span>时，只有紧跟其后的两条指令需要停顿<span class="tm">（stall）</span>。</li>
+          <li>结论：没有转发时，只有紧跟其后的两条指令需要停顿。</li>
         </ul>
-        <p><strong>转发（forwarding，也叫旁路 bypassing）</strong>：结果其实在 EX 结束时就已经算出来了，没必要等写回<span class="tm">（write-back）</span>寄存器堆。把 EX/MEM（A/M）和 MEM/WB（M/W）流水线寄存器<span class="tm">（pipeline register）</span>里的值直接送回 ALU 输入端：</p>
+        <p><strong>转发（forwarding，也叫旁路 bypassing）</strong>：结果其实在 EX 结束时就已经算出来了，没必要等写回寄存器堆。把 EX/MEM（A/M）和 MEM/WB（M/W）流水线寄存器<span class="tm">（pipeline register）</span>里的值直接送回 ALU 输入端：</p>
         <ul class="speclist">
           <li>硬件：在 ALU 每个输入前加一个 MUX，加上从 EX/MEM、MEM/WB 回来的通路，再加冒险检测逻辑来选输入。</li>
           <li>正常情况选寄存器堆读出的值；检测到冒险就选转发来的值。</li>
@@ -3048,7 +3121,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s5">
         <h3><span class="num">12.5</span> Load-use 冒险与硬件互锁</h3>
-        <p>转发<span class="tm">（forwarding）</span>不能解决所有 RAW。<code>LW R1,0(R2)</code> 的数据要到 <b>MEM 结束</b>才从存储器读出来，而紧跟的 <code>SUB R4,R1,R6</code> 在下一个周期的 <b>EX 开始</b>就要用，时间上往回倒了，转发也来不及。</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li><b>Load-use</b>：LW 的数据要到 MEM 结束才有，紧跟着用它的指令在 EX 就要用 → 有转发<span class="tm">（forwarding）</span>也要<b>停 1 个周期</b>。转发只能救 ALU 算出来的结果，救不了从存储器读出来的。</li><li>例：20% 是 load，其中一半紧跟着就用 → CPI = 1 + 0.2 × 0.5 × 1 = <b>1.1</b>。</li></ul></div>
+
+        <p>转发不能解决所有 RAW。<code>LW R1,0(R2)</code> 的数据要到 <b>MEM 结束</b>才从存储器读出来，而紧跟的 <code>SUB R4,R1,R6</code> 在下一个周期的 <b>EX 开始</b>就要用，时间上往回倒了，转发也来不及。</p>
         <div class="tablewrap"><table>
           <thead><tr><th>情形</th><th>需要停顿<span class="tm">（stall）</span></th></tr></thead>
           <tbody>
@@ -3073,7 +3148,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s6">
         <h3><span class="num">12.6</span> 编译器调度消除停顿</h3>
-        <p>与其让硬件停顿<span class="tm">（stall）</span>，不如让编译器把<strong>不相关的指令挪进停顿的位置</strong>，让 CPU 在等数据的那一拍干点有用的活。只要被移动的指令和周围没有依赖，程序结果就不变。</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>编译器调度<span class="tm">（compiler scheduling）</span>：把<b>不相关</b>的指令（例如下一条语句的 LW）挪进停顿<span class="tm">（stall）</span>的空位，前提是不改变程序结果。课上例子：A = B + C、D = E − F，把 LW E 提前到 ADD 前面。</li></ul></div>
+
+        <p>与其让硬件停顿，不如让编译器把<strong>不相关的指令挪进停顿的位置</strong>，让 CPU 在等数据的那一拍干点有用的活。只要被移动的指令和周围没有依赖，程序结果就不变。</p>
         <div class="tablewrap"><table>
           <caption>a = b + c; d = e − f;（变量都在内存里，有转发<span class="tm">（forwarding）</span>）</caption>
           <thead><tr><th>原始代码</th><th>调度后</th></tr></thead>
@@ -3105,7 +3182,9 @@ ABCDE 1F890 1
 
       <div class="sub" id="m12-s7">
         <h3><span class="num">12.7</span> 控制冒险</h3>
-        <p>原始 DLX 在 EX 级才算出分支<span class="tm">（branch）</span>目标和判断条件。等结果出来时，后面已经有三条顺序指令进了流水线<span class="tm">（pipeline）</span>；如果分支跳转，这些指令都不该执行。最简单的办法是停顿<span class="tm">（stall）</span>：</p>
+        <div class="callout tnote"><div class="lbl">老师上课提醒</div><ul class="speclist" style="margin:0"><li>分支<span class="tm">（branch）</span>的<b>条件和目标地址都在 EX 才算出来</b>，在这之前流水线<span class="tm">（pipeline）</span>已经取进了后面 3 条指令；分支要跳的话这 3 条要冲掉（flush）。最简单的办法是停 3 个周期等结果。</li><li>第 12 周讲到这里（slide 44）。分支预测<span class="tm">（branch prediction）</span>、延迟<span class="tm">（latency）</span>槽等处理方法第 13 周讲完。</li></ul></div>
+
+        <p>原始 DLX 在 EX 级才算出分支目标和判断条件。等结果出来时，后面已经有三条顺序指令进了流水线；如果分支跳转，这些指令都不该执行。最简单的办法是停顿<span class="tm">（stall）</span>：</p>
         <div class="formula">
           <span class="fl">原始 DLX：分支代价<span class="tm">（branch penalty）</span> 3 周期　CPI = 1 + 0.3 × 3 = <b>1.9</b>（分支占 30%）</span>
           <span class="fl">改进 DLX：在 ID 级加一个比较器<span class="tm">（comparator）</span>判断条件、一个加法器算目标地址</span>

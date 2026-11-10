@@ -1276,6 +1276,9 @@ details.ex > div{padding:6px 16px 14px 16px;}
         <details class="sol"><summary>完整解答</summary><div>
           <div class="calc"><span class="l">流水周期 = max(10, 25, 15) = <b>25 s</b>，瓶颈是 Y</span><span class="l">单个任务延迟<span class="tm">（latency）</span> = 10 + 25 + 15 = 50 s</span><span class="l">总时间 = 50 + 999 × 25 = <b>25,025 s</b>（约 6.95 小时）</span><span class="l">顺序 = 1000 × 50 = <b>50,000 s</b></span><span class="l">加速比<span class="tm">（speedup）</span> = 50,000 / 25,025 ≈ <b>2.0</b></span><span class="l">稳态吞吐 = 1 个 / 25 s = 144 个 / 小时</span></div>
           <p>三级流水理想加速比是 3，这里只有 2，原因是 Y 太慢（25 s，而平均 16.7 s）。要提速就得把 Y 拆开或加速 Y，见 T10.6。</p>
+          <h4>老师课上（第 11 周）讲的完整小题</h4>
+          <div class="calc"><span class="l">第一个任务：讲义答案 50 s（各级实际时间相加）；若按<b>同步流水</b>每级都占 25 s，是 3 × 25 = <b>75 s</b></span><span class="l">总时间：50 + 999 × 25 = 25,025 s；同步假设下 75 + 999 × 25 = <b>25,050 s</b>（核对框两种都算对）</span><span class="l">稳态吞吐 = 1 / 25 s × 3600 = <b>144 个 / 小时</b></span><span class="l">填充流水线<span class="tm">（pipeline）</span>所占比例 = 50 / 25,025 ≈ <b>0.2%</b></span><span class="l">Y 从 25 s 降到 18 s：周期 18 s → <b>200 个 / 小时</b></span><span class="l">只能把某一级减 5 s：减 X 或 Z 还是 144 个 / 小时；<b>减 Y</b> → 周期 20 s → <b>180 个 / 小时</b></span></div>
+          <p>老师的结论：吞吐只由最慢的一级决定，要提速就去削瓶颈那一级，削别的级完全没用。</p>
         </div></details>
       </div>
     </article>
